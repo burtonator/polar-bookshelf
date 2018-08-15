@@ -276,7 +276,7 @@ All donations go to supporting Polar which include website hosting costs, web de
 
 # Discussion
 
-We have a <a href="<a href="https://discord.gg/GT8MhA6">">Discord server</a> if you would like to discuss Polar with other users.
+We have a [Discord server](https://discord.gg/GT8MhA6) if you would like to discuss Polar with other users.
 
 You can also create a Github issue if you have something more complicated. 
 
