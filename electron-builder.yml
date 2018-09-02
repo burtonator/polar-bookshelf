@@ -31,6 +31,17 @@ linux:
   fileAssociations:
     - ext: "pdf"
 
+snap:
+  confinement: "strict"
+  grade: "devel"
+  stagePackages: [
+  "default"
+  ]
+  plugs: [
+  "default"
+  ]
+
+
 nsis:
   artifactName: ${name}-${version}-${arch}.${ext}
 
