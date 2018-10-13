@@ -152,12 +152,14 @@ export class MainApp {
 
         });
 
-        app.on('activate', async function() {
+        app.on('activate', async function(event, hasVisibleWindows) {
 
             // On OS X it's common to re-create a window in the app when the
             // dock icon is clicked and there are no other windows open.
 
-            await MainAppBrowserWindowFactory.createWindow();
+            if (!hasVisibleWindows) {
+              await MainAppBrowserWindowFactory.createWindow();
+            }
 
         });
 
