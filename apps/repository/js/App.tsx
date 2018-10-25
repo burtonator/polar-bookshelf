@@ -169,11 +169,10 @@ export default class App extends React.Component<AppProps, AppState> {
                             {
                                 Header: 'Title',
                                 accessor: 'title',
-                                Cell: (row) => (React.createElement("div", {contentEditable: true,
+                                Cell: (row) => (React.createElement("div", {contentEditable: false,
                                  style: {
                                    background: data[row.index]['editing'] ? 'white' : 'unset',
                                    color: data[row.index]['editing'] ? 'black' : 'unset'
-
                                  },
                                  onBlur: (e) => {
                                   const data = [...this.state.data];
@@ -181,11 +180,15 @@ export default class App extends React.Component<AppProps, AppState> {
                                   data[row.index]['editing'] = false
                                   this.setState({ data });
                                   this.onDocSetTitle(this.state.data[row.index], e.target.innerHTML)
+                                  e.target.contentEditable = false
+                                  e.target.blur()
                                 },
                                 onClick: (e) => {
                                   const data = [...this.state.data];
                                   data[row.index]['editing'] = true
                                   this.setState({ data });
+                                  e.target.contentEditable = true
+                                  e.target.focus()
                                 },
                                 dangerouslySetInnerHTML: {
                                   __html: this.state.data[row.index][row.column.id]
@@ -404,7 +407,10 @@ export default class App extends React.Component<AppProps, AppState> {
                         if (! singleClickColumns.includes(column.id)) {
                             return {
                                 onDoubleClick: (e: any) => {
+                                    var selection = window.getSelection ? window.getSelection() : undefined
+                                    if(selection) selection.empty()
                                     e.target.blur();
+                                    rowInfo.original.contenteditable = false
                                     this.onDocumentLoadRequested(rowInfo.original.fingerprint, rowInfo.original.filename);
                                 }
                             };
