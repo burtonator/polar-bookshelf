@@ -169,7 +169,29 @@ export default class App extends React.Component<AppProps, AppState> {
                             {
                                 Header: 'Title',
                                 accessor: 'title',
+                                Cell: (row) => (React.createElement("div", {contentEditable: true,
+                                 style: {
+                                   background: data[row.index]['editing'] ? 'white' : 'unset',
+                                   color: data[row.index]['editing'] ? 'black' : 'unset'
 
+                                 },
+                                 onBlur: (e) => {
+                                  const data = [...this.state.data];
+                                  data[row.index][row.column.id] = e.target.innerHTML;
+                                  data[row.index]['editing'] = false
+                                  this.setState({ data });
+                                  this.onDocSetTitle(this.state.data[row.index], e.target.innerHTML)
+                                },
+                                onClick: (e) => {
+                                  const data = [...this.state.data];
+                                  data[row.index]['editing'] = true
+                                  this.setState({ data });
+                                },
+                                dangerouslySetInnerHTML: {
+                                  __html: this.state.data[row.index][row.column.id]
+                                },
+                              },
+                            ))
                             },
                             {
                                 Header: 'Last Updated',
@@ -382,6 +404,7 @@ export default class App extends React.Component<AppProps, AppState> {
                         if (! singleClickColumns.includes(column.id)) {
                             return {
                                 onDoubleClick: (e: any) => {
+                                    e.target.blur();
                                     this.onDocumentLoadRequested(rowInfo.original.fingerprint, rowInfo.original.filename);
                                 }
                             };
@@ -676,4 +699,3 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
 }
-
