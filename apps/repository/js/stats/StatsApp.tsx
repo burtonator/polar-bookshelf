@@ -4,6 +4,7 @@ import {RepoSidebar} from '../RepoSidebar';
 import {RepoDocMetaManager} from '../RepoDocMetaManager';
 import NewDocumentRateChart from './NewDocumentRateChart';
 import TopTagsChart from './TopTagsChart';
+import TopTagsTable from './TopTagsTable';
 
 const log = Logger.create();
 
@@ -41,12 +42,19 @@ export default class StatsApp extends React.Component<IProps, IState> {
                             <NewDocumentRateChart docInfos={docInfos}/>
                         </div>
 
-                        <div className="col-lg-12">
+                    </div>
+
+                    <div className="row mt-2">
+
+                        <div className="col-lg-8">
                             <TopTagsChart docInfos={docInfos}/>
                         </div>
 
-                    </div>
+                        <div className="col-lg-4">
+                            <TopTagsTable docInfos={docInfos}/>
+                        </div>
 
+                    </div>
 
                 </div>
 

@@ -104,7 +104,7 @@ export class MainAppBrowserWindowFactory {
             // coded here.  We can refactor this in the future though.
             if (navURL.startsWith("https://accounts.google.com") ||
                 navURL.startsWith("https://polar-32b0f.firebaseapp.com") ||
-                navURL.startsWith("http://localapp.getpolarized.io")) {
+                navURL.startsWith("http://localhost")) {
 
                 log.info("Allowing URL for authentication: " + navURL);
 

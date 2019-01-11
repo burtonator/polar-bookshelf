@@ -1,6 +1,17 @@
+# 1.9.0
+
+- Now using 'localhost' instead of 'localapp.getpolarized.io' for the hostname.
+  Some users weren't able to resolve this (not sure why) and additionally 
+  working offline didn't function either.
+
 # 1.8.0
 
 Major changes:
+
+- PDFs auto-import when trying to share them from the browser.
+
+- Refactored the rich text editor so the bar at the top is no longer in 'air' 
+  mode so that users can realize that it supports rich text.
 
 - support for cloze deletion
 
@@ -9,9 +20,6 @@ Major changes:
 - New logs view to show logs as they're being written which can help users 
   debug issues with Polar and report problems to the dev team plus understand
   what's happening with their data.
-
-- Refactored the rich text editor so the bar at the top is no longer in 'air' 
-  mode so that users can realize that it supports rich text.
 
 - Related tags in the tag selector
 

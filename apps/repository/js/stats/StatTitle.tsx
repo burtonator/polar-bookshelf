@@ -25,3 +25,4 @@ export default class StatTitle extends React.Component<any, any> {
     }
 
 }
+

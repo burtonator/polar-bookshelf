@@ -23,6 +23,7 @@ import {AnnotationFlashcardBox} from '../../js/annotation_sidebar/flashcard_inpu
 import {FlashcardType} from '../../js/metadata/FlashcardType';
 import {FlashcardInputForCloze} from '../../js/annotation_sidebar/flashcard_input/FlashcardInputForCloze';
 import {FlashcardInputForFrontAndBack} from '../../js/annotation_sidebar/flashcard_input/FlashcardInputForFrontAndBack';
+import {TopPDFExample} from './TopPDFExample';
 
 class App<P> extends React.Component<{}, IAppState> {
 
@@ -108,6 +109,10 @@ class App<P> extends React.Component<{}, IAppState> {
         return (
 
             <div>
+
+                <h1 className="component">Top PDFs</h1>
+
+                <TopPDFExample/>
 
                 <h1 className="component">FlashcardInputForCloze</h1>
 

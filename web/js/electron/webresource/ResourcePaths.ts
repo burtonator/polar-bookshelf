@@ -72,7 +72,7 @@ export class ResourcePaths {
             return 'file://' + absolutePath + queryData;
 
         } else {
-            return "http://localapp.getpolarized.io:8500" + relativeURL;
+            return "http://localhost:8500" + relativeURL;
         }
 
     }

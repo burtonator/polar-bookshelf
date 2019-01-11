@@ -40,6 +40,12 @@ build_for_arch() {
     arch=${1}
 
    # -v ${PWD##*/}-node-modules:/project/node_modules \
+   #
+   # NOTE:
+   # using a channel didn't work because the client itself needs to know that
+   # we're using a specific channel.
+   #
+   # --config.publish.channel=latest-win-'${arch}'
 
     docker run --rm -ti \
        --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') \
@@ -49,7 +55,7 @@ build_for_arch() {
        -v ~/.cache/electron:/root/.cache/electron \
        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
        -v ${WINDOWS_CSC_DIR}:/root/windows-csc \
-       electronuserland/builder:wine bash -c 'npm install && ./node_modules/.bin/electron-builder --config=electron-builder.yml --config.publish.channel=latest-win-'${arch}' --config.nsis.artifactName=\${name}-\${version}-'${arch}'.\${ext} --'${arch}' --win --publish always'
+       electronuserland/builder:wine bash -c 'npm install && ./node_modules/.bin/electron-builder --config=electron-builder.yml --config.nsis.artifactName=\${name}-\${version}-'${arch}'.\${ext} --'${arch}' --win --publish always'
 }
 
 build_for_arch x64

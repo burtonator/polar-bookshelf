@@ -23,8 +23,8 @@ describe('Flashcards', function() {
             const flashcard = Flashcards.create(FlashcardType.CLOZE, fields, archetype, 'page:1');
 
             const expected = {
-                "id": "1uWrt4yLYp",
-                "guid": "1uWrt4yLYp",
+                "id": "1TPGcJEaas",
+                "guid": "1TPGcJEaas",
                 "created": "2012-03-02T11:38:49.321Z",
                 "lastUpdated": "2012-03-02T11:38:49.321Z",
                 "type": "CLOZE",
@@ -54,8 +54,8 @@ describe('Flashcards', function() {
             const flashcard = Flashcards.create(FlashcardType.CLOZE, fields, archetype, 'page:1');
 
             const expected = {
-                "id": "1uWrt4yLYp",
-                "guid": "1uWrt4yLYp",
+                "id": "1TPGcJEaas",
+                "guid": "1TPGcJEaas",
                 "created": "2012-03-02T11:38:49.321Z",
                 "lastUpdated": "2012-03-02T11:38:49.321Z",
                 "type": "CLOZE",
@@ -85,23 +85,22 @@ describe('Flashcards', function() {
             const flashcard = Flashcards.createFromSchemaFormData(FORM_DATA, archetype, 'page:1');
 
             const expected = {
-                    "id": "1p2utfePaW",
-                    "guid": "1p2utfePaW",
-                    "created": "2012-03-02T11:38:49.321Z",
-                    "lastUpdated": "2012-03-02T11:38:49.321Z",
-                    "type": "BASIC_FRONT_BACK",
-                    "fields": {
-                        "back": {
-                            "HTML": "This is the back"
-                        },
-                        "front": {
-                            "HTML": "This is the front"
-                        }
+                "id": "18HUWUqgtV",
+                "guid": "18HUWUqgtV",
+                "created": "2012-03-02T11:38:49.321Z",
+                "lastUpdated": "2012-03-02T11:38:49.321Z",
+                "type": "BASIC_FRONT_BACK",
+                "fields": {
+                    "back": {
+                        "HTML": "This is the back"
                     },
-                    "archetype": "9d146db1-7c31-4bcf-866b-7b485c4e50ea",
-                    "ref": "page:1"
-                }
-            ;
+                    "front": {
+                        "HTML": "This is the front"
+                    }
+                },
+                "archetype": "9d146db1-7c31-4bcf-866b-7b485c4e50ea",
+                "ref": "page:1"
+            };
 
             assertJSON(flashcard, expected);
 

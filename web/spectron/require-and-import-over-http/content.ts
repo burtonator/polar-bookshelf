@@ -4,9 +4,9 @@ SpectronRenderer.run(async (state) => {
 
     console.log("Running within SpectronRenderer now.");
 
-    history.pushState({}, "Home", "http://localapp.getpolarized.io/");
+    history.pushState({}, "Home", "http://localhost/");
 
-    state.testResultWriter.write(document.location!.href === "http://localapp.getpolarized.io/");
+    state.testResultWriter.write(document.location!.href === "http://localhost/");
 
 });
 

@@ -16,6 +16,57 @@ export class WhatsNewContent extends React.Component<IProps, IState> {
 
             <div>
 
+                <h3>Polar 1.8</h3>
+
+                <div className="intro">
+
+                    <p>
+                        This release concentrated on a number of smaller features
+                        requested by users plus fit and finish.  The major changes
+                        include refactoring the text editor so that it's more
+                        clear that it supports rich text and formatted HTML.
+                        We also now support cloze deletions for Anki which was
+                        a big feature for a lot of users but required a big
+                        refactor.  Additionally we have a new logs view so that
+                        you can monitor the internal behavior of Polar during
+                        sync (and other) operations.  You can also copy the entire
+                        log to the clipboard for reporting bugs to the Polar
+                        developers.
+
+                    </p>
+
+                    <h4>Changelog:</h4>
+
+                    <ul>
+
+                        <li>PDFs auto-import when trying to share them from the browser.</li>
+
+                        <li>Refactored the rich text editor so the bar at the top is no longer in 'air'
+                        mode so that users can realize that it supports rich text.</li>
+
+                        <li>Support for cloze deletion</li>
+
+                        <li>Stats view for core stats</li>
+
+                        <li>New logs view to show logs as they're being written which can help users
+                        debug issues with Polar and report problems to the dev team plus understand
+                        what's happening with their data.</li>
+
+                        <li>Related tags in the tag selector</li>
+
+                        <li>'capturing' a PDF from the browser now works and the PDF is then saved into
+                        the repository.</li>
+
+                        <li>Copy URL to clipboard shows toaster that the URL was copied successfully.</li>
+
+                        <li>Reveal file in finder (or Explorer on Windows).</li>
+
+                        <li>Copy file path to clipboard.</li>
+
+                    </ul>
+
+                </div>
+
                 <h3>Polar 1.7 - Annotation Manager</h3>
 
                 <div className="intro">
@@ -117,7 +168,7 @@ export class WhatsNewContent extends React.Component<IProps, IState> {
                         We have an <a
                         href="https://opencollective.com/polar-bookshelf/donate">Open
                         Collective</a> setup to accept donations.  If you use
-                        Polar at work ask your employeer if they can make a donation.
+                        Polar at work ask your employer if they can make a donation.
                         Many larger employers will both match donations and support
                         projects that help their employees.
                     </p>

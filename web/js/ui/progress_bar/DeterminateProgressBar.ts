@@ -54,7 +54,7 @@ export class DeterminateProgressBar {
 
             const progressElement = this.get();
 
-            if (! progressElement.get() || progressElement.get().value !== 100) {
+            if (! progressElement.isPresent() || progressElement.get().value !== 100) {
                 return;
             }
 

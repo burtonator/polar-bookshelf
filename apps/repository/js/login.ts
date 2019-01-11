@@ -9,7 +9,7 @@ window.addEventListener('load', async () => {
 
     if (firebase.auth().currentUser === null) {
 
-        const signInSuccessUrl = 'http://localapp.getpolarized.io:8500/apps/repository/index.html#configured';
+        const signInSuccessUrl = 'http://localhost:8500/apps/repository/index.html#configured';
         FirebaseUIAuth.login({signInSuccessUrl});
 
         // bring up the UI so that we can login.

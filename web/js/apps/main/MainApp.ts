@@ -58,7 +58,7 @@ export class MainApp {
         const webserverConfig = WebserverConfig.create({
             dir: AppPath.get(),
             port: WEBSERVER_PORT,
-            host: 'localapp.getpolarized.io',
+            host: 'localhost',
             useSSL: false,
         });
 

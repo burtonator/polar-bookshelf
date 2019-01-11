@@ -144,7 +144,7 @@ export class CloudAuthButton extends React.Component<IProps, IState> {
     private changeAuthStage(stage?: AuthStage) {
 
         if (stage === 'login') {
-            window.location.href = 'http://localapp.getpolarized.io:8500/apps/repository/login.html';
+            window.location.href = 'http://localhost:8500/apps/repository/login.html';
             return;
         }
 

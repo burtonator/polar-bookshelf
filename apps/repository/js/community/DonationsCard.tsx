@@ -26,7 +26,7 @@ export default class DonationsCard extends React.Component<any, any> {
                             We have an <a
                             href="https://opencollective.com/polar-bookshelf/donate">Open
                             Collective</a> setup to accept donations.  If you use
-                            Polar at work ask your employeer if they can make a donation.
+                            Polar at work ask your employer if they can make a donation.
                             Many larger employers will both match donations and support
                             projects that help their employees.
                         </p>
