@@ -103,8 +103,8 @@ export class AnkiSyncEngine implements SyncEngine {
                 .filter(typedTag => typedTag.isPresent())
                 .map(typedTag => typedTag.get())
                 .map(typedTag => typedTag.value)
+                .map(typedTag => typedTag.replace(/_/g, "::"))
                 .pop();
-
         }
 
         if (! deckName) {

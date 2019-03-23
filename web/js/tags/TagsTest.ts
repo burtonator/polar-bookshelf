@@ -48,6 +48,10 @@ describe('RegExp', function() {
         assert.throws(() => Tags.assertValid("#bar:cat:dog"));
     });
 
+    it("tags with underscores", function() {
+        Tags.assertValid("#deck:MainDeck_SubDeck");
+    });
+
 });
 
 describe('type tags', function() {
