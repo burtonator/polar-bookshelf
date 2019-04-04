@@ -112,7 +112,7 @@ export class Pagemarks {
 
             }
 
-            if (pagemarks.map(pagemark => pagemark.percentage)
+            if (top === 100 || pagemarks.map(pagemark => pagemark.percentage)
                          .reduce(Reducers.SUM, 0) === 100) {
 
                 // if this page is completely covered just ignore it
@@ -299,6 +299,13 @@ export class Pagemarks {
             }
 
         });
+
+        for (const key of Object.keys(result)) {
+            if (result[key].rect.top === 100) {
+                //log.debug("Invalid pagemark: begins at end of page.", result[key]);
+                delete result[key];
+            }
+        }
 
         return result;
 
