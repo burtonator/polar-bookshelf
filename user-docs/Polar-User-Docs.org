@@ -1,29 +1,73 @@
+#+TODO: TODO(t) | DONE(d)
+#+TODO: WRITE(w) EDIT(e) | REVIEW(r) GOOD(g)
 #+TITLE: Polar Bookshelf Manual
 #+AUTHOR: B. Charles Reynolds
 
-* Polar Bookshelf Manual
-Lorem ipsum and such.
+#+BEGIN_ORGREF
+*bold*
+/italic/
+_underlined_
+=verbatim=
+~code~’
++strike-through+
+#+END_ORGREF
 
-* Keybindings for Common Polar Operations
+* Need to do these things
+** TODO pull some stuff from README.md at GitHub
+** TODO pour through other doc-stuff at GitHub
+** TODO actually _write_ some shit
+
+* EDIT Introduction
+** Features
+
+Polar allows you to keep all your documents, annotations, and flashcards in one place. Never lose track of what you're reading again. Annotate documents directly while reading them and sync with spaced repetition systems like Anki.
+
+*** PDF support
+
+We have first-class PDF support thanks to PDF.js. PDFs work well when reading content in book format or when reading scientific research which is often stored as PDF.
+
+*** Captured Web Pages
+
+Download HTML content and save them as offline documents which can be annotated. Captured pages are rendered for greater readability using CSS browser emulation.
+
+*** Pagemarks
+
+Easily keep track of what you're reading and the progress of each document. Pagemarks enable a form of non-linear reading named incremental reading and the ability to suspend and resume individual documents for later consumption.
+
+*** Offline-first
+
+All content is stored locally which means you can use Polar while offline. Polar cloud sync allows you to use Polar with other computers as well. And our webapp allows you to access your data anywhere.
+
+*** Hackable
+
+The entire system is based on Electron, Node, pdf.js, React and other web standards. If you're a developer - welcome home!
+
+*** Standards based
+
+All content is stored as JSON in a well documented schema. Annotations never change the original content which keeps your document repository safe.
+
+
+* EDIT Keybindings for Common Polar Operations
 
 ** Toggle Sidebar
 
- =F10=: Toggles the sidebar view when using the document viewer. The sidebar shows annotations in a ‘tree view’ including comments and flashcards.
- Abort
+ =F10= Toggles the sidebar view when using the document viewer. The sidebar shows annotations in a ‘tree view’ including comments and flashcards.
 
- =Escape=: Most components support Escape as a way to terminate entering data including tag completion.
+** Abort
+
+ =Escape= Most components support Escape as a way to terminate entering data including tag completion.
 
 ** Complete Tags
 
- =Control-Enter=: Will finish a tag input and select all the tags.
+ =Control= + =Enter= Will finish a tag input and select all the tags.
 
 ** Complete Annotation
 
- =Control-Enter=: Finishes an annotation and saves it to Polar. This includes flashcards and comments.
+ =Control= + =Enter= Finishes an annotation and saves it to Polar. This includes flashcards and comments.
 
 ** Create Cloze Deletion for Flashcard
 
- =Control+Shift+R= Will take highlighted text and make it a cloze deletion.
+ =Control= + =Shift= + =R= Will take highlighted text and make it a cloze deletion.
 
 ** Navigate to next annotation
 
@@ -31,31 +75,10 @@ Lorem ipsum and such.
 
 ** Create Text Hightlight on Selected Text
 
- =Control + Alt + T=
+ =Control= + =Alt= + =T=
 
 
-* Bulk Import
-
-Polar allows you to bulk import one or more PDFs from a directory on you local disk and imports them into your repository.
-
-If you have cloud sync enabled they’re automatically imported into the cloud.
-
-Multiple files can be imported by selecting more than one.
-
-** Metadata
-
- We attempt to extract metadata from the PDF - specifically the document title.
-
- If no metadata is available we revert to the filename as the title (including extension).
-
-** Limitations
-
- - We do not currently (2018-01-25) support recursively adding directories.
-
- - We do not currently (2018-01-25) support DOI metadata extraction for PDFs. This is something we’re actively investigating including DOI/arxiv metadata resolution using public APIs.
-
-
-* Web Page Capture and Archival of HTML Content
+* EDIT Web Page Capture and Archival of HTML Content
 
 ** Web Page Capture
 
@@ -93,7 +116,7 @@ Multiple files can be imported by selecting more than one.
 
  Capture prevents the problem of “link rot” where URLs vanish from the web over time due to a natural form of attribution. Either the domain expires or the content is deleted or the location changed.
 
- The [[https://blog.archive.org/2018/10/01/more-than-9-million-broken-links-on-wikipedia-are-now-rescued/][Internet Archive]] has found that more than 9M URLs on Wikipedia return 404 error pages.
+ The Internet Archive has found that more than [[https://blog.archive.org/2018/10/01/more-than-9-million-broken-links-on-wikipedia-are-now-rescued/][9M URLs]] on Wikipedia return 404 error pages.
 
  With Polar you never have to worry about this being an issue as you have a permanent long term copy of important content.
 
@@ -153,7 +176,29 @@ We’re lucky captured pages work AT ALL.
  - We also cleanup and strip javavascript.
  - WARC would only represent the storage, not the extraction. It might be possible to WRITE WARC or have export to WARC though.
 
-* Annotation Sidebar
+
+* EDIT Bulk Import
+
+Polar allows you to bulk import one or more PDFs from a directory on you local disk and imports them into your repository.
+
+If you have cloud sync enabled they’re automatically imported into the cloud.
+
+Multiple files can be imported by selecting more than one.
+
+** Metadata
+
+ We attempt to extract metadata from the PDF - specifically the document title.
+
+ If no metadata is available we revert to the filename as the title (including extension).
+
+** Limitations
+
+ - We do not currently (2018-01-25) support recursively adding directories.
+
+ - We do not currently (2018-01-25) support DOI metadata extraction for PDFs. This is something we’re actively investigating including DOI/arxiv metadata resolution using public APIs.
+
+
+* EDIT Annotation Sidebar
 
 The annotation sidebar in Polar shows a list of highlights, comments and flashcards associated with a specific document.
 
@@ -162,7 +207,7 @@ This allows you to create, edit, and delete annotations for a specific document 
 [[./annotation-sidebar.png]]
 
 
-* Incremental Reading
+* EDIT Incremental Reading
 
 Incremental reading is a strategy around suspending and resuming reading of a document over time. Reading the documents in chunks and coming back to the document at any future point in time.
 
@@ -227,7 +272,7 @@ Pagemarks allow you to specify a range, or multiple ranges. Additionally, pagema
 
 
 
-* Device Sync
+* EDIT Device Sync
 
 Polar supports two main types of data sync to keep your data transferred and synchronized between your devices - cloud sync and git sync.
 
@@ -295,7 +340,7 @@ Additionally, the design for cloud sync supports more features and functionality
 
 
 
-* Indexes
+* EDIT Indexes
 ** Frequently Asked Questions
 *** How do I support Polar?
 
@@ -512,3 +557,5 @@ Additionally, the design for cloud sync supports more features and functionality
 *** Opt-Out
 
   We will implement an opt-out feature in the future. We would still encourage you to leave tracking on as this data is very very valuable for us to continue to improve the application and without your usage data we can’t improve the application for your specific use case.
+
+* Changelog
