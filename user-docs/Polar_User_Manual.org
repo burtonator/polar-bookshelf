@@ -15,7 +15,9 @@ _underlined_
 * Need to do these things
 ** TODO pull some stuff from README.md at GitHub
 ** TODO pour through other doc-stuff at GitHub
-** TODO actually _write_ some shit
+** TODO edit *heavily*
+** TODO actually _write_ some additional content
+
 
 * EDIT Introduction
 ** Features
