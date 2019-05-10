@@ -1,0 +1,514 @@
+#+TITLE: Polar Bookshelf Manual
+#+AUTHOR: B. Charles Reynolds
+
+* Polar Bookshelf Manual
+Lorem ipsum and such.
+
+* Keybindings for Common Polar Operations
+
+** Toggle Sidebar
+
+ =F10=: Toggles the sidebar view when using the document viewer. The sidebar shows annotations in a ‘tree view’ including comments and flashcards.
+ Abort
+
+ =Escape=: Most components support Escape as a way to terminate entering data including tag completion.
+
+** Complete Tags
+
+ =Control-Enter=: Will finish a tag input and select all the tags.
+
+** Complete Annotation
+
+ =Control-Enter=: Finishes an annotation and saves it to Polar. This includes flashcards and comments.
+
+** Create Cloze Deletion for Flashcard
+
+ =Control+Shift+R= Will take highlighted text and make it a cloze deletion.
+
+** Navigate to next annotation
+
+ =TAB= while in annotation view
+
+** Create Text Hightlight on Selected Text
+
+ =Control + Alt + T=
+
+
+* Bulk Import
+
+Polar allows you to bulk import one or more PDFs from a directory on you local disk and imports them into your repository.
+
+If you have cloud sync enabled they’re automatically imported into the cloud.
+
+Multiple files can be imported by selecting more than one.
+
+** Metadata
+
+ We attempt to extract metadata from the PDF - specifically the document title.
+
+ If no metadata is available we revert to the filename as the title (including extension).
+
+** Limitations
+
+ - We do not currently (2018-01-25) support recursively adding directories.
+
+ - We do not currently (2018-01-25) support DOI metadata extraction for PDFs. This is something we’re actively investigating including DOI/arxiv metadata resolution using public APIs.
+
+
+* Web Page Capture and Archival of HTML Content
+
+** Web Page Capture
+
+ Polar supports long term web page archival via a process called “capture” which downloads and caches the content locally. We store it in Polar as if it were any other type of document (like PDF).
+
+ This allows you to manage web pages with tags and annotations including text and area highlights, comments, and flashcards.
+
+ This essentially allows Polar to work like your own personal Internet archive for documents critical to your education and maintain the knowledge contained within using annotations and comments and use incremental reading to read large collections of web pages in parallel.
+
+ One issue with annotating documents on the web is that the author might change the document (or even delete it) thereby invalidating your annotations.
+
+ Polar prevents that by capturing the content on disk (and in the cloud) for your own long term usage.
+
+ During this process we fetch the full HTML, including iframes, and store them in a portable PHZ file that can be used for long term archival of web content.
+
+ Additionally, we capture the document in a way to make them more usable and more readable.
+
+ [[./capture-preview-narrow.png]]
+
+** Readability
+
+ Polar supports capturing the document in a more readable form by emulating tablet and mobile devices during capture.
+
+ Websites usually try to cooperate with tablets and mobile devices by making them more readable on smaller screens.
+
+ With Polar we emulate these devices during capture to preserve web pages in a more readable form - often with sidebar and navigational content removed.
+
+ #+CAPTION: Document Captured with Sidebar
+ [[./readability-example-bad-narrow.png]]
+
+ #+CAPTION: Captured as Tablet with Sidebar Removed
+ [[./readability-example-good-narrow.png]]
+
+** Link Rot
+
+ Capture prevents the problem of “link rot” where URLs vanish from the web over time due to a natural form of attribution. Either the domain expires or the content is deleted or the location changed.
+
+ The [[https://blog.archive.org/2018/10/01/more-than-9-million-broken-links-on-wikipedia-are-now-rescued/][Internet Archive]] has found that more than 9M URLs on Wikipedia return 404 error pages.
+
+ With Polar you never have to worry about this being an issue as you have a permanent long term copy of important content.
+
+** Usage
+
+ To capture a new page just select =File | Capture Web Page= then enter a URL.
+
+ A preview window will show what the page will look like in Polar.
+
+ After that you have to click the ‘capture’ button to the top right and a new document will be saved within Polar.
+
+** Document Repository
+
+ After the web page is captured and saved locally it’s saved to the document repository where you can reference it at any time in the future.
+
+ The document repository supports features like tagging, tracking reading progress, custom sorting (by updated time, added time), etc.
+
+ [[./document-repository-narrow.png]]
+
+** Chrome Extension
+
+ The Polar Chrome Extension allows you to send directly from Chrome into Polar. You can copy the URL and paste it into Polar directly but it’s more convenient to have a one click button in integrated into your browser.
+
+** Design
+
+*** Light, Thin, Fat, Full Archives.
+
+ We define the following archive types:
+
+ - light: URL only (not supported yet)
+ - thin: HTML only with iframes. No CSS, images, audio, or video (supported in Polar 1.x)
+ - fat: HTML + CSS + images. No audio or video. (under development)
+ - full: HTML + CSS plus all resources including images, audio, and video (not supported yet).
+
+** Why not use a standard format.
+
+I would have loved to. I didn’t want to build a document format and spend months doing so.
+
+We’re lucky captured pages work AT ALL.
+
+*** What are the challenges of creating a portable HTML archive that mandates something custom.
+
+ - CORS access policies prevent the content being access programmatically for things like screenshots.
+ - CORS prevents loading resources from our origin and the target origin
+
+*** Why not MHTML
+
+ - Firefox doesn’t support MHTML
+ - MHTML doesn’t support images
+ - We can’t extend it, fix bugs in it, etc.
+
+*** Why not WARC
+
+ - Chrome can’t replace an HTTP response while it’s served. Only send a redirect. This means that you end up building a loader ANYWAY which is 90% of the requirements for Polar.
+ - WARC doesn’t support compression settings for individual entries. We only STORE images/video for performance and storage gains.
+ - With WARC the full HTTP request would need to be replayed. With our content capture we’re able to use in-browser assets and cache to rebuild the page.
+ - We also cleanup and strip javavascript.
+ - WARC would only represent the storage, not the extraction. It might be possible to WRITE WARC or have export to WARC though.
+
+* Annotation Sidebar
+
+The annotation sidebar in Polar shows a list of highlights, comments and flashcards associated with a specific document.
+
+This allows you to create, edit, and delete annotations for a specific document and view all annotations in one central location.
+
+[[./annotation-sidebar.png]]
+
+
+* Incremental Reading
+
+Incremental reading is a strategy around suspending and resuming reading of a document over time. Reading the documents in chunks and coming back to the document at any future point in time.
+
+Wikipedia has a good overview of [[https://en.wikipedia.org/wiki/Incremental_reading][incremental reading]]
+
+#+BEGIN_QUOTE
+  Incremental reading is a software-assisted method for learning and retaining information from reading, helping with the creation of flashcards out of electronic articles read in portions inside a prioritized reading list.
+
+  It is particularly targeted to people who are trying to learn for life a large amount of information, particularly if that information comes from various sources.
+
+  “Incremental reading” means “reading in portions”. Instead of a linear reading of articles one at a time, the method works by keeping a large reading list of electronic articles or books (often dozens or hundreds of them) and reading parts of several articles in each session. Articles in the reading list are prioritized by the user.
+
+  In the course of reading, key points of articles are broken up into flashcards, which are then learned and reviewed over an extended period of time with the help of a spaced repetition algorithm.
+#+END_QUOTE
+
+Incremental reading in Polar is implemented with the use of “pagemarks” which allow the user to mark regions of the document as read.
+
+You can think of a pagemark as a kind of ‘sectioned bookmark’. A pagemark has a start and an end so that you know which part of the book has been read.
+
+Pagemarks allow suspend and resume of reading for weeks and months in the future until you’re ready to resume, without losing your place.
+
+Pagemarks are contrasted with bookmarks in that a bookmark is only a simple pointer.
+
+Pagemarks allow you to specify a range, or multiple ranges. Additionally, pagemarks are used to keep track of the total progress of the document and to sort documents in the document repository by their reading progress..
+
+#CAPTION:Screenshot showing a document with 4 pagemarks
+[[./annotations-shadow.png]]
+
+** Create Pagemark to Point
+
+ When you right click and select “Create Pagemark to Point” Polar creates pagemarks over all previous pages up until the previous pagemark (or the beginning) of the document.
+
+ This enables you to import a book which you’ve been reading and mark multiple pages as read so that you can now just use Polar to track your pgoress.
+
+ For example, if you have a 300 page book, and you’ve read pages 1-200 you can just jump to page 200 and “Create Pagemark to Point” and pagemarks will be created across all previous pages.
+
+ You can still pagemark the current page by selecting “Create Pagemark Box” to or run “Control Alt N” to mark just the current page.
+
+** Create Pagemark Box.
+
+ When you right click and select “Create Pagemark Box” Polar creates a single pagemark box which you can resize and drag to cover parts of the page you’ve read.
+
+ This is useful when the document has multiple columns and you want to mark a single column.
+
+** Usage
+
+ Pagemarks can be created with either the keyboard of the mouse.
+
+ When working with a document you can simply right click and “Create Pagemark at Point” which will create a pagemark on the current page to the current mouse position.
+
+** Linux / Windows key bindings
+
+ - =Control Alt N= - create a new pagemark on the current page
+ - =Control Alt click= - create a pagemark on the page up until the current mouse click
+ - =Control Alt E= - erase the current pagemark
+
+** MacOS Key bindings
+
+ - =Meta-Command N= - create a new pagemark on the current page
+ - =Meta-Command click= - create a pagemark on the page up until the current mouse click
+ - =Meta-Command E= - erase the current pagemark
+
+
+
+* Device Sync
+
+Polar supports two main types of data sync to keep your data transferred and synchronized between your devices - cloud sync and git sync.
+
+If you’re only using your local machine you don’t really need to use device sync.
+
+IF you have a laptop, desktop, or work machine, and routinely go back and forth then using device sync might be for you.
+
+** Cloud Sync
+
+ Polar supports synchronizing the storage of your documents and annotations (known as our datastore) with the cloud and synchronizing data across computers.
+
+ Cloud sync is near real-time and actively pushes updates to your other devices so that when you change computers your documents are already up to date - no waiting (assuming your computer is active at the time).
+
+*** Backed by Firebase
+
+  Polar cloud sync is backed by Google’s Firebase. You can read about the design in this [[https://getpolarized.io/2019/01/03/building-cloud-sync-on-google-firebase.html][blog post in the cloud sync infrastructure]].
+
+*** Security and Permissions
+
+  All documents in Polar are only available to your account and we use Google Firebase access control credentials to block unauthorized users (anyone other than you).
+
+*** Future Features
+
+  Additionally, cloud sync was specifically designed to support additional features in the future including mobile, selective replication online collaboration, and other exciting new capabilities.
+
+  Selective replication is something we plan on adding in Q1 2019 and allows you to keep the majority if your documents in the cloud and selectively fetch them when necessary.
+
+  This enables users with massive repositories to free up disk space by keeping most of their data in the cloud.
+
+*** Pricing
+
+  Right now cloud sync is free for all users. We plan on making Polar cloud sync free for 95% users and the remaining 5% have the added benefit of supporting Polar with their monthly subscription fee.
+
+  We expect cloud sync to cost $7.99 per month for users with the largest document repository.
+** Git Sync
+
+ Polar supports synchronizing the storage of your documents and annotations (known as your datastore) into git since Polar just stores JSON files directly and the underlying PDFs are immutable.
+
+ We still recommend using [[./Polar-CloudSync.org][cloud sync]] for most users as it supports a much greater feature set and is vastly easier to use.
+
+ However, if you’re already familiar with git, it’s nice to have a secondary backup. Additionally, git sync allows you to diff and work with the files directly.
+
+ The main polar developers keep their =.polar= directory in git for this purpose.
+
+*** Incompatibility
+
+  Right now git sync and cloud sync are compatible but they might not be at a future point in time. Specifically, the selective sync issue will not be compatible with git since files are removed but may be selectively restored.
+
+  Selective sync allows you to selectively replicate files locally that are actively being used and keep the rest of your repository in the cloud.
+
+*** Usage
+
+  Just add your =.polar= directory to git via =git init= and use the normal git flow.
+
+  Just make sure that if you do a =git pull= that you first stop Polar as you could corrupt documents as Polar isn’t yet smart enough to do a differential reload when docs change while Polar is running.
+** 3rd Party Sync
+
+DO NOT use a 3rd party sync framework like Dropbox, SpiderOak, etc.
+
+Polar is not designed for this use case and it’s possible to corrupt your Polar data.
+
+Polar cloud sync is optimized for use with Polar. Dropbox and other 3rd party sync systems introduce data write race conditions that can lead to corruption.
+
+Additionally, the design for cloud sync supports more features and functionality than 3rd parties. We haven’t enabled some of these features yet but will be doing so in Q1 2019.
+
+
+
+* Indexes
+** Frequently Asked Questions
+*** How do I support Polar?
+
+  We have an Open Collective setup to allow donations.
+
+*** How do I import my existing data?
+
+  If you have a large number of PDF files that you would like to import you can select File | Import and select multiple files and they will all be imported into your repository.
+
+  This process is fairly quick taking about 1 minute per 100-200MB.
+
+*** Where is my data kept?
+
+  Your data is kept in a .polar directory in your home dir.
+
+  This changes between platforms depending if you’re on Windows, MacOS or Linux.
+
+  You can find out the exact directory by going to Help | About.
+
+*** Polar is awesome!
+
+  That’s not really a question but we agree completely.
+
+*** Why is Polar using so much disk space?
+
+  The Polar disk repository is actually amazingly efficient in terms of disk usage however the operating system sometimes misreports the total usage.
+
+  The main culprit is our .backup directories which are used when performing cloud syncs. We generally keep one per day for every initial sync (though we might keep more in the future).
+
+  These contain a full backup/snapshot of your disk repository at the time it was created (once per day).
+
+  However, these use what are called ‘hard links’ where we ‘link’ the same files together and they appear in two places on the filesystem but they’re actually the same file.
+
+  If you have 10 hard links to 1 file, and you count the bytes used, some tools report 10x the actual space.
+
+  However, we’re actually using very little more than the original file size sync the data is actually the same.
+
+  They’re basically just alternative for the same underlying file.
+
+*** Why can’t I open files directly?
+
+  Polar has somewhat strict data requirements for the files it’s managing. The goal of Polar is to keep your data for as long as it’s valuable to you so we need to make sure it’s always consistent.
+
+  By using a dedicated data directory we can avoid accidental deletions, and mutations of files.
+
+  Additionally, since all your data is now in one place, we can support features like cloud sync, filesystem consistency checks, sharing, etc.
+
+  Some of these features aren’t implemented yet but are on the roadmap.
+
+*** How do I sync to Anki
+
+  https://getpolarized.io/docs/anki-sync-for-spaced-repetition.html
+
+*** Can I export data from Polar?
+
+  Yes. The PDF and PHZ (web capture) files are in your stash directory in your local datastore. You can just copy them out if you wish to export.
+
+  The annotations are another issue.
+
+  We have exporters for annotations which can be run per document and are located in the annotation sidebar.
+
+*** What characters are supported in tags?
+
+  Polar documents can be tagged for classification and management. This allows you to filter the document repository for specific tags.
+
+  Right now we use the twitter-text library to determine if a tag is valid.
+
+  This is somewhat constrained as characters like ‘#’ and ‘-‘ are not supported.
+
+  International characters and any character that can be supported as part of Twitter hashtags are supported within Polar.
+
+  We DID extend the framework to support ‘:’ so that we could have typed tags.
+
+  The idea was to be compatible with external systems so that data exported from Polar was compatible.
+
+  We might revisit supporting extended tags in the future with additional characters but just issue warnings that these tags aren’t supported on all platforms.
+
+*** Do you have any plans to support ePub format?
+
+  Yes. But not in the short term. Check out our notes on ePub.
+
+*** How do I build and run from source?
+
+  Polar is VERY easy to compile from source. Polar is based on Typescript, Electron, and other important dependencies so these must be fetched first.
+  Install NodeJS + npm
+
+  First, install the lasted version of NodeJS and npm for your platform. At the time of this writing we’re using the 10.x series to build Polar.
+  Build from Source
+
+  First, fetch the latest version of Polar from git then run:
+
+  npm install
+
+  Make sure to run this periodically when pulling a fresh version from git as dependencies may have changed.
+
+  Then run:
+
+  npm compile && npm start
+
+  At this point you should have a version of Polar running on your machine.
+
+  npm install only needs to be run occassionally. Usually when you pull from git and the package.json file changes with new dependencies.
+  How do I enable advanced logging?
+
+  There are two ways to enable advanced logging:
+  Update environment (temporary)
+
+  Set the POLAR_LOG_LEVEL environment variable.
+
+  Linux/Mac run export POLAR_LOG_LEVEL=DEBUG
+
+  NOTE: Make sure it’s exported. If you just set it child processes can’t see the value.
+
+  Windows run set POLAR_LOG_LEVEL=DEBUG
+
+  then run Polar either via npm start for source builds or run the binary directly.
+  Update your config (permanent)
+
+  NOTE: This is no longer the recommended way to change your log level. We recommend setting POLAR_LOG_LEVEL. When permanently setting the log level to DEBUG there can be sever performance degredations - especially when moving pagemarks which can lock up Polar and make it feel that the app has crashed when in reality it’s just being amazingly slow logging thousands of messages.
+
+  Create a file in your .polar/config directory named logging.json with the following content:
+
+  {
+    "level": "DEBUG",
+    "target": "CONSOLE"
+  } 
+
+  By default we use logging level WARN to improve performance and also so it does not log pointless messages to the console which would just be confusing to an end user.
+
+  The available log levels are:
+
+  DEBUG
+  VERBOSE
+  INFO
+  WARN
+  ERROR
+
+  We currently only support a log target of CONSOLE due to performance reasons.
+
+  There IS an on-disk version enabled but it usually ends up locking up Electron essentially defeating the point.
+
+  We plan on implementing a logger implemented on Websockets in the future.
+  Commons Errors
+  Quiting. App is single instance.
+
+  This happens because another version of Polar is running in the background.
+
+  Either quit this version or run:
+
+  killall electron
+  killall polar-bookshelf
+
+  … on MacOS and Windows you probably want to kill either the Electron or Polar Bookshelf processes if they’re running in the background.
+  Aren’t Electron Apps Bloated?
+
+*** RAM
+
+  A default install of Polar uses about 350MB of RAM after a fresh start.
+
+  As of 2018 this is about $5 worth of RAM.
+
+  Electron and web apps provide for an amazingly powerful development platform.
+
+  Without PDF.js, React, Node, and other frameworks, it would be prohibitively expensive to re-implement Polar (and not very fun either).
+
+  Now add the cost of porting to Windows, Linux, MacOS, Android and iOS.
+
+  You’re asking to spend hundreds of thousands of dollars hiring a developer to save $5 on RAM.
+
+  It’s just not a very practical solution.
+
+  I’d like to get memory consumption down. It’s possible that there are some features we can remove but right now it’s not a priority.
+
+  Just spend the extra $5…
+
+*** Disk
+
+  The binary download is only 100MB. Fairly reasonable for modern apps.
+
+** Tracking Policy
+
+ Polar uses Google Analytics and other 3rd party services to track your usage of Polar for quality assurance, UI/UX and usability issues, fault detection, and adoption and usage of new features.
+
+ Our /only/ goal for tracking is to improve the quality of the application.
+
+ We are /not/ interested in tracking the actual content of the books you read, the annotations, you create, etc.
+
+ We would consider this a bug and revert any change that actively exposed the reading list or annotations of our users without their consent.
+
+ There may be data leaks (such as the name of a book in an exception log) but we try to keep this to either zero or a minimum by iterating and improving any potential data leaks.
+
+*** What we track
+
+  This is a non-exhaustive list of what we track in Polar. It may be inaccurate but we strive to keep it up to date.
+
+**** Runtime Faults and Exceptions
+
+  We use [[https://sentry.io][Sentry]] to report exceptions as they are encountered in the application. If Polar has a bug of failure a recording of that is sent to sentry which allows us to debug real-world problems fix them.
+
+**** Usage
+
+  We use Google Analytics to track various features and usage of the product including but not limited to:
+
+  - Number of documents in your repository
+  - Product version
+  - The types of documents you’re using.
+  - The types of features you’re using (capture, annotations, etc)
+  - Application level events (create comment, create annotation, etc)
+
+*** How we track
+
+  ALL tracking data is sent via SSL. We consider this a hard requirement and will revert any tracking system that either has insecure or broken SSL.
+
+*** Opt-Out
+
+  We will implement an opt-out feature in the future. We would still encourage you to leave tracking on as this data is very very valuable for us to continue to improve the application and without your usage data we can’t improve the application for your specific use case.

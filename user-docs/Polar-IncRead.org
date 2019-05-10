@@ -1,5 +1,5 @@
 
-#+TITLE:Incremental Reading
+* Incremental Reading
 
 Incremental reading is a strategy around suspending and resuming reading of a document over time. Reading the documents in chunks and coming back to the document at any future point in time.
 
@@ -28,37 +28,37 @@ Pagemarks allow you to specify a range, or multiple ranges. Additionally, pagema
 #CAPTION:Screenshot showing a document with 4 pagemarks
 [[./annotations-shadow.png]]
 
-* Create Pagemark to Point
+** Create Pagemark to Point
 
-When you right click and select “Create Pagemark to Point” Polar creates pagemarks over all previous pages up until the previous pagemark (or the beginning) of the document.
+ When you right click and select “Create Pagemark to Point” Polar creates pagemarks over all previous pages up until the previous pagemark (or the beginning) of the document.
 
-This enables you to import a book which you’ve been reading and mark multiple pages as read so that you can now just use Polar to track your pgoress.
+ This enables you to import a book which you’ve been reading and mark multiple pages as read so that you can now just use Polar to track your pgoress.
 
-For example, if you have a 300 page book, and you’ve read pages 1-200 you can just jump to page 200 and “Create Pagemark to Point” and pagemarks will be created across all previous pages.
+ For example, if you have a 300 page book, and you’ve read pages 1-200 you can just jump to page 200 and “Create Pagemark to Point” and pagemarks will be created across all previous pages.
 
-You can still pagemark the current page by selecting “Create Pagemark Box” to or run “Control Alt N” to mark just the current page.
+ You can still pagemark the current page by selecting “Create Pagemark Box” to or run “Control Alt N” to mark just the current page.
 
-* Create Pagemark Box.
+** Create Pagemark Box.
 
-When you right click and select “Create Pagemark Box” Polar creates a single pagemark box which you can resize and drag to cover parts of the page you’ve read.
+ When you right click and select “Create Pagemark Box” Polar creates a single pagemark box which you can resize and drag to cover parts of the page you’ve read.
 
-This is useful when the document has multiple columns and you want to mark a single column.
+ This is useful when the document has multiple columns and you want to mark a single column.
 
-* Usage
+** Usage
 
-Pagemarks can be created with either the keyboard of the mouse.
+ Pagemarks can be created with either the keyboard of the mouse.
 
-When working with a document you can simply right click and “Create Pagemark at Point” which will create a pagemark on the current page to the current mouse position.
+ When working with a document you can simply right click and “Create Pagemark at Point” which will create a pagemark on the current page to the current mouse position.
 
-* Linux / Windows key bindings
+** Linux / Windows key bindings
 
-- =Control Alt N= - create a new pagemark on the current page
-- =Control Alt click= - create a pagemark on the page up until the current mouse click
-- =Control Alt E= - erase the current pagemark
+ - =Control Alt N= - create a new pagemark on the current page
+ - =Control Alt click= - create a pagemark on the page up until the current mouse click
+ - =Control Alt E= - erase the current pagemark
 
-* MacOS Key bindings
+** MacOS Key bindings
 
-- =Meta-Command N= - create a new pagemark on the current page
-- =Meta-Command click= - create a pagemark on the page up until the current mouse click
-- =Meta-Command E= - erase the current pagemark
+ - =Meta-Command N= - create a new pagemark on the current page
+ - =Meta-Command click= - create a pagemark on the page up until the current mouse click
+ - =Meta-Command E= - erase the current pagemark
 

@@ -1,29 +1,29 @@
 
-#+TITLE:Keybindings for Common Polar Operations
+* Keybindings for Common Polar Operations
 
-* Toggle Sidebar
+** Toggle Sidebar
 
-=F10=: Toggles the sidebar view when using the document viewer. The sidebar shows annotations in a ‘tree view’ including comments and flashcards.
-Abort
+ =F10=: Toggles the sidebar view when using the document viewer. The sidebar shows annotations in a ‘tree view’ including comments and flashcards.
+ Abort
 
-=Escape=: Most components support Escape as a way to terminate entering data including tag completion.
+ =Escape=: Most components support Escape as a way to terminate entering data including tag completion.
 
-* Complete Tags
+** Complete Tags
 
-=Control-Enter=: Will finish a tag input and select all the tags.
+ =Control-Enter=: Will finish a tag input and select all the tags.
 
-* Complete Annotation
+** Complete Annotation
 
-=Control-Enter=: Finishes an annotation and saves it to Polar. This includes flashcards and comments.
+ =Control-Enter=: Finishes an annotation and saves it to Polar. This includes flashcards and comments.
 
-* Create Cloze Deletion for Flashcard
+** Create Cloze Deletion for Flashcard
 
-=Control+Shift+R= Will take highlighted text and make it a cloze deletion.
+ =Control+Shift+R= Will take highlighted text and make it a cloze deletion.
 
-* Navigate to next annotation
+** Navigate to next annotation
 
-=TAB= while in annotation view
+ =TAB= while in annotation view
 
-* Create Text Hightlight on Selected Text
+** Create Text Hightlight on Selected Text
 
-=Control + Alt + T=
+ =Control + Alt + T=

@@ -1,5 +1,5 @@
 
-#+TITLE:Git Sync
+* Git Sync
 
 Polar supports synchronizing the storage of your documents and annotations (known as your datastore) into git since Polar just stores JSON files directly and the underlying PDFs are immutable.
 
@@ -9,14 +9,14 @@ However, if you’re already familiar with git, it’s nice to have a secondary 
 
 The main polar developers keep their =.polar= directory in git for this purpose.
 
-* Incompatibility
+** Incompatibility
 
-Right now git sync and cloud sync are compatible but they might not be at a future point in time. Specifically, the selective sync issue will not be compatible with git since files are removed but may be selectively restored.
+ Right now git sync and cloud sync are compatible but they might not be at a future point in time. Specifically, the selective sync issue will not be compatible with git since files are removed but may be selectively restored.
 
-Selective sync allows you to selectively replicate files locally that are actively being used and keep the rest of your repository in the cloud.
+ Selective sync allows you to selectively replicate files locally that are actively being used and keep the rest of your repository in the cloud.
 
-* Usage
+** Usage
 
-Just add your =.polar= directory to git via =git init= and use the normal git flow.
+ Just add your =.polar= directory to git via =git init= and use the normal git flow.
 
-Just make sure that if you do a =git pull= that you first stop Polar as you could corrupt documents as Polar isn’t yet smart enough to do a differential reload when docs change while Polar is running.
+ Just make sure that if you do a =git pull= that you first stop Polar as you could corrupt documents as Polar isn’t yet smart enough to do a differential reload when docs change while Polar is running.

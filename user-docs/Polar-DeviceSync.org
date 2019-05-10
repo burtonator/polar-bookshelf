@@ -1,5 +1,5 @@
 
-#+TITLE:Device Sync
+* Device Sync
 
 Polar supports two main types of data sync to keep your data transferred and synchronized between your devices - [[./Polar-GitSync.org][git sync]] and [[./Polar-CloudSync][cloud sync]].
 
@@ -7,7 +7,7 @@ If you’re only using your local machine you don’t really need to use device 
 
 IF you have a laptop, desktop, or work machine, and routinely go back and forth then using device sync might be for you.
 
-* 3rd Party Sync
+** 3rd Party Sync
 
 DO NOT use a 3rd party sync framework like Dropbox, SpiderOak, etc.
 
