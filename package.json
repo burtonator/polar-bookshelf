@@ -186,7 +186,7 @@
     "node-fetch": "~2.3.0",
     "npm": "~6.5.0",
     "opencollective-postinstall": "~2.0.1",
-    "pdfjs-dist": "~2.0.943",
+    "pdfjs-dist": "~2.2.228",
     "polar-loader": "1.0.3",
     "polar-shared": "^2.0.11",
     "popper.js": "~1.14.4",
