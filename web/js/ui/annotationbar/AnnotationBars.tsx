@@ -38,6 +38,11 @@ export class AnnotationBars {
 
         ActiveSelections.addEventListener(activeSelectionEvent => {
 
+            if (activeSelectionEvent.type === 'destroyed') {
+                // only created supported for now.
+                return;
+            }
+
             // this causes the popup to display
             controlledPopupProps.triggerPopupEventDispatcher.dispatchEvent({
                 point: {

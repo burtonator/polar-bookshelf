@@ -1,11 +1,12 @@
 import {SerializedObject} from './SerializedObject';
-import {ISODateTimeString} from './ISODateTimeStrings';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {IAnnotationInfo} from "polar-shared/src/metadata/IAnnotationInfo";
 
 /**
  * High level information about the annotations in this document.
  *
  */
-export class AnnotationInfo extends SerializedObject {
+export class AnnotationInfo extends SerializedObject implements IAnnotationInfo {
 
     /**
      * The last time this document was annotated (pagemarks updated, text
@@ -28,3 +29,4 @@ export class AnnotationInfo extends SerializedObject {
     }
 
 }
+

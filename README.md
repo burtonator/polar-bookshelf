@@ -6,7 +6,7 @@
   <h1>Polar Bookshelf</h1>
 
 <a href="https://github.com/burtonator/polar-bookshelf/releases">
-    <img src="https://img.shields.io/github/downloads/burtonator/polar-bookshelf/total.svg"/>
+     <img src="https://img.shields.io/github/downloads/burtonator/polar-bookshelf/total.svg"/>
 </a>
 
 <a href="https://discord.gg/GT8MhA6">
@@ -21,13 +21,12 @@
     <img src="https://img.shields.io/twitter/follow/getpolarized.svg?style=social&label=Follow"/>
 </a>
 
-
-<!--
-
-FIXME: include our github release download count:
-
-
--->
+<a href="#backers" alt="sponsors on Open Collective">
+<img src="https://opencollective.com/polar-bookshelf/backers/badge.svg" />
+</a> 
+<a href="#sponsors" alt="Sponsors on Open Collective">
+<img src="https://opencollective.com/polar-bookshelf/sponsors/badge.svg" />
+</a>
 
 <br/>
 <br/>
@@ -50,9 +49,11 @@ https://discord.gg/qp5FsY
 [![AppVeyor](https://img.shields.io/appveyor/ci/Sential/wexond.svg?style=flat-square)](https://ci.appveyor.com/project/Sential/wexond)
 -->
 
-Polar Bookshelf is an incremental reading and personal knowledge repository for
-PDF and the web created using the [Electron framework](https://electron.atom.io)
-and [PDF.js](https://mozilla.github.io/pdf.js)
+Polar Bookshelf is personal knowledge repository which supports advanced
+features like incremental reading, annotation, comments, and spaced repetition. 
+It supports reading PDF and the web content and was created using the [Electron
+framework](https://electron.atom.io) and
+[PDF.js](https://mozilla.github.io/pdf.js)
 
 </div>
 
@@ -69,7 +70,7 @@ research which is often stored as PDF.
 
 - **Area Highlights** Capture a region of the page as a highlight which can be a chart, figure, infographic, etc.  
 
-- **Local Storage** All content is stored locally. You can also use a system like ```git``` or ```Dropbox``` to transfer your repository across machines.
+- **Local Storage** All content is stored locally. 
 
 - **Hackable** The entire system is based on ```Electron```, ```Node```, ```pdf.js```, ```React``` and other web standards.  If you're a developer - welcome home!
 
@@ -105,12 +106,9 @@ research which is often stored as PDF.
     etc.
 </p>
 
-# [Downloads](https://github.com/burtonator/polar-bookshelf/releases)
+# [Downloads](https://getpolarized.io/download.html)
 
-Packages for Windows, MacOS, and Linux are available in the [releases](https://github.com/burtonator/polar-bookshelf/releases) page.
-
-Note that our packages are NOT currently signed so you will receive an error on 
-Windows and MacOS before installation.  
+Packages for Windows, MacOS, and Linux are available on the [downloads](https://getpolarized.io/download.html) page.
 
 We also have a [CHANGELOG](./docs/CHANGELOG.md) available if you're interested into what went into each release.
 
@@ -127,7 +125,7 @@ If it's a very technical issue it might be best to [create a Github Issue](https
 Polar is a document manager for PDF and web content as well as a personal
 knowledge repository.
 
-It allows you to keep all important reading material in one place including
+Polar allows you to keep all important reading material in one place including
 annotations and flashcards for spaced repetition.
 
 It supports for features like pagemarks, text highlights, and progress tracking
@@ -135,21 +133,19 @@ by keeping track of how much you've read including restoring pagemarks when you
 re-open documents.
 
 Pagemarks are a new concept for tracking your reading inspired from [incremental
-reading](https://en.wikipedia.org/wiki/Incremental_reading).  They allow suspend
+reading](https://getpolarized.io/incremental-reading.html).  They allow suspend
 and resume of reading for weeks and months in the future until you're ready to
 resume, without losing your place.
 
 Since you can create multiple pagemarks they work even if you jump around in a
 book (which is often in technical or research work).
 
-<a href="https://www.youtube.com/watch?v=h5ZY2z_vgOg&feature=youtu.be"><img src="https://raw.githubusercontent.com/burtonator/polar-bookshelf/master/docs/demo.png?1=2"></a>
-
 # Web Content
 
-PDF is an excellent document but we've found that many HTML pages don't convert
-to PDF well since they were not intended to be printed.
+PDF is an excellent document format but we've found that many HTML pages don't
+convert to PDF well since they were not intended to be printed.
 
-Captured pages contain HTML content stored in ```phz``` (polar HTML zip) files.
+Captured pages contain HTML content stored in ```phz``` (Polar HTML zip) files.
 
 We fetch all resources, render the page as DOM and apply CSS, then de-activate
 the page by removing all scripts.
@@ -174,27 +170,6 @@ a PDF or PHZ file your pagemarks and other annotations are restored.
 Since storage is local you're not reliant on one specific cloud provider. You can 
 also use tools like git or Dropbox to synchronize across machines.
 
-# Pagemarks
-
-Pagemarks provide a way for you to keep track of your reading by marking portions
-of your document as 'read'.  You can have multiple pagemarks per document. 
-
-Additionally there is a progress bar that tracks the progress of the document
-based on the number of pagemarks you've created.
-
-Right now usage is only via keyboard bindings:
-
-## Linux / Windows key bindings
-
- - Control Alt N - create a new pagemark on the current page
- - Control Alt click - create a pagemark on the page up until the current mouse click
- - Control Alt E - erase the current pagemark
-
-## MacOS Key bindings
-
- - Meta-Command N - create a new pagemark on the current page
- - Meta-Command click - create a pagemark on the page up until the current mouse click
- - Meta-Command E - erase the current pagemark
 
 # Text Highlights
 
@@ -242,6 +217,10 @@ Flashcards can be created by right clicking an annotation and selecting
 "Create Flashcard".  The resulting flashcards are stored as annotations in your 
 repository.
 
+To specify the Anki deck for a document, add a tag starting with `deck:`.  Slashes are used to specify subdecks.
+For instance, to set a document to the Anki deck ML::100PageMLBook, use the Polar tag `deck:ML/100PageMLBook`.
+
+
 ## Status
 
 This is currently a beta feature and we're working on implementing Anki sync
@@ -267,28 +246,6 @@ All data is stored on disk in JSON format.  This also includes extracted metadat
 from the document.  For example, text highlights include the source text that you
 copied as well as pointers into the original document where they can be found.
 
-# Pending Features
-
-We're currently working on landing a few key features which are halfway
-implemented including:
-
-- A rework of text highlights for PDFs
-
-- Thumbnails of highlights (text + area) stored in .json
-
-- Flashcard integration with Anki support. The flashcard UI is mostly complete
-  but I need feedback on the design.
-
-# [Roadmap](./docs/ROADMAP.md)
-
-Check our our [roadmap](./docs/ROADMAP.md) to see if there are any features you 
-need pending for a future release.  
-
-Feel free to jump on any of these issues if you're a developer and would like
-to implement them yourself.
-
-Donations also help to support the project and encourage specific features.
-
 # Principles
 
 We believe the following design principles are core to seeing this as a
@@ -308,17 +265,51 @@ Install NodeJS and npm for your platform.
 
 ### To run:
 
+Install latest **stable** node and npm versions.
+
+You can check which version you need at 
+
+https://nodejs.org/
+
+... then run: 
+
 ```
 $ git clone https://github.com/burtonator/polar-bookshelf
 $ cd polar-bookshelf
-$ npm install && npm start
+$ npm install && npm run-script compile && npm start
 ```
 
 # Donations
 
-If you'd like to donate we accept Bitcoin at <a href="bitcoin:bc1q059asaaqjt5cultx993gfytjssj4g6fw3q8n7g">bc1q059asaaqjt5cultx993gfytjssj4g6fw3q8n7g</a>
+Polar is supported by [community donations](https://opencollective.com/polar-bookshelf) 
 
-All donations go to supporting Polar which include website hosting costs, web designer costs, continual integration services, etc. 
+All donations  go to supporting Polar which include website hosting costs, web designer costs, continual integration services, etc. 
+
+## Contributors
+
+This project exists thanks to all the people who contribute. <img src="https://opencollective.com/polar-bookshelf/contributors.svg?width=890&button=false" />
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/polar-bookshelf#backer)]
+
+<a href="https://opencollective.com/polar-bookshelf#backers" target="_blank"><img src="https://opencollective.com/polar-bookshelf/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/polar-bookshelf#sponsor)]
+
+<a href="https://opencollective.com/polar-bookshelf/sponsor/0/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/1/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/2/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/3/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/4/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/5/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/6/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/7/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/8/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/polar-bookshelf/sponsor/9/website" target="_blank"><img src="https://opencollective.com/polar-bookshelf/sponsor/9/avatar.svg"></a>
 
 # License
 

@@ -24,7 +24,7 @@ xdescribe('Create ranges', function() {
 
             createPagemarksForPageRanges.execute({range: {start: 1, end: 204}});
 
-            await persistenceLayer.sync(fingerprint, docMeta!);
+            await persistenceLayer.write(fingerprint, docMeta!);
 
             // to 204...
 

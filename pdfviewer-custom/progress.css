@@ -1,0 +1,67 @@
+
+/* determinate progress bars */
+
+progress[value] {
+
+    -webkit-appearance: none;
+    -moz-appearance:    none;
+    appearance:         none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+
+    border: 1px solid #a7a7a7;
+
+}
+
+progress[value]::-webkit-progress-bar {
+    background-color: #fff;
+}
+
+progress[value]::-webkit-progress-value {
+    background-color: #90aff7;
+}
+
+/* indeterminate progress bars */
+
+.progress-indeterminate-slider {
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height:4px;
+    overflow-x: hidden;
+}
+
+.progress-indeterminate-line {
+    position:absolute;
+    opacity: 0.4;
+    background:#4a8df8;
+    width:150%;
+    height:4px;
+}
+
+.progress-indeterminate-subline {
+    position:absolute;
+    background:#4a8df8;
+    height:4px;
+}
+
+.progress-indeterminate-inc {
+
+    animation: progress-indeterminate-increase 2s infinite;
+}
+
+.progress-indeterminate-dec {
+    animation: progress-indeterminate-decrease 2s 0.5s infinite;
+}
+
+@keyframes progress-indeterminate-increase {
+    from { left: -5%; width: 5%; }
+    to { left: 130%; width: 100%;}
+}
+@keyframes progress-indeterminate-decrease {
+    from { left: -80%; width: 80%; }
+    to { left: 110%; width: 10%;}
+}
+

@@ -1,5 +1,5 @@
 import {WebRequest} from 'electron';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Reactor} from '../reactor/Reactor';
 import OnBeforeRedirectDetails = Electron.OnBeforeRedirectDetails;
 import OnBeforeRequestDetails = Electron.OnBeforeRequestDetails;
@@ -7,6 +7,7 @@ import OnCompletedDetails = Electron.OnCompletedDetails;
 import OnErrorOccurredDetails = Electron.OnErrorOccurredDetails;
 import OnResponseStartedDetails = Electron.OnResponseStartedDetails;
 import OnSendHeadersDetails = Electron.OnSendHeadersDetails;
+import OnBeforeSendHeadersDetails = Electron.OnBeforeSendHeadersDetails;
 
 
 export class WebRequestReactor {
@@ -100,7 +101,7 @@ export class WebRequestReactor {
 
     }
 
-    private handleBeforeSendHeaders(details: OnBeforeRequestDetails,
+    private handleBeforeSendHeaders(details: OnBeforeSendHeadersDetails,
                                     callback: (response: Electron.Response) => void): void {
 
         this.handleEvent({

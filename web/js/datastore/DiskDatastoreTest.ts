@@ -1,58 +1,56 @@
-
 import {assert} from 'chai';
 import {assertJSON} from '../test/Assertions';
-import {DocMetas, MockDocMetas} from '../metadata/DocMetas';
 import {DiskDatastore} from './DiskDatastore';
-import {DefaultPersistenceLayer} from './DefaultPersistenceLayer';
-import {DocMeta} from '../metadata/DocMeta';
-import {isPresent} from '../Preconditions';
 
 import os from 'os';
 import fs from 'fs';
-import {Files} from '../util/Files';
-import {FilePaths} from '../util/FilePaths';
-import {Dictionaries} from '../util/Dictionaries';
+import {Files} from 'polar-shared/src/util/Files';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 import {Directories, GlobalDataDir} from './Directories';
-
-const rimraf = require('rimraf');
+import {Platform, Platforms} from '../util/Platforms';
+import {DatastoreTester} from './DatastoreTester';
+import {Backend} from 'polar-shared/src/datastore/Backend';
+import {DefaultPersistenceLayer} from './DefaultPersistenceLayer';
+import {MockDocMetas} from '../metadata/DocMetas';
+import {DocMetaFileRef} from './DocMetaRef';
+import {MockPHZWriter} from '../phz/MockPHZWriter';
 
 const tmpdir = os.tmpdir();
 
-describe('DiskDatastore', function() {
+describe("DiskDatastore", async function() {
 
-    it("init and test paths", async function() {
+    DatastoreTester.test(async () => new DiskDatastore());
 
-        const dataDir = FilePaths.join(tmpdir, 'test-paths');
-        removeDirectory(dataDir);
 
-        GlobalDataDir.set(dataDir);
-        const diskDatastore = new DiskDatastore();
-
-        await diskDatastore.init();
-
-        assert.equal(diskDatastore.dataDir, FilePaths.join(tmpdir, 'test-paths'));
-
-        assert.equal(diskDatastore.stashDir, FilePaths.join(tmpdir, 'test-paths', 'stash'));
-
-        // now create it and
-
+    it("getDataDir", function() {
+        assert.notEqual(Directories.getDataDir(), null);
     });
 
 
-    it("test async exists function", async function() {
+    it("getDataDirsForPlatform MAC_OS", function() {
 
-        const dataDir = FilePaths.join(tmpdir, 'this-file-does-not-exist');
-        removeDirectory(dataDir);
+        if (Platforms.get() !== Platform.MACOS) {
+            return;
+        }
 
-        assert.equal(fs.existsSync(dataDir), false);
-        assert.equal(await Files.existsAsync(dataDir), false);
+        const userHome = '/Users/alice';
+        const platform = Platform.MACOS;
+
+        assertJSON(DiskDatastore.getDataDirsForPlatform({userHome, platform}), {
+            "paths": [
+                "/Users/alice/.polar",
+                "/Users/alice/Library/Application Support/Polar"
+            ],
+            "preferredPath": "/Users/alice/Library/Application Support/Polar"
+        });
 
     });
+
 
     it("init dataDir directory on init()", async function() {
 
         const dataDir = FilePaths.join(tmpdir, 'disk-datastore.test');
-        removeDirectory(dataDir);
+        await Files.removeDirectoryRecursivelyAsync(dataDir);
 
         GlobalDataDir.set(dataDir);
         const diskDatastore = new DiskDatastore();
@@ -98,7 +96,7 @@ describe('DiskDatastore', function() {
         };
 
         // test double init...
-        assertJSON(await diskDatastore.init(), expected );
+        assertJSON(await diskDatastore.init(), expected);
 
         expected = {
             "dataDirConfig": {
@@ -140,169 +138,97 @@ describe('DiskDatastore', function() {
 
     });
 
-    it("getDataDir", function() {
 
-        assert.notEqual(Directories.getDataDir(), null);
+    it("init and test paths", async function() {
 
-    });
+        const dataDir = FilePaths.join(tmpdir, 'test-paths');
+        await Files.removeDirectoryRecursivelyAsync(dataDir);
 
-    describe('Write and discover documents', function() {
+        GlobalDataDir.set(dataDir);
+        const diskDatastore = new DiskDatastore();
 
-        const fingerprint = "0x001";
+        await diskDatastore.init();
 
-        const dataDir = FilePaths.join(tmpdir, 'test-data-dir');
+        assert.equal(diskDatastore.dataDir, FilePaths.join(tmpdir, 'test-paths'));
 
-        let diskDatastore: DiskDatastore;
-        let persistenceLayer: DefaultPersistenceLayer;
+        assert.equal(diskDatastore.stashDir, FilePaths.join(tmpdir, 'test-paths', 'stash'));
 
-        let docMeta: DocMeta;
-
-        beforeEach(async function() {
-
-            removeDirectory(dataDir);
-
-            GlobalDataDir.set(dataDir);
-            diskDatastore = new DiskDatastore();
-            persistenceLayer = new DefaultPersistenceLayer(diskDatastore);
-
-            await persistenceLayer.init();
-
-            docMeta = MockDocMetas.createWithinInitialPagemarks(fingerprint, 14);
-
-            const contains = await persistenceLayer.contains(fingerprint);
-
-            assert.equal(contains, false);
-
-            await persistenceLayer.sync(fingerprint, docMeta);
-
-        });
-
-        it("write and read data to disk", async function() {
-            //
-            // let contains = await persistenceLayer.contains(fingerprint);
-            //
-            // assert.ok(! contains);
-
-            const docMeta0 = await persistenceLayer.getDocMeta(fingerprint);
-
-            assert.ok(docMeta0!.docInfo.lastUpdated !== undefined);
-
-            delete docMeta0!.docInfo.lastUpdated;
-
-            assert.equal(isPresent(docMeta0), true);
-
-            assertJSON(Dictionaries.sorted(docMeta), Dictionaries.sorted(docMeta0));
-
-        });
-
-
-        it("getDocMetaFiles", async function() {
-
-            const docMetaFiles = await diskDatastore.getDocMetaFiles();
-
-            assert.equal(docMetaFiles.length > 0, true);
-
-            assert.equal(docMetaFiles.map((current) => current.fingerprint).includes(fingerprint), true);
-
-        });
+        // now create it and
 
     });
 
-    //     diskDatastore.init();
-//     diskDatastore.init();
-//     let fingerprint = "0x0000";
-//     diskDatastore.sync(fingerprint, {});
-//     var docMeta = await diskDatastore.getDocMeta(fingerprint)
-//
-//     // test for something that doesn't exits.
-//     docMeta = await diskDatastore.getDocMeta("0xmissing")
-//     assert.equal(docMeta, null)
+    it("test async exists function", async function() {
 
+        const dataDir = FilePaths.join(tmpdir, 'this-file-does-not-exist');
+        await Files.removeDirectoryRecursivelyAsync(dataDir);
+
+        assert.equal(fs.existsSync(dataDir), false);
+        assert.equal(await Files.existsAsync(dataDir), false);
+
+    });
+
+    it("Add file and remove file from the stash and see if it exists.", async function() {
+
+        const path = await Files.realpathAsync(FilePaths.join(__dirname, "..", "..", "..", "docs", "example.pdf"));
+
+        assert.ok(await Files.existsAsync(path), "No file found from: " + process.cwd());
+
+        const dataDir = FilePaths.join(tmpdir, 'datastore-stash-backend');
+        await Files.removeDirectoryRecursivelyAsync(dataDir);
+
+        GlobalDataDir.set(dataDir);
+        const diskDatastore = new DiskDatastore();
+        await diskDatastore.init();
+
+        await diskDatastore.writeFile(Backend.STASH, {name: 'example.pdf'}, await Files.readFileAsync(path));
+
+        const pdfPath = FilePaths.join(dataDir, "stash", "example.pdf");
+
+        assert.ok(await Files.existsAsync(pdfPath), "Could not find file: " + pdfPath);
+
+        assert.ok(await diskDatastore.containsFile(Backend.STASH, {name: 'example.pdf'}));
+
+        await diskDatastore.deleteFile(Backend.STASH, {name: 'example.pdf'});
+
+        assert.isFalse(await Files.existsAsync(pdfPath));
+
+    });
+
+    it("Delete file and make sure state.json and dir are no longer present", async function() {
+
+        const dataDir = FilePaths.join(tmpdir, 'datastore-delete-test');
+
+        GlobalDataDir.set(dataDir);
+        const diskDatastore = new DiskDatastore();
+        await diskDatastore.init();
+
+        const persistenceLayer = new DefaultPersistenceLayer(diskDatastore);
+
+        await persistenceLayer.init();
+
+        const fingerprint = '0x00datadelete';
+        const docMeta = MockDocMetas.createWithinInitialPagemarks(fingerprint, 14);
+
+        await persistenceLayer.write(fingerprint, docMeta);
+
+        const stateFile = FilePaths.join(dataDir, fingerprint, 'state.json');
+
+        assert.ok(await Files.existsAsync(stateFile));
+
+        const docMetaFileRef: DocMetaFileRef = {
+            fingerprint,
+            docFile: {
+                name: `${fingerprint}.phz`
+            },
+            docInfo: docMeta.docInfo
+        };
+
+        await MockPHZWriter.write(FilePaths.create(diskDatastore.stashDir, `${fingerprint}.phz`));
+
+        await persistenceLayer.delete(docMetaFileRef);
+
+        assert.isFalse(await persistenceLayer.contains(stateFile));
+
+    });
 
 });
-
-function removeDirectory(path: string) {
-    rimraf.sync(path);
-}
-
-//
-//
-//
-// async function testBasicFileOperations() {
-//
-//     let testFilePath = `${tmpdir}/test.write";
-//     let testDirPath = `${tmpdir}/test.dir";
-//
-//     // test removing files
-//     await diskDatastore.unlinkAsync(testFilePath)
-//                        .catch(function (err) {})
-//     await diskDatastore.rmdirAsync(testDirPath)
-//                        .catch(function (err) {console.error(err)})
-//
-//     // test access
-//
-//     var canAccess =
-//         await diskDatastore.accessAsync(testFilePath, fs.constants.R_OK | fs.constants.W_OK)
-//                            .then(() => true)
-//                            .catch(() => false);
-//
-//     assert.equal(canAccess, false);
-//
-//     // test writing
-//     await diskDatastore.writeFileAsync(testFilePath, "asdf", {});
-//
-//     // now see if the file exists.
-//
-//     var canAccess =
-//         await diskDatastore.accessAsync(testFilePath, fs.constants.R_OK | fs.constants.W_OK)
-//                            .then(() => true)
-//                            .catch(() => false);
-//
-//     assert.equal(canAccess, true);
-//
-//     // test reading
-//     var result = await diskDatastore.readFileAsync(testFilePath);
-//     assert.equal("asdf", result);
-//
-//     // test removing files
-//     await diskDatastore.unlinkAsync(testFilePath);
-//
-//     await diskDatastore.mkdirAsync(testDirPath)
-//
-//     // now stat() the dir to see that it's actuall a dir.
-//     var stat = await diskDatastore.statAsync(testDirPath);
-//
-//     assert.equal(stat.isDirectory(), true);
-//
-//     // now test existsAsync
-//     assert.equal(await diskDatastore.existsAsync(`${tmpdir}"), true );
-//
-//     assert.equal(await diskDatastore.existsAsync(`${tmpdir}asdf"), false );
-//
-//     assert.equal(await diskDatastore.existsAsync("/home/burton/.polar/0xmissing"), false );
-//
-//     console.log("Worked");
-//
-// }
-//
-// async function testDiskDatastore() {
-//
-//     diskDatastore.init();
-//     diskDatastore.init();
-//     let fingerprint = "0x0000";
-//     diskDatastore.sync(fingerprint, {});
-//     var docMeta = await diskDatastore.getDocMeta(fingerprint)
-//
-//     // test for something that doesn't exits.
-//     docMeta = await diskDatastore.getDocMeta("0xmissing")
-//     assert.equal(docMeta, null)
-//
-// }
-//
-// testBasicFileOperations();
-//
-// testDiskDatastore();
-// //
-// //  test2();
-// //
-// //

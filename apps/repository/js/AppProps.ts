@@ -1,7 +1,7 @@
-import {IListenablePersistenceLayer} from '../../../web/js/datastore/IListenablePersistenceLayer';
+import {ListenablePersistenceLayer} from '../../../web/js/datastore/ListenablePersistenceLayer';
 
-export interface AppProps {
-
-    persistenceLayer: IListenablePersistenceLayer;
-
-}
+/**
+ * Create a new PeristenceLayer. Note that this must NOT be initialized becuase
+ * we may want to add event listeners.
+ */
+export type PersistenceLayerFactory = () => ListenablePersistenceLayer;

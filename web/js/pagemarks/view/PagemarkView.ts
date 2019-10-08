@@ -25,13 +25,15 @@ export class PagemarkView {
         this.model = model;
 
         this.primaryPagemarkComponentManager
-            = new ComponentManager(model,
+            = new ComponentManager("pagemark",
+                                   model,
                                    new DefaultContainerProvider(),
                                    () => new PrimaryPagemarkComponent(),
                                    () => new PagemarkModel());
 
         this.thumbnailPagemarkComponentManager
-            = new ComponentManager(model,
+            = new ComponentManager("thumbnail",
+                                   model,
                                    new ThumbnailContainerProvider(),
                                    () => new ThumbnailPagemarkComponent(),
                                    () => new PagemarkModel());

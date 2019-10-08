@@ -3,9 +3,9 @@
  * added.
  *
  */
-import {Hashcodes} from '../Hashcodes';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
 import {Attachment} from './Attachment';
-import {ISODateTimeString, ISODateTimeStrings} from './ISODateTimeStrings';
+import {ISODateTimeString, ISODateTimeStrings} from 'polar-shared/src/metadata/ISODateTimeStrings';
 
 // used to avoid collision if we create multiple too fast.
 let sequence = 0;

@@ -3,7 +3,7 @@ import {IPCEvent} from './IPCEvent';
 import {WritablePipe} from '../pipes/Pipe';
 import {IPCMessage} from './IPCMessage';
 import {BrowserWindowReference} from '../../ui/dialog_window/BrowserWindowReference';
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class ElectronIPCEvent extends IPCEvent {
 

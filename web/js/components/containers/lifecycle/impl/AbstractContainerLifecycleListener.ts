@@ -4,7 +4,7 @@
 import {Container} from '../../Container';
 import {ContainerLifecycleListener} from '../ContainerLifecycleListener';
 import {ContainerLifecycleState} from '../ContainerLifecycleState';
-import {isPresent} from '../../../../Preconditions';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 /**
  * Listens to the lifecycle of .page

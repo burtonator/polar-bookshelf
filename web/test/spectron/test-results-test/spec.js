@@ -1,6 +1,6 @@
 const assert = require('assert');
 const {assertJSON} = require("../../../js/test/Assertions");
-const {Functions} = require("../../../js/util/Functions");
+const {Functions} = require("polar-shared/src/util/Functions");
 const {Spectron} = require("../../../js/test/Spectron");
 const {TestResultsReceiver} = require("../../../web/js/test/results/TestResultsReceiver");
 

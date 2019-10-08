@@ -3,9 +3,11 @@
  */
 export class AdBlocker {
 
-    public static cleanse(contentDoc: Document, url: string) {
+    public static cleanse(contentDoc: Document, url: string): AdBlockResult {
 
-        return this.removeElements('amp-ad', contentDoc);
+        return {
+            amp: this.removeElements('amp-ad', contentDoc)
+        };
 
     }
 
@@ -31,6 +33,9 @@ export class AdBlocker {
 
 }
 
+export interface AdBlockResult {
+    readonly amp: IDomMutations;
+}
 
 export interface IDomMutations {
     elementsRemoved: number;
@@ -39,3 +44,4 @@ export interface IDomMutations {
 export class DomMutations implements IDomMutations {
     public elementsRemoved: number = 0;
 }
+

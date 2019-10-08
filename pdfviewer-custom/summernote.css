@@ -1,0 +1,8 @@
+
+.rich-text-area-input .note-editor.note-frame {
+    border: none;
+}
+
+.rich-text-area-input .note-statusbar {
+    display: none;
+}

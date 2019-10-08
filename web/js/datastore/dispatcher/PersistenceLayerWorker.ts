@@ -1,5 +1,5 @@
 import {IPCMessage} from '../../ipc/handler/IPCMessage';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {RemotePersistenceLayerFactory} from '../factories/RemotePersistenceLayerFactory';
 
 const log = Logger.create();

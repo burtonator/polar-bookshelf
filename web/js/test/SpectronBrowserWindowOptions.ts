@@ -4,6 +4,11 @@ import process from 'process';
 
 const SPECTRON_SHOW = 'SPECTRON_SHOW';
 
+const offscreen = process.env.SPECTRON_OFFSCREEN === 'true';
+const show = !offscreen;
+
+console.log("Running with spectron config: ", {offscreen, show});
+
 export class SpectronBrowserWindowOptions {
 
     public static create(): BrowserWindowConstructorOptions {
@@ -12,11 +17,8 @@ export class SpectronBrowserWindowOptions {
         // showing the window is really annoying when developing locally but
         // for debug purposes it's nice to actually show them.
 
-        // const show: boolean = process.env[SPECTRON_SHOW] === 'true';
-
         // NOT showing by default because on windows, and other platforms, the
         // procs are often stuck so I need to figure that part out.
-        const show = true;
 
         return {
 
@@ -30,10 +32,12 @@ export class SpectronBrowserWindowOptions {
 
             show,
 
-
             webPreferences: {
                 webSecurity: false,
-                nodeIntegration: true
+                nodeIntegration: true,
+                partition: "persist:spectron",
+                webviewTag: true,
+                offscreen
             }
 
         };

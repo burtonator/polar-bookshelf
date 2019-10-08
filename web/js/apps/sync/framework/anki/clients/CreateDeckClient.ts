@@ -26,7 +26,7 @@ export class CreateDeckClient implements ICreateDeckClient {
 
     public async execute(deck: string): Promise<number> {
 
-        let body = {
+        const body = {
             action: "createDeck",
             version: 6,
             params: {
@@ -34,7 +34,7 @@ export class CreateDeckClient implements ICreateDeckClient {
             }
         };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         return <number> await AnkiConnectFetch.fetch(init);
 
@@ -43,8 +43,8 @@ export class CreateDeckClient implements ICreateDeckClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock(result: number) {
-        let client = TypeMoq.Mock.ofType<ICreateDeckClient>();
+    public static createMock(result: number) {
+        const client = TypeMoq.Mock.ofType<ICreateDeckClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny())).returns(() => Promise.resolve(result));
         return client.object;
     }

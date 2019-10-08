@@ -4,7 +4,7 @@ import {AnnotationDescriptor} from '../../../metadata/AnnotationDescriptor';
 import {IPCEvent} from '../../../ipc/handler/IPCEvent';
 import {IPCMessage} from '../../../ipc/handler/IPCMessage';
 import {PostMessageFormHandler} from '../flashcards/PostMessageFormHandler';
-import {Logger} from '../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Completion} from '../../../util/Promises';
 
 const log = Logger.create();

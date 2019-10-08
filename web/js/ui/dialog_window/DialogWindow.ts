@@ -1,11 +1,11 @@
 import {BrowserWindow} from 'electron';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserWindowPromises} from '../../electron/framework/BrowserWindowPromises';
 import {WebContentsPromises} from '../../electron/framework/WebContentsPromises';
 import {DialogWindowReference} from './DialogWindowReference';
 import {DialogWindowMenu} from './DialogWindowMenu';
-import {AppPaths} from '../../electron/webresource/AppPaths';
-import {Preconditions} from '../../Preconditions';
+import {ResourcePaths} from '../../electron/webresource/ResourcePaths';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 const log = Logger.create();
 
@@ -81,18 +81,22 @@ export class DialogWindow {
 
         switch (options.resource.type) {
             case ResourceType.FILE:
-                window.loadFile(options.resource.value);
+                window.loadFile(options.resource.value)
+                    .catch(err => console.error(err));
+
                 break;
             case ResourceType.URL:
-                window.loadURL(options.resource.value, {});
+                window.loadURL(options.resource.value, {})
+                    .catch(err => console.error(err));
                 break;
 
             case ResourceType.APP:
 
-                let appURL = AppPaths.resource(options.resource.value);
+                const appURL = ResourcePaths.resourceURLFromRelativeURL(options.resource.value);
                 log.info("Loading app URL:" , appURL);
-                window.loadURL(appURL, {});
-                break
+                window.loadURL(appURL, {})
+                    .catch(err => console.error(err));
+                break;
 
         }
 

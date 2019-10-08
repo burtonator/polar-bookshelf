@@ -1,7 +1,7 @@
 import $ from '../../ui/JQuery';
 
 import {CreateFlashcardForm} from './elements/schemaform/CreateFlashcardForm';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {CreateFlashcardService} from './CreateFlashcardService';
 import {DocumentReadyStates} from '../../util/dom/DocumentReadyStates';
 

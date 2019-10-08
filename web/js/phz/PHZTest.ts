@@ -2,27 +2,27 @@ import {assert} from 'chai';
 import {TestingTime} from '../test/TestingTime';
 import {ResourceFactory} from './ResourceFactory';
 import {assertJSON} from '../test/Assertions';
-import {Files} from '../util/Files';
+import {Files} from 'polar-shared/src/util/Files';
 import {PHZWriter} from './PHZWriter';
 import {PHZReader} from './PHZReader';
-import {Dictionaries} from '../util/Dictionaries';
-import {FilePaths} from '../util/FilePaths';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 import JSZip from 'jszip';
-import {Streams} from '../util/Streams';
+import {Streams} from 'polar-shared/src/util/Streams';
 
 TestingTime.freeze();
 
 describe('PHZ functionality', function() {
 
-    it("JSZIP support", function () {
+    it("JSZIP support", function() {
         console.log("FIXME: " , JSZip.support);
     });
 
-    it("ResourceFactory", function () {
+    it("ResourceFactory", function() {
 
-        let resource = ResourceFactory.create("http://example.com", "text/html");
+        const resource = ResourceFactory.create("http://example.com", "text/html");
 
-        let expected = {
+        const expected = {
             "id": "1XKZEWhTwbtoPFSkR2TJ",
             "created": "2012-03-02T11:38:49.321Z",
             "meta": {},
@@ -39,13 +39,13 @@ describe('PHZ functionality', function() {
 
     });
 
-    it("Writing with no data", async function () {
+    it("Writing with no data", async function() {
 
-        let path = FilePaths.tmpfile("test.phz");
+        const path = FilePaths.createTempName("test.phz");
 
-        await Files.unlinkAsync(path);
+        await Files.removeAsync(path);
 
-        let phzWriter = new PHZWriter(path);
+        const phzWriter = new PHZWriter(path);
 
         await phzWriter.close();
 
@@ -53,15 +53,15 @@ describe('PHZ functionality', function() {
 
     });
 
-    it("Writing one resource", async function () {
+    it("Writing one resource", async function() {
 
-        let path = FilePaths.tmpfile("test.phz");
+        const path = FilePaths.createTempName("test.phz");
 
-        await Files.unlinkAsync(path);
+        await Files.removeAsync(path);
 
-        let phzWriter = new PHZWriter(path);
+        const phzWriter = new PHZWriter(path);
 
-        let resource = ResourceFactory.create("http://example.com", "text/html");
+        const resource = ResourceFactory.create("http://example.com", "text/html");
 
         await phzWriter.writeResource(resource, "<html></html>");
 
@@ -71,16 +71,14 @@ describe('PHZ functionality', function() {
 
     });
 
-    it("Reading", async function () {
+    it("Reading", async function() {
 
+        const path = FilePaths.createTempName("test.phz");
 
+        await Files.removeAsync(path);
 
-        let path = FilePaths.tmpfile("test.phz");
-
-        await Files.unlinkAsync(path);
-
-        let phzWriter = new PHZWriter(path);
-        let resource = ResourceFactory.create("http://example.com", "text/html");
+        const phzWriter = new PHZWriter(path);
+        const resource = ResourceFactory.create("http://example.com", "text/html");
 
         await phzWriter.writeMetadata({
             title: "this is the title"
@@ -89,10 +87,10 @@ describe('PHZ functionality', function() {
         await phzWriter.writeResource(resource, "<html></html>");
         await phzWriter.close();
 
-        let phzReader = new PHZReader(path);
-        await phzReader.init();
+        const phzReader = new PHZReader();
+        await phzReader.init(path);
 
-        let resources = await phzReader.getResources();
+        const resources = await phzReader.getResources();
 
         let expected: any = {
             "entries": {
@@ -128,7 +126,7 @@ describe('PHZ functionality', function() {
         const stream = await phzReader.getResourceAsStream(resourceEntry);
         assert.ok(stream);
 
-        assert.equal((await Streams.toBuffer(stream)).toString("UTF-8"), "<html></html>")
+        assert.equal((await Streams.toBuffer(stream)).toString("UTF-8"), "<html></html>");
 
         // test getting the metadata (when there isn't any)
 
@@ -142,28 +140,28 @@ describe('PHZ functionality', function() {
 
     });
 
-    it("Reading with no metadata or resources", async function () {
+    it("Reading with no metadata or resources", async function() {
 
-        let path = FilePaths.tmpfile("test.phz");
+        const path = FilePaths.createTempName("test.phz");
 
-        await Files.unlinkAsync(path);
+        await Files.removeAsync(path);
 
-        let phzWriter = new PHZWriter(path);
+        const phzWriter = new PHZWriter(path);
         await phzWriter.close();
 
-        let phzReader = new PHZReader(path);
-        await phzReader.init();
+        const phzReader = new PHZReader();
+        await phzReader.init(path);
 
-        let resources = await phzReader.getResources();
+        const resources = await phzReader.getResources();
 
-        let expected = {
+        const expected = {
             "entries": {
             }
         };
 
         assertJSON(resources, expected);
 
-        let metadata = await phzReader.getMetadata();
+        const metadata = await phzReader.getMetadata();
         assert.equal(metadata, null);
 
     });

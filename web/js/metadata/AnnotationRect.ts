@@ -1,7 +1,8 @@
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Dimensions} from '../util/Dimensions';
 import {Interval} from '../math/Interval';
 import {Rects} from '../Rects';
+import {IAnnotationRect} from "polar-shared/src/metadata/IAnnotationRect";
 
 const ENTIRE_PAGE = Rects.createFromBasicRect({ left: 0, top: 0, width: 100, height: 100});
 
@@ -40,7 +41,7 @@ const ENTIRE_PAGE = Rects.createFromBasicRect({ left: 0, top: 0, width: 100, hei
  * This would NOT be a square but a rectangle and the percentages confuse that.
  *
  */
-export class AnnotationRect {
+export class AnnotationRect implements IAnnotationRect {
 
     /**
      * @type {number}
@@ -96,7 +97,7 @@ export class AnnotationRect {
     /**
      * Compute a percentage of the page that this rect holds.
      */
-    toPercentage() {
+    public toPercentage(): number {
         return 100 * (Rects.createFromBasicRect(this).area / ENTIRE_PAGE.area);
     }
 
@@ -106,9 +107,9 @@ export class AnnotationRect {
      *
      * @return {Rect}
      */
-    toFractionalRect() {
+    public toFractionalRect() {
 
-        let result = {
+        const result = {
             left: this.left / 100,
             top: this.top / 100,
             width: this.width / 100,
@@ -124,19 +125,40 @@ export class AnnotationRect {
      *
      * @return {Rect}
      */
-    toDimensions(dimensions: Dimensions) {
+    public toDimensions(dimensions: Dimensions) {
 
-        Preconditions.assertNotNull(dimensions, "dimensions");
+        Preconditions.assertPresent(dimensions, "dimensions");
 
-        let fractionalRect = this.toFractionalRect();
+        const fractionalRect = this.toFractionalRect();
+
+        // TODO: this will give us fractional pixels which I think is wrong.
 
         return Rects.createFromBasicRect({
             left: fractionalRect.left * dimensions.width,
             width: fractionalRect.width * dimensions.width,
             top: fractionalRect.top * dimensions.height,
             height: fractionalRect.height * dimensions.height,
-        })
+        });
 
     }
 
+    public toDimensionsFloor(dimensions: Dimensions) {
+
+        Preconditions.assertPresent(dimensions, "dimensions");
+
+        const fractionalRect = this.toFractionalRect();
+
+        // TODO: this will give us fractional pixels which I think is wrong.
+
+        return Rects.createFromBasicRect({
+            left: Math.floor(fractionalRect.left * dimensions.width),
+            width: Math.floor(fractionalRect.width * dimensions.width),
+            top: Math.floor(fractionalRect.top * dimensions.height),
+            height: Math.floor(fractionalRect.height * dimensions.height),
+        });
+
+    }
+
+
 }
+

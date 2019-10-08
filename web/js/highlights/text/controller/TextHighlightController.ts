@@ -1,35 +1,26 @@
 import {Model} from '../../../model/Model';
 import {TriggerEvent} from '../../../contextmenu/TriggerEvent';
-import {ipcRenderer} from 'electron';
-import {Logger} from '../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {TextHighlightRow} from './TextHighlightRow';
-import {notNull, Preconditions} from '../../../Preconditions';
+import {notNull, Preconditions} from 'polar-shared/src/Preconditions';
 import {DocFormatFactory} from '../../../docformat/DocFormatFactory';
 import {DocFormat} from '../../../docformat/DocFormat';
 import {KeyEvents} from '../../../KeyEvents';
 import {TextHighlighterFactory} from './TextHighlighterFactory';
 import {TextExtracter} from './TextExtracter';
 import {TextHighlightRecord, TextHighlightRecords} from '../../../metadata/TextHighlightRecords';
-import {Image} from '../../../metadata/Image';
 import {SelectedContents} from '../selection/SelectedContents';
-import {SelectionScreenshots} from './SelectionScreenshots';
-import {Hashcodes} from '../../../Hashcodes';
-import {IDimensions} from '../../../util/Dimensions';
-import {ImageType} from '../../../metadata/ImageType';
-
-import $ from '../../../ui/JQuery';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
 import {TextHighlights} from '../../../metadata/TextHighlights';
-import {Screenshots} from '../../../metadata/Screenshots';
 import {AnnotationPointers} from '../../../annotations/AnnotationPointers';
-import {Optional} from '../../../util/ts/Optional';
-import {PagemarkMode} from '../../../metadata/PagemarkMode';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {TypedMessage} from '../../../util/TypedMessage';
 import {HighlightCreatedEvent} from '../../../comments/react/HighlightCreatedEvent';
-import {HighlightColor} from '../../../metadata/BaseHighlight';
-
-const {TextHighlightRows} = require("./TextHighlightRows");
-
-const {TextSelections} = require("./TextSelections");
+import {Elements} from '../../../util/Elements';
+import {DocMetas} from "../../../metadata/DocMetas";
+import {HighlightColor} from "polar-shared/src/metadata/IBaseHighlight";
+import {TextSelections} from "./TextSelections";
+import {TextHighlightRows} from "./TextHighlightRows";
 
 const log = Logger.create();
 
@@ -38,24 +29,6 @@ export class TextHighlightController {
     constructor(model: Model) {
         this.model = Preconditions.assertNotNull(model, "model");
         this.docFormat = DocFormatFactory.getInstance();
-
-        // TODO: migrate this to Messenger and postMessage so that it's easily
-        // tested outside of electron.
-        ipcRenderer.on('context-menu-command', (event: Electron.EventEmitter, arg: any) => {
-
-            switch (arg.command) {
-
-                case "delete-text-highlight":
-                    this.onTextHighlightDeleted(arg);
-                    break;
-
-                default:
-                    console.warn("Unhandled command: " + arg.command);
-                    break;
-            }
-
-        });
-
     }
 
     private readonly model: Model;
@@ -94,13 +67,47 @@ export class TextHighlightController {
 
             if (event.code) {
 
+                const getPageNum = () => {
+
+                    const sel = window.getSelection()!;
+
+                    if (sel.rangeCount >= 1) {
+
+                        const range = sel.getRangeAt(0);
+
+                        const startElement = range.startContainer instanceof Element ?
+                            range.startContainer :
+                            range.startContainer.parentElement;
+
+                        if (startElement && startElement instanceof HTMLElement) {
+
+                            const pageElement = Elements.untilRoot(startElement, ".page");
+
+                            if (pageElement) {
+                                return parseInt(pageElement.getAttribute("data-page-number"), 10);
+                            }
+
+                        }
+
+                    }
+
+                    return undefined;
+
+                };
+
+                const pageNum = getPageNum();
+
                 switch (event.code) {
 
                     // TODO: we should not use 'code' but should use 'key'... The
                     // problem is that on OS X the key code returned 'Dead' but was
                     // working before.  Not sure why it started breaking.
                     case "KeyT":
-                        await this.doHighlight();
+
+                        if (pageNum) {
+                            await this.doHighlight(pageNum);
+                        }
+
                         break;
 
                     default:
@@ -114,10 +121,11 @@ export class TextHighlightController {
 
     }
 
-
     private onMessageReceived(event: any) {
 
-        log.info("Received message: ", event);
+        // log.info("Received message: ", event);
+
+        const triggerEvent = event.data;
 
         switch (event.data.type) {
 
@@ -125,43 +133,59 @@ export class TextHighlightController {
 
                 const typedMessage: TypedMessage<HighlightCreatedEvent> = event.data;
 
-                this.doHighlight(typedMessage.value.highlightColor)
+                const highlightColor = typedMessage.value.highlightColor;
+                const pageNum = typedMessage.value.pageNum;
+
+                this.doHighlight(pageNum, typedMessage.value.highlightColor)
                     .catch(err => log.error("Unable to create text highlight", err));
 
+                break;
+
+            case "delete-text-highlight":
+                this.onTextHighlightDeleted(triggerEvent);
+                break;
+
+            case "scroll-to-text-highlight":
+                this.onScrollToTextHighlight(triggerEvent);
+                break;
+
+            default:
+                // log.warn("Unhandled message: " + event.data.type, event.data);
                 break;
 
         }
 
     }
 
-    private async doHighlight(highlightColor: HighlightColor = 'yellow') {
+    private async doHighlight(pageNum: number,
+                              highlightColor: HighlightColor = 'yellow') {
 
         if (this.docFormat.name === "html") {
-            await this.doHighlightModern(highlightColor);
+            await this.doHighlightModern(highlightColor, pageNum);
         } else {
-            this.doHighlightLegacy(highlightColor);
+            this.doHighlightLegacy(highlightColor, pageNum);
         }
 
     }
 
-    public doHighlightLegacy(highlightColor: HighlightColor) {
+    public doHighlightLegacy(highlightColor: HighlightColor, pageNum: number) {
 
-        const textHighlighter = this.createLegacyTextHighlighter(highlightColor);
+        const textHighlighter = this.createLegacyTextHighlighter(highlightColor, pageNum);
         textHighlighter.doHighlight();
 
     }
 
-    public async doHighlightModern(highlightColor: HighlightColor) {
+    public async doHighlightModern(highlightColor: HighlightColor, pageNum: number) {
 
-        console.log("Doing modern text highlight");
-        await this.onTextHighlightCreatedModern(highlightColor);
+        log.info("Doing modern text highlight");
+        await this.onTextHighlightCreatedModern(highlightColor, pageNum);
 
     }
 
     /**
      * Set text highlighting in the current document with the highlighter.
      */
-    public createLegacyTextHighlighter(highlightColor: HighlightColor) {
+    public createLegacyTextHighlighter(highlightColor: HighlightColor, pageNum: number) {
 
         let sequence = 0;
 
@@ -194,7 +218,7 @@ export class TextHighlightController {
 
                 (async () =>  {
 
-                    await controller.onTextHighlightCreatedLegacy("." + highlightClazz, highlightColor);
+                    await controller.onTextHighlightCreatedLegacy("." + highlightClazz, highlightColor, pageNum);
 
                     // the underlying <span> highlights need to be removed now.
 
@@ -225,9 +249,11 @@ export class TextHighlightController {
      * Called by the controller when we have a new highlight created so that
      * we can update the model.
      */
-    private async onTextHighlightCreatedLegacy(selector: string, highlightColor: HighlightColor) {
+    private async onTextHighlightCreatedLegacy(selector: string,
+                                               highlightColor: HighlightColor,
+                                               pageNum: number) {
 
-        await this.createTextHighlight(async () => {
+        await this.createTextHighlight(pageNum, async () => {
 
             // FIXME: get the new highlighter working FIRST without text and without
             // rows , or other advanced features.
@@ -258,14 +284,15 @@ export class TextHighlightController {
      * Called by the controller when we have a new highlight created so that
      * we can update the model.
      */
-    private async onTextHighlightCreatedModern(highlightColor: HighlightColor) {
+    private async onTextHighlightCreatedModern(highlightColor: HighlightColor,
+                                               pageNum: number) {
 
         // FIXME: get the new highlighter working FIRST without text and without
         // rows , or other advanced features.
 
-        await this.createTextHighlight(async () => {
+        await this.createTextHighlight(pageNum, async () => {
 
-            const win = notNull(this.docFormat.targetDocument()).defaultView;
+            const win = notNull(this.docFormat.targetDocument()).defaultView!;
 
             log.info("TextHighlightController.onTextHighlightCreatedModern");
 
@@ -311,59 +338,31 @@ export class TextHighlightController {
 
     }
 
-    public async createTextHighlight(factory: () => Promise<TextHighlightRecord>): Promise<TextHighlightRecord> {
+    public async createTextHighlight(pageNum: number,
+                                     factory: () => Promise<TextHighlightRecord>): Promise<TextHighlightRecord> {
 
         // TODO: this really needs to be reworked so I can test it properly with
         // some sort of screenshot provider
 
         const doc = notNull(this.docFormat.targetDocument());
-        const win = doc.defaultView;
+        const win = doc.defaultView!;
 
         const screenshotID = Hashcodes.createRandomID();
 
         // start the screenshot now but don't await it yet.  this way we're not
         // blocking the creation of the screenshot in the UI.
-        const selectionScreenshot = SelectionScreenshots.capture(doc, win);
+        // const selectionScreenshot = SelectionScreenshots.capture(doc, win);
 
         const textHighlightRecord = await factory();
 
-        // TODO this is actually difficult because this screenshot is SLOW and
-        // if I could move it AFTER we updated the UI would be much better but
-        // it takes like 50ms-150ms and TWO of them are a big problem.  It would
-        // be better to do this AFTER I've taken the screenshots.
-
-        // let highlightScreenshot = await Screenshots.capture(selectionScreenshot.clientRect)
-
-        const screenshotDimensions = {
-            width: Math.floor(selectionScreenshot.clientRect.width),
-            height: Math.floor(selectionScreenshot.clientRect.height)
-        };
-
-        const screenshotImageRef = this.toImage(screenshotID, 'screenshot', screenshotDimensions);
-
-        TextHighlights.attachImage(textHighlightRecord.value, screenshotImageRef);
-
-        // this.attachScreenshot(textHighlightRecord.value, 'screenshot-with-highlight', highlightScreenshot);
-
-        const currentPageMeta = this.docFormat.getCurrentPageMeta();
-
-        const pageMeta = this.model.docMeta.getPageMeta(currentPageMeta.pageNum);
+        const pageMeta = DocMetas.getPageMeta(this.model.docMeta, pageNum);
 
         log.info("Added text highlight to model");
 
         // now clear the selection since we just highlighted it.
-        win.getSelection().empty();
+        win.getSelection()!.empty();
 
         pageMeta.textHighlights[textHighlightRecord.id] = textHighlightRecord.value;
-
-        const capturedScreenshot = await selectionScreenshot.capturedScreenshotPromise;
-
-        const screenshot = this.toScreenshot(screenshotID,
-                                             capturedScreenshot.dataURL,
-                                             'screenshot',
-                                             screenshotDimensions);
-
-        pageMeta.screenshots[screenshot.id] = screenshot;
 
         return textHighlightRecord;
 
@@ -373,16 +372,76 @@ export class TextHighlightController {
 
         let result = "";
 
-        $(selector).each(function() {
+        const elements: HTMLElement[]
+            = Array.from(document.querySelectorAll(selector));
 
-            // TODO: we should include the x/y and width + height of every text
-            // selection so that we have where it was placed in the document.
+        if (elements.length === 0) {
+            return "";
+        }
 
-            result += "\n" + $(this).text();
+        let bottom: number | undefined;
+        let right: number | undefined;
+
+        const elementFontSizeInPixels = (element: HTMLElement): number => {
+            const computedStyle = window.getComputedStyle(element, null);
+            const fontSize = computedStyle.getPropertyValue('font-size');
+            return parseInt(fontSize);
+        };
+
+        for (const element of Array.from(elements)) {
+
+            const rect = element.getBoundingClientRect();
+
+            // const fontSize = elementFontSizeInPixels(element);
+
+            // First, handle spacing for the layout which mostly just applies
+            // to PDF.js but also works for html but this is almost always
+            // flowing text so pretty much always just works.  PDF.js is the
+            // outlier though.
+
+            if (bottom !== undefined && rect.bottom !== bottom) {
+                result += "\n";
+            } else {
+
+                if (right !== undefined) {
+
+                    const gap = rect.left - right;
+
+                    if (gap >= 1) {
+                        result += " ";
+                    }
+
+                }
+
+            }
+
+            // Second, just append the text now.
+
+            result += element.innerText;
+
+            bottom = rect.bottom;
+            right = rect.right;
+
+        }
+
+        return result;
+
+    }
+
+    private onScrollToTextHighlight(triggerEvent: TriggerEvent) {
+
+        const annotationPointers
+            = AnnotationPointers.toAnnotationPointers(".text-highlight", triggerEvent);
+
+        Optional.first(...annotationPointers).map(annotationDescriptor => {
+
+            const id = annotationDescriptor.id;
+
+            const element = document.querySelector(`.annotations div[data-annotation-id='${id}']`);
+            element!.scrollIntoView();
 
         });
 
-        return result;
 
     }
 
@@ -401,7 +460,7 @@ export class TextHighlightController {
 
             log.info("Deleting annotationDescriptor: ", JSON.stringify(annotationDescriptor, null, "  "));
 
-            const pageMeta = this.model.docMeta.getPageMeta(annotationDescriptor.pageNum);
+            const pageMeta = DocMetas.getPageMeta(this.model.docMeta, annotationDescriptor.pageNum);
 
             // keep the current highlight.
             const textHighlight = pageMeta.textHighlights[annotationDescriptor.id];
@@ -414,29 +473,6 @@ export class TextHighlightController {
 
     }
 
-    private toImage(screenshotID: string, rel: string, dimensions: IDimensions) {
-
-        return new Image({
-            src: `screenshot:${screenshotID}`,
-            width: dimensions.width,
-            height: dimensions.height,
-            rel,
-            type: ImageType.PNG
-        });
-
-    }
-
-    private toScreenshot(id: string, src: string, rel: string, dimensions: IDimensions) {
-
-        const imageOpts = {
-            width: dimensions.width,
-            height: dimensions.height,
-            type: ImageType.PNG,
-            rel
-        };
-
-        return Screenshots.create(src, imageOpts, id);
-
-    }
-
 }
+
+

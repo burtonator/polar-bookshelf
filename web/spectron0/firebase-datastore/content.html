@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="/node_modules/firebase/firebase.js"></script>
+    <script src="/node_modules/firebaseui/dist/firebaseui.js"></script>
+    <link rel="stylesheet" href="/node_modules/firebaseui/dist/firebaseui.css" />
+    <script src="https://unpkg.com/mocha@5.2.0/mocha.js"></script>
+    <link href="https://unpkg.com/mocha@5.2.0/mocha.css" rel="stylesheet" />
+
+</head>
+<body>
+
+<div id="firebaseui-auth-container"></div>
+
+<div id="sign-in-status"></div>
+<div id="sign-in"></div>
+<div id="account-details"></div>
+
+<div id="mocha"></div>
+
+<script>
+
+    const {remote} = require('electron');
+    const fs = require('fs');
+
+    const appPath = remote.getGlobal("appPath");
+    const entryPoint = appPath + "/content.js";
+    console.log("Going to require entry point: " + entryPoint);
+    require(entryPoint);
+</script>
+
+</body>
+</html>

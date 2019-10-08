@@ -1,6 +1,6 @@
 import {Model} from '../model/Model';
-import {Preconditions} from '../Preconditions';
-import {Logger} from '../logger/Logger';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {DocDetails} from '../metadata/DocDetails';
 import {DocDetail} from '../metadata/DocDetail';
 
@@ -37,7 +37,7 @@ export class Controller {
         await this.model.createPagemark(pageNum, options);
     }
 
-    erasePagemarks(pageNum: number) {
+    public erasePagemarks(pageNum: number) {
         log.info("Controller sees pagemarks erased: " + pageNum);
         this.model.erasePagemark(pageNum);
     }
@@ -45,12 +45,12 @@ export class Controller {
     /**
      * Mark the given page number as read.
      */
-    erasePagemark(num: number) {
+    public erasePagemark(num: number) {
         log.info("Controller sees pagemark erased: " + num);
         this.model.erasePagemark(num);
     }
 
-    getCurrentPageElement() {
+    public getCurrentPageElement() {
 
     }
 

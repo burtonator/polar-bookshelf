@@ -1,18 +1,13 @@
 import {TextRect} from './TextRect';
-import {Text} from './Text';
+import {Text} from 'polar-shared/src/metadata/Text';
 import {Texts} from './Texts';
 import {TextType} from './TextType';
-import {BaseHighlight, HighlightColor} from './BaseHighlight';
-import {Preconditions} from '../Preconditions';
-import {Rect} from '../Rect';
-import {Image} from './Image';
-import {Note} from './Note';
-import {Question} from './Question';
-import {Flashcard} from './Flashcard';
-import {Author} from './Author';
-import {ISODateTimeString} from './ISODateTimeStrings';
+import {BaseHighlight} from './BaseHighlight';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
+import {ITextRect} from "polar-shared/src/metadata/ITextRect";
 
-export class TextHighlight extends BaseHighlight {
+export class TextHighlight extends BaseHighlight implements ITextHighlight {
 
     /**
      * A raw array-like object of text from the regions that the user
@@ -21,7 +16,7 @@ export class TextHighlight extends BaseHighlight {
      * in the specific regions they selected.
      *
      */
-    public textSelections: {[id: number]: TextRect} = {};
+    public textSelections: {[id: number]: ITextRect} = {};
 
     /**
      * The text selections converted to a text string which may or may not be
@@ -32,10 +27,11 @@ export class TextHighlight extends BaseHighlight {
      */
     public text: Text | string = Texts.create("", TextType.HTML);
 
+    public revisedText?: Text | string;
+
     constructor(val: ITextHighlight) {
 
         super(val);
-
 
         // FIXME: all these extractions (text, html, etc) should be 'snippet'
         // because we also have to include the context with them and with the
@@ -76,20 +72,3 @@ export class TextHighlight extends BaseHighlight {
 
 }
 
-export interface ITextHighlight {
-
-    readonly textSelections: {[id: number]: TextRect};
-    readonly text: Text | string;
-    readonly rects: {[key: number]: Rect};
-    readonly image?: Image;
-    readonly images: {[key: string]: Image};
-    readonly notes: {[key: string]: Note};
-    readonly questions: {[key: string]: Question};
-    readonly flashcards: {[key: string]: Flashcard};
-    readonly id: string;
-    readonly guid: string;
-    readonly created: ISODateTimeString;
-    readonly lastUpdated: ISODateTimeString;
-    readonly author?: Author;
-    readonly color?: HighlightColor;
-}

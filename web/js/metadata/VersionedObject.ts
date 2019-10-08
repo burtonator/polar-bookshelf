@@ -1,42 +1,20 @@
 import {Author} from './Author';
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
-import {ISODateTimeString} from './ISODateTimeStrings';
-import {Ref} from './Refs';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {Ref} from 'polar-shared/src/metadata/Refs';
+import {IVersionedObject} from "polar-shared/src/metadata/IVersionedObject";
 
-export abstract class VersionedObject extends SerializedObject {
+export abstract class VersionedObject extends SerializedObject implements IVersionedObject {
 
-    /**
-     * The unique ID for this object.  Every object needs to have a unique ID so
-     * that we can reference it easily.  The ID should represent the immutable
-     * form of this object. If the object is mutated the id should change.
-     */
     public id: string;
 
-    /**
-     * When an object is created it has an id just like every other annotation
-     * object however, we can update them over time and when it's updated we
-     * need to generate a new id.  The guid allows us to reference a flashcard
-     * as it changes over time.  If the user updates the flashcard we keep the
-     * same guid so we have a unique handle on the annotation as it's edited and
-     * the initial guid never changes but the id is still essentially the pk.
-     */
     public guid: string;
 
-    /**
-     * The time this object was created
-     *
-     */
     public created: ISODateTimeString;
 
-    /**
-     * The last time this annotation was updated (note changed, moved, etc).
-     */
     public lastUpdated: ISODateTimeString;
 
-    /**
-     * The author who created this object.
-     */
     public author?: Author;
 
     public ref?: Ref;
@@ -59,7 +37,7 @@ export abstract class VersionedObject extends SerializedObject {
 
         super.setup();
 
-        if(!this.lastUpdated && this.created) {
+        if (!this.lastUpdated && this.created) {
             this.lastUpdated = this.created;
         }
 
@@ -69,8 +47,8 @@ export abstract class VersionedObject extends SerializedObject {
 
         super.validate();
 
-        this.created = Preconditions.assertNotNull(this.created);
-        this.lastUpdated = Preconditions.assertNotNull(this.lastUpdated);
+        this.created = Preconditions.assertPresent(this.created);
+        this.lastUpdated = Preconditions.assertPresent(this.lastUpdated);
 
         Preconditions.assertNotNull(this.id, "id");
         Preconditions.assertNotNull(this.created, "created");

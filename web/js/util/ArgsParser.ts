@@ -2,7 +2,7 @@
  * Simple util that takes command line arguments like --foo=bar and parses them
  * into a map.
  */
-import {Strings} from './Strings';
+import {Strings} from "polar-shared/src/util/Strings";
 
 export class ArgsParser {
 

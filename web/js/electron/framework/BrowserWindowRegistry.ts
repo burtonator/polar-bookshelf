@@ -1,7 +1,6 @@
 import {BrowserWindow} from 'electron';
-import {Sets} from '../../util/Sets';
-import {Dictionaries} from '../../util/Dictionaries';
-
+import {SetArrays} from 'polar-shared/src/util/SetArrays';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
 
 export class BrowserWindowMeta {
 
@@ -61,7 +60,7 @@ export class BrowserWindowRegistry {
     public static tag(id: ID, tags: TagMap) {
         this.gc();
 
-        if(! (id in this.registry)) {
+        if (! (id in this.registry)) {
             this.registry[`${id}`] = new BrowserWindowMeta();
         }
 
@@ -69,7 +68,7 @@ export class BrowserWindowRegistry {
 
         Dictionaries.forDict(tags, (name, value) => {
             meta.tags[name] = value;
-        })
+        });
 
     }
 
@@ -83,7 +82,7 @@ export class BrowserWindowRegistry {
 
         Dictionaries.forDict(this.registry, (id, meta) => {
 
-            if(meta.tags[tag.name] === tag.value) {
+            if (meta.tags[tag.name] === tag.value) {
                 result.push(parseInt(id));
             }
 
@@ -93,15 +92,22 @@ export class BrowserWindowRegistry {
 
     }
 
+    /**
+     * Get a copy of the current registry.
+     */
+    public static dump(): Readonly<{[id: string]: BrowserWindowMeta}> {
+        return Object.freeze(Object.assign({}, this.registry));
+    }
+
     public static gc() {
 
-        let registryKeys = Object.keys(this.registry);
-        let liveWindowIDs
+        const registryKeys = Object.keys(this.registry);
+        const liveWindowIDs
             = this.liveWindowsProvider.getLiveWindowIDs().map(current => current.toString())
 
-        let allWindowIDs = Sets.union(registryKeys, liveWindowIDs);
+        const allWindowIDs = SetArrays.union(registryKeys, liveWindowIDs);
 
-        let keysToRemove = Sets.difference(allWindowIDs, liveWindowIDs);
+        const keysToRemove = SetArrays.difference(allWindowIDs, liveWindowIDs);
 
         keysToRemove.forEach(current => delete this.registry[current]);
 

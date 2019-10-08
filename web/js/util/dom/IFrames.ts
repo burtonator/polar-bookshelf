@@ -1,25 +1,62 @@
-import {isPresent} from '../../Preconditions';
+import {isPresent} from 'polar-shared/src/Preconditions';
+import {URLStr} from "polar-shared/src/util/Strings";
 
 export class IFrames {
 
     public static async waitForContentDocument(iframe: HTMLIFrameElement,
-                                               options: WaitForContentDocumentOptions = { currentURL: 'about:blank'}): Promise<HTMLDocument> {
+                                               options: WaitForContentDocumentOptions = { initialURL: 'about:blank'}): Promise<HTMLDocument> {
 
         return new Promise<HTMLDocument>(resolve => {
 
-            function timer() {
+            const timer = () => {
 
-                if(iframe.contentDocument && iframe.contentDocument.location.href !== options.currentURL) {
-                    resolve(iframe.contentDocument);
-                    return;
+                if (iframe.contentDocument) {
+
+                    const currentURL = this.getURL(iframe);
+
+                    if (currentURL !== options.initialURL) {
+                        resolve(iframe.contentDocument);
+                        return;
+                    }
+
                 }
 
                 setTimeout(timer, 100);
-            }
+
+            };
 
             timer();
 
         });
+
+    }
+
+    /**
+     * Mark the frame as loaded manually by specifying a data attribute.
+     */
+    public static markLoadedManually(iframe: HTMLIFrameElement, url: URLStr) {
+
+        iframe.setAttribute('data-loaded-src', url);
+
+    }
+
+    public static getURL(iframe: HTMLIFrameElement): string | undefined {
+
+        if (! iframe) {
+            return undefined;
+        }
+
+        const loadedSrc = iframe.getAttribute('data-loaded-src');
+
+        if (loadedSrc) {
+            return loadedSrc;
+        }
+
+        if (iframe.contentDocument && iframe.contentDocument!.location) {
+            return iframe.contentDocument!.location!.href;
+        }
+
+        return undefined;
 
     }
 
@@ -32,16 +69,16 @@ export class IFrames {
      */
     public static computeTopLevelClientRect(clientRect: ClientRect, win: Window): ClientRect {
 
-        while(isPresent(win.frameElement)) {
+        while (isPresent(win.frameElement)) {
 
-            let iframeClientRect = win.frameElement.getBoundingClientRect();
+            const iframeClientRect = win.frameElement.getBoundingClientRect();
 
-            let left = clientRect.left + iframeClientRect.left;
-            let top = clientRect.top + iframeClientRect.top;
-            let width = clientRect.width;
-            let height = clientRect.height;
-            let bottom = top + height;
-            let right = left + width;
+            const left = clientRect.left + iframeClientRect.left;
+            const top = clientRect.top + iframeClientRect.top;
+            const width = clientRect.width;
+            const height = clientRect.height;
+            const bottom = top + height;
+            const right = left + width;
 
             clientRect = { left, top, width, height, bottom, right };
 
@@ -56,5 +93,5 @@ export class IFrames {
 }
 
 interface WaitForContentDocumentOptions {
-    readonly currentURL: string;
+    readonly initialURL: string;
 }

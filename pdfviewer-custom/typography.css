@@ -1,0 +1,22 @@
+.intro .title,
+.intro .title * {
+    font-size: 38px;
+}
+
+.intro .subtitle,
+.intro .subtitle * {
+    font-size: 27px;
+}
+
+
+.intro strong,
+.intro b,
+.intro i,
+.intro p,
+.intro li {
+    font-size: 18px;
+}
+
+.intro label {
+    font-size: 15px;
+}

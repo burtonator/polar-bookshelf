@@ -1,32 +1,24 @@
-import {Image} from './Image';
 import {ExtendedAnnotation} from './ExtendedAnnotation';
-import {Preconditions} from '../Preconditions';
-import {Rect} from '../Rect';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {
+    HighlightColor,
+    HighlightRects,
+    IBaseHighlight,
+    Position
+} from "polar-shared/src/metadata/IBaseHighlight";
+import {IImage} from "polar-shared/src/metadata/IImage";
 
+export class BaseHighlight extends ExtendedAnnotation implements IBaseHighlight {
 
-export class BaseHighlight extends ExtendedAnnotation {
+    public rects: HighlightRects = {};
 
-    /**
-     * The rectangles where we need to place content for this highlights.
-     */
-    public rects: {[key: number]: Rect} = {};
+    public image?: IImage;
 
-    /**
-     * Optional image for this highlight taken when the highlight was
-     * created.  This is usually a screenshot of the annotation and what
-     * it looks like on screen.
-     */
-    public image?: Image;
+    public images: {[key: string]: IImage} = {};
 
-    /**
-     * Images for this highlight.  By default there are none.
-     */
-    public images: {[key: string]: Image} = {};
-
-    /**
-     * The color of this highlight. Defaults to yellow if undefined.
-     */
     public color?: HighlightColor;
+
+    public position?: Position;
 
     constructor(val: any) {
 
@@ -45,10 +37,3 @@ export class BaseHighlight extends ExtendedAnnotation {
 
 }
 
-/**
- * The set of highlight colors.  We also provide transparent for text you want
- * to index but might not actually want visible in the document. We can use this
- * for secondary / anonymous highlights like notes and comments which might
- * not need to be visibly shown.
- */
-export type HighlightColor = 'yellow' | 'red' | 'green' | 'blue' | 'transparent';

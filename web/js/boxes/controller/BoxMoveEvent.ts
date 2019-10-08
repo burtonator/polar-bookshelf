@@ -1,5 +1,5 @@
 import {Rect} from '../../Rect';
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class BoxMoveEvent {
 

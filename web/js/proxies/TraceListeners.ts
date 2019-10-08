@@ -1,4 +1,4 @@
-import {TraceListener} from './TraceListener';
+import {TraceListener, TraceListenerFunction} from './TraceListener';
 
 export class TraceListeners {
 
@@ -6,14 +6,15 @@ export class TraceListeners {
      * Convert this to an array so that we're always working with an array.
      *
      */
-    public static asArray(input: TraceListener | TraceListener[]): TraceListener[] {
+    public static asArray(input: TraceListener | TraceListenerFunction | ReadonlyArray<TraceListener>):
+        ReadonlyArray<TraceListener | TraceListenerFunction> {
 
         if (! input) {
             return [];
         }
 
         if (! Array.isArray(input)) {
-            return [input];
+            return <ReadonlyArray<TraceListener | TraceListenerFunction>> [input];
         }
 
         return input;

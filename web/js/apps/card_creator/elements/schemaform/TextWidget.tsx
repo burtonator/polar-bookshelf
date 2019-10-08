@@ -4,7 +4,7 @@
 import ReactSummernote from './ReactSummernote';
 import React from 'react';
 import {TypedWidgetProps} from './TypedWidgetProps';
-import {Logger} from '../../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 const log = Logger.create();
 
 export class TextWidget extends React.Component  {

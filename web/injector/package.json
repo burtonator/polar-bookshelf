@@ -1,0 +1,16 @@
+{
+  "name": "injector",
+  "version": "1.0.1",
+  "description": "Simple Electron Package injector for the renderer",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^3.1.3"
+  }
+}

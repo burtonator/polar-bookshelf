@@ -1,7 +1,9 @@
-import {Optional} from '../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {Styles} from '../../util/Styles';
-import {Logger} from '../../logger/Logger';
-import {Preconditions} from '../../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {Functions} from 'polar-shared/src/util/Functions';
+import {Documents} from './Documents';
 
 const log = Logger.create();
 
@@ -14,7 +16,7 @@ const log = Logger.create();
 export class FrameResizer {
 
     private readonly parent: HTMLElement;
-    private readonly iframe: HTMLIFrameElement;
+    private readonly host: HTMLIFrameElement | Electron.WebviewTag;
 
     private height: number | undefined;
 
@@ -24,10 +26,10 @@ export class FrameResizer {
     //
     // https://stackoverflow.com/questions/1835219/is-there-an-event-that-fires-on-changes-to-scrollheight-or-scrollwidth-in-jquery
 
-    constructor(parent: HTMLElement, iframe: HTMLIFrameElement) {
+    constructor(parent: HTMLElement, host: HTMLIFrameElement | Electron.WebviewTag) {
 
         this.parent = Preconditions.assertPresent(parent);
-        this.iframe = Preconditions.assertPresent(iframe);
+        this.host = Preconditions.assertPresent(host);
 
         // the current height
         this.height = undefined;
@@ -41,7 +43,7 @@ export class FrameResizer {
      * sort of caching or throttling of resize, we can just force it one last
      * time.
      */
-    public resize(force: boolean = false) {
+    public async resize(force: boolean = false, newHeight?: number): Promise<number | undefined> {
 
         // TODO: accidental horizontal overflow...
         //
@@ -51,28 +53,27 @@ export class FrameResizer {
         // - I could see if the CSS is loaded, and that no more images or other
         //   resources have changed and then fix the page to that dimension.
         //
-        // - I could back off significantly in duration if only a small percentage
-        //   of the page height has changed.  For example, if we're less than 1%
-        //   I can just wait until the final rendering.  We are often only off
-        //   by a few px.
-        //
+        // - I could back off significantly in duration if only a small
+        // percentage of the page height has changed.  For example, if we're
+        // less than 1% I can just wait until the final rendering.  We are
+        // often only off by a few px.
 
-        const contentDocument = this.iframe.contentDocument;
+        if (! newHeight) {
 
-        if (! contentDocument) {
-            return;
+            const newHeightAsOptional = await this.getDocumentHeight();
+
+            if (! newHeightAsOptional.isPresent()) {
+                return this.height;
+            }
+
+            newHeight = newHeightAsOptional.get();
+
         }
 
-        if (! contentDocument.body) {
-            return;
-        }
-
-        const height = Styles.parsePX(Optional.of(this.iframe.style.height)
+        const height = Styles.parsePX(Optional.of(this.host.style.height)
                                         .filter( (current: any) => current !== null)
                                         .filter( current => current !== "")
                                         .getOrElse("0px"));
-
-        const newHeight = contentDocument.body.scrollHeight;
 
         const delta = Math.abs(newHeight - height);
 
@@ -80,15 +81,66 @@ export class FrameResizer {
         const deltaPerc = 100 * (delta / height);
 
         if (! force && deltaPerc < 5) {
-            return;
+            return this.height;
         }
 
         // we basically keep polling.
-        if (height !== newHeight) {
-            // log.info(`Setting new height to: ${newHeight} vs previous ${this.iframe.style.height}`);
-            this.iframe.style.height = `${newHeight}px`;
+        if (force || height !== newHeight) {
+
+            const heightElement = this.host.parentElement!;
+
+            // log.info(`Setting new height to: ${newHeight} vs previous
+            // ${this.iframe.style.height}`);
+            this.host.style.minHeight = `${newHeight}px`;
+            heightElement.style.minHeight = `${newHeight}px`;
+
+            for (const dataHeightElement of [heightElement, this.host]) {
+                dataHeightElement.setAttribute('data-height', `${newHeight}`);
+
+                if (dataHeightElement.getAttribute('data-original-height') === null) {
+                    dataHeightElement.setAttribute('data-original-height', `${newHeight}`);
+                }
+
+            }
+
             this.height = newHeight;
+
+            return this.height;
+
         }
+
+        return this.height;
+
+    }
+
+    /**
+     * Get the internal height of the given document OR return undefined if
+     * we don't have it yet. We might not have it if the document is still
+     * loading.
+     */
+    private async getDocumentHeight(): Promise<Optional<number>> {
+
+        if (this.host instanceof HTMLIFrameElement) {
+            return this.getDocumentHeightForIFrame(this.host);
+        } else {
+            return this.getDocumentHeightForWebview(this.host);
+        }
+
+    }
+
+    private async getDocumentHeightForIFrame(iframe: HTMLIFrameElement): Promise<Optional<number>> {
+        return Optional.of(Documents.height(iframe.contentDocument));
+
+    }
+
+    private async getDocumentHeightForWebview(webview: Electron.WebviewTag): Promise<Optional<number>> {
+
+        const webContents = webview.getWebContents();
+
+        const script = Functions.functionToScript(Documents.height);
+        const height: number | undefined = await webContents.executeJavaScript(script);
+
+        return Optional.of(height);
 
     }
 

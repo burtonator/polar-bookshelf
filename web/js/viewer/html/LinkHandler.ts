@@ -1,14 +1,16 @@
 import {shell} from 'electron';
 import {IFrames} from '../../util/dom/IFrames';
 import {DocumentReadyStates} from '../../util/dom/DocumentReadyStates';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Events} from '../../util/dom/Events';
+import {Nav} from '../../ui/util/Nav';
 
 const log = Logger.create();
 
 /**
  * The link handler works with the the iframe, and all child iframes, and
- * intercepts all link clicks, and aborts them, forwarding them to the shell.
+ * intercepts all link clicks, and aborts them, forwarding them to the shell
+ * if we're running within Electron.
  */
 export class LinkHandler {
 
@@ -18,9 +20,9 @@ export class LinkHandler {
         this.iframe = iframe;
     }
 
-    async start() {
+    public async start() {
 
-        let doc = await IFrames.waitForContentDocument(this.iframe);
+        const doc = await IFrames.waitForContentDocument(this.iframe);
 
         await DocumentReadyStates.waitFor(doc, 'interactive');
 
@@ -60,7 +62,7 @@ export class LinkHandler {
         doc.querySelectorAll('a')
             .forEach(anchor => anchor.addEventListener('keydown', event => {
 
-                if(event.key === 'Enter' || event.key === 'Return') {
+                if (event.key === 'Enter' || event.key === 'Return') {
                     event.preventDefault();
                     event.stopPropagation();
                     this.handleLinkEvent(event);
@@ -72,12 +74,20 @@ export class LinkHandler {
 
     private handleLinkEvent(event: Event) {
 
-        let anchor = Events.getAnchor(event.target);
+        const anchor = Events.getAnchor(event.target);
 
-        if(anchor) {
-            let href = anchor.href;
+        if (anchor) {
+            const href = anchor.href;
             log.info("Opening URL: " + href);
-            shell.openExternal(href);
+
+            if (shell) {
+                shell.openExternal(href)
+                    .catch(err => console.error(err));
+
+            } else {
+                Nav.openLinkWithNewTab(href);
+            }
+
         }
 
     }

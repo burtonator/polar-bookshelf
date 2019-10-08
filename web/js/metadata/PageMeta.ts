@@ -1,75 +1,40 @@
 import {SerializedObject} from './SerializedObject';
-import {PageInfo} from './PageInfo';
-import {Flashcard} from './Flashcard';
-import {Comment} from './Comment';
-import {Note} from './Note';
-import {TextHighlight} from './TextHighlight';
-import {AreaHighlight} from './AreaHighlight';
-import {Screenshot} from './Screenshot';
-import {Thumbnail} from './Thumbnail';
-import {Pagemark} from './Pagemark';
-import {Question} from './Question';
+import {ReadingProgress} from 'polar-shared/src/metadata/ReadingProgress';
+import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
+import {IPageInfo} from "polar-shared/src/metadata/IPageInfo";
+import {IPagemark} from "polar-shared/src/metadata/IPagemark";
+import {INote} from "polar-shared/src/metadata/INote";
+import {IComment} from "polar-shared/src/metadata/IComment";
+import {IQuestion} from "polar-shared/src/metadata/IQuestion";
+import {IFlashcard} from "polar-shared/src/metadata/IFlashcard";
+import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
+import {IAreaHighlight} from "polar-shared/src/metadata/IAreaHighlight";
+import {IScreenshot} from "polar-shared/src/metadata/IScreenshot";
+import {IThumbnail} from "polar-shared/src/metadata/IThumbnail";
 
-export class PageMeta extends SerializedObject {
+export class PageMeta extends SerializedObject implements IPageMeta {
 
-    /**
-     * The pageInfo for this page.
-     * @type {PageInfo}
-     */
-    public readonly pageInfo: PageInfo;
+    public readonly pageInfo: IPageInfo;
 
-    /**
-     * The index of page number to pagemark which stores the data we need
-     * for keeping track of pagemarks.  The index is the pagemark column.
-     *
-     */
-    public readonly pagemarks: {[id: string]: Pagemark} = {};
+    public readonly pagemarks: {[id: string]: IPagemark} = {};
 
-    /**
-     * The note for this annotation.
-     */
-    public readonly notes: {[id: string]: Note} = {};
+    public readonly notes: {[id: string]: INote} = {};
 
-    /**
-     * The note for this annotation.
-     */
-    public readonly comments: {[id: string]: Comment} = {};
+    public readonly comments: {[id: string]: IComment} = {};
 
-    /**
-     *
-     */
-    public readonly questions: {[id: string]: Question} = {};
+    public readonly questions: {[id: string]: IQuestion} = {};
 
-    /**
-     *
-     * @type {Object<string,Flashcard>}
-     */
-    public readonly flashcards: {[id: string]: Flashcard} = {};
+    public readonly flashcards: {[id: string]: IFlashcard} = {};
 
-    /**
-     * An index of test highlights for the page.
-     *
-     */
-    public readonly textHighlights: {[id: string]: TextHighlight} = {};
+    public readonly textHighlights: {[id: string]: ITextHighlight} = {};
 
+    public readonly areaHighlights: {[id: string]: IAreaHighlight} = {};
 
-    /**
-     * An index of area highlights for the page.
-     *
-     */
-    public readonly areaHighlights: {[id: string]: AreaHighlight} = {};
+    public readonly screenshots: {[id: string]: IScreenshot} = {};
 
-    /**
-     * Screenshots we've taken of this page while performing annotations.
-     */
-    public readonly screenshots: {[id: string]: Screenshot} = {};
+    public readonly thumbnails: {[id: string]: IThumbnail} = {};
 
-    /**
-     * The thumbnails for this page.  Usually, this is just one thumbnail
-     * but there might be multiple.  If we want a specific noe we can just
-     * look at the width and height.
-     */
-    public readonly thumbnails: {[id: string]: Thumbnail} = {};
+    public readonly readingProgress: {[id: string]: ReadingProgress} = {};
 
     constructor(val: any) {
 
@@ -120,3 +85,4 @@ export class PageMeta extends SerializedObject {
     }
 
 }
+

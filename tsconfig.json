@@ -10,7 +10,8 @@
         "noImplicitReturns": true,
         "removeComments": true,
         "strictFunctionTypes": true,
-        "sourceMap": true,
+        "inlineSourceMap": true,
+        "inlineSources": true,
         "target": "ES2015",
         "module": "commonjs",
         "moduleResolution": "node",
@@ -44,7 +45,7 @@
         "apps/**/*"
     ],
     "exclude": [
-
+        "web/spectron.disabled/*"
     ],
     "types": [
         "mocha",

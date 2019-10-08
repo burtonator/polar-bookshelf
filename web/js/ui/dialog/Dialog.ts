@@ -6,6 +6,7 @@ require("jquery-ui-bundle");
 
 /**
  * Dialog box for entering data in the UI.
+ * @Deprecated
  */
 export class Dialog {
 

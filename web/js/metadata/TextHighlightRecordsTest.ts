@@ -3,6 +3,7 @@ import {TextHighlightRecords} from './TextHighlightRecords';
 import {assertJSON} from '../test/Assertions';
 import {Rect} from '../Rect';
 import {TextRect} from './TextRect';
+import {ITextRect} from "polar-shared/src/metadata/ITextRect";
 
 TestingTime.freeze();
 
@@ -12,43 +13,51 @@ describe('TextHighlightRecords', function() {
 
         it("basic", function () {
 
-            let rects: Rect[] = [ new Rect({top: 100, left: 100, right: 200, bottom: 200, width: 100, height: 100})];
-            let textSelections: TextRect[] = [{text: "hello world"}];
-            let text = "hello world";
+            const rects: Rect[] = [ new Rect({top: 100, left: 100, right: 200, bottom: 200, width: 100, height: 100})];
+            const textSelections: ITextRect[] = [{text: "hello world", rect: rects[0]}];
+            const text = "hello world";
 
             // create a basic TextHighlight object..
-            let textHighlightRecord = TextHighlightRecords.create(rects, textSelections, {TEXT: text});
+            const textHighlightRecord = TextHighlightRecords.create(rects, textSelections, {TEXT: text});
 
-            let expected = {
+            const expected = {
                 "id": "1Af41QXbBH",
                 "value": {
-                    "id": "1Af41QXbBH",
-                    "guid": "1Af41QXbBH",
+                    "color": "yellow",
                     "created": "2012-03-02T11:38:49.321Z",
+                    "flashcards": {},
+                    "guid": "1Af41QXbBH",
+                    "id": "1Af41QXbBH",
+                    "images": {},
                     "lastUpdated": "2012-03-02T11:38:49.321Z",
+                    "notes": {},
+                    "questions": {},
                     "rects": {
                         "0": {
-                            "left": 100,
-                            "top": 100,
-                            "right": 200,
                             "bottom": 200,
-                            "width": 100,
-                            "height": 100
-                        }
-                    },
-                    "textSelections": {
-                        "0": {
-                            "text": "hello world"
+                            "height": 100,
+                            "left": 100,
+                            "right": 200,
+                            "top": 100,
+                            "width": 100
                         }
                     },
                     "text": {
                         "TEXT": "hello world"
                     },
-                    "images": {},
-                    "notes": {},
-                    "questions": {},
-                    "flashcards": {},
-                    "color": "yellow"
+                    "textSelections": {
+                        "0": {
+                            "rect": {
+                                "bottom": 200,
+                                "height": 100,
+                                "left": 100,
+                                "right": 200,
+                                "top": 100,
+                                "width": 100
+                            },
+                            "text": "hello world"
+                        }
+                    }
                 }
             };
 

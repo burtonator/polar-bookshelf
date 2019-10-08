@@ -1,4 +1,4 @@
-const {Functions} = require("../../../js/util/Functions");
+const {Functions} = require("polar-shared/src/util/Functions");
 const {SpectronRenderer} = require("../../../js/test/SpectronRenderer");
 const {TestResultsService} = require("../../../web/js/test/results/TestResultsService");
 

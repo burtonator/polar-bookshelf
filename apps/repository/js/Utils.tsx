@@ -65,4 +65,11 @@ export const Footer = () =>
         </div>
 
     </div>
+
+    {/*<div className="text-center p-1">*/}
+        {/*<a href="https://opencollective.com/polar-bookshelf/donate" target="_blank">*/}
+            {/*<img src="https://opencollective.com/polar-bookshelf/donate/button@2x.png?color=blue" width="250" />*/}
+        {/*</a>*/}
+    {/*</div>*/}
+
     </footer>;

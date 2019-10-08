@@ -1,7 +1,7 @@
-import {isPresent, Preconditions} from '../Preconditions';
+import {isPresent, Preconditions} from 'polar-shared/src/Preconditions';
 import {Event} from './Event';
-import {Listener} from './Listener';
-import {Logger} from '../logger/Logger';
+import {EventListener, RegisteredEventListener} from './EventListener';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {ISimpleReactor} from './SimpleReactor';
 
 const log = Logger.create();
@@ -42,6 +42,15 @@ export class Reactor<V> implements IReactor<V> {
         return this;
     }
 
+    public size(eventName: string) {
+
+        if (this.events[eventName]) {
+            return this.events[eventName].size();
+        }
+
+        return 0;
+    }
+
     /**
      *
      * @param eventName The name of the event to dispatch.
@@ -74,27 +83,29 @@ export class Reactor<V> implements IReactor<V> {
 
     }
 
-    /**
-     *
-     */
-    public addEventListener(eventName: string, listener: Listener<V>) {
+    public addEventListener(eventName: string, eventListener: EventListener<V>): RegisteredEventListener<V> {
 
         Preconditions.assertNotNull(eventName, "eventName");
 
-        if (typeof listener !== "function") {
-            throw new Error("listener is not a function: " + typeof listener);
+        if (typeof eventListener !== "function") {
+            throw new Error("listener is not a function: " + typeof eventListener);
         }
 
         if (this.events[eventName] === undefined) {
             throw new Error("No registered event for event name: " + eventName);
         }
 
-        this.events[eventName].registerListener(listener);
-        return this;
+        this.events[eventName].registerListener(eventListener);
+
+        const release = () => {
+            this.removeEventListener(eventName, eventListener);
+        };
+
+        return {eventListener, release};
 
     }
 
-    public removeEventListener(eventName: string, listener: Listener<V>): boolean {
+    public removeEventListener(eventName: string, listener: EventListener<V>): boolean {
 
         if (this.events[eventName]) {
             return this.events[eventName].removeListener(listener);
@@ -137,17 +148,19 @@ export class Reactor<V> implements IReactor<V> {
 
 export interface IReactor<V> {
     once(eventName: string): Promise<V>;
-    addEventListener(eventName: string, listener: Listener<V>): void;
+    addEventListener(eventName: string, listener: EventListener<V>): RegisteredEventListener<V>;
     dispatchEvent(eventName: string, value: V): void;
     hasRegisteredEvent(eventName: string): boolean;
     hasEventListeners(eventName: string): boolean;
     registerEvent(eventName: string): IReactor<V>;
+    size(eventName: string): number;
 }
 
 export interface IMutableReactor<V> extends IReactor<V> {
     clearEvent(eventName: string): void;
-    removeEventListener(eventName: string, listener: Listener<V>): boolean;
-    getEventListeners(eventName: string): Array<Listener<V>>;
+    removeEventListener(eventName: string, listener: EventListener<V>): boolean;
+    getEventListeners(eventName: string): Array<EventListener<V>>;
+    size(eventName: string): number;
 }
 
 export interface INamedEventDispatcher<V> extends IReactor<V> {

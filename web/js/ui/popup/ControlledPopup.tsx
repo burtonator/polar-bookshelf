@@ -2,12 +2,17 @@ import * as React from 'react';
 import {IEventDispatcher} from '../../reactor/SimpleReactor';
 import {TriggerPopupEvent} from './TriggerPopupEvent';
 import Popover from 'reactstrap/lib/Popover';
-import {Optional} from '../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {Point} from '../../Point';
 import {Points} from '../../Points';
 import {DocFormat} from '../../docformat/DocFormat';
 import {DocFormatFactory} from '../../docformat/DocFormatFactory';
 import {PopupStateEvent} from './PopupStateEvent';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {getSourceFile} from 'tslint';
+import {ISODateTimeString, ISODateTimeStrings} from 'polar-shared/src/metadata/ISODateTimeStrings';
+
+const log = Logger.create();
 
 export class ControlledPopup extends React.Component<ControlledPopupProps, IState> {
 
@@ -27,6 +32,10 @@ export class ControlledPopup extends React.Component<ControlledPopupProps, IStat
             active: false,
         };
 
+    }
+
+    public componentWillMount(): void {
+
         this.props.popupStateEventDispatcher.addEventListener(event => {
             this.setState(event);
         });
@@ -35,6 +44,11 @@ export class ControlledPopup extends React.Component<ControlledPopupProps, IStat
             this.onTriggerPopupEvent(event);
         });
 
+    }
+
+
+    public componentWillUnmount(): void {
+        this.moveElementToBody();
     }
 
     public render() {
@@ -63,13 +77,23 @@ export class ControlledPopup extends React.Component<ControlledPopupProps, IStat
 
     private toggle() {
 
-        // TODO: activate/deactivate only when there is no selection.
+        // TODO: we keep the dialog open too long as we aren't really told when
+        // the active selection goes away so we should update ActiveSelections
+        // to send an updated event when selection is destroyed, not just
+        // created.  We should have an event type of 'created' and 'destroyed'
 
         if (this.selection) {
 
+            const active = ! this.selection.isCollapsed;
+
             this.setState({
-                active: ! this.selection.isCollapsed,
+                active,
+                activated: ISODateTimeStrings.create()
             });
+
+            if (! active) {
+                this.moveElementToBody();
+            }
 
         }
 
@@ -94,12 +118,29 @@ export class ControlledPopup extends React.Component<ControlledPopupProps, IStat
 
     }
 
+    private moveElementToBody() {
+
+        const id = `${this.props.id}-anchor`;
+        const anchorElement = document.getElementById(id);
+
+        if (! anchorElement) {
+            // already missing and not on the page.
+            return;
+        }
+
+        const doc = anchorElement!.ownerDocument;
+        anchorElement!.parentElement!.removeChild(anchorElement!);
+        doc!.body.appendChild(anchorElement!);
+
+    }
+
     private onTriggerPopupEvent(event: TriggerPopupEvent) {
 
         // we need to place the anchor element properly on the page and the
         // popup id displayed relative to the anchor.
 
         const pageElements = document.querySelectorAll(".page");
+
         const pageElement = pageElements[event.pageNum - 1];
 
         this.selection = event.selection;
@@ -129,18 +170,25 @@ export class ControlledPopup extends React.Component<ControlledPopupProps, IStat
         const id = `${this.props.id}-anchor`;
         const cssText = `position: absolute; top: ${top}px; left: ${left}px;`;
 
-        const anchorElement = document.getElementById(id)!;
-        anchorElement.style.cssText = cssText;
+        const anchorElement = document.getElementById(id);
 
-        // now move the element to the proper page.
+        if (anchorElement) {
 
-        anchorElement.parentElement!.removeChild(anchorElement);
+            anchorElement.style.cssText = cssText;
 
-        pageElement.insertBefore(anchorElement, pageElement.firstChild);
+            // now move the element to the proper page.
 
-        this.setState({
-            active: true,
-        });
+            anchorElement.parentElement!.removeChild(anchorElement);
+
+            pageElement.insertBefore(anchorElement, pageElement.firstChild);
+
+            this.setState({
+                active: true,
+            });
+
+        } else {
+            log.warn("Could not find anchor element for id: " + id);
+        }
 
     }
 
@@ -161,6 +209,9 @@ export interface ControlledPopupProps {
 interface IState {
 
     active: boolean;
+
+    // timestamp so that we can force reactivation
+    activated?: ISODateTimeString;
 
 }
 

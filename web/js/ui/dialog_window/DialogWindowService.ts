@@ -1,4 +1,4 @@
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {ParentWindowRegistry} from './ParentWindowRegistry';
 import {IPCEngine} from '../../ipc/handler/IPCEngine';
 import {IPCRegistry} from '../../ipc/handler/IPCRegistry';

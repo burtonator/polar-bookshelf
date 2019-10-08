@@ -1,5 +1,5 @@
 import {StartableService, StoppableService} from './Service';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 
@@ -7,7 +7,7 @@ export class Services {
 
     public static async start(...services: StartableService[]) {
 
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
 
         services.forEach(service => {
             log.info("Starting service: " + service.constructor.name);

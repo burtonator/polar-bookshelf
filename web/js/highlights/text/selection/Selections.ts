@@ -10,14 +10,14 @@ export class Selections {
      * @param selection {Selection}
      * @return {Array<Range>}
      */
-    static toRanges(selection: Selection): Range[] {
+    public static toRanges(selection: Selection): Range[] {
 
-        let result = [];
+        const result = [];
 
         for (let idx = 0; idx < selection.rangeCount; idx++) {
 
             // note that we almost always have 1 selection
-            let range = selection.getRangeAt(idx);
+            const range = selection.getRangeAt(idx);
             result.push(range);
 
         }

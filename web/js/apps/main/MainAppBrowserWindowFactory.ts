@@ -1,24 +1,22 @@
-import {BrowserWindow, nativeImage, shell} from "electron";
-import {Logger} from '../../logger/Logger';
-import {AppPaths} from '../../electron/webresource/AppPaths';
-import {of} from 'rxjs';
+import {BrowserWindow, nativeImage, shell, DownloadItem, WebContents, screen} from "electron";
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {ResourcePaths} from '../../electron/webresource/ResourcePaths';
 
 const log = Logger.create();
 
-const WIDTH = 800 * 1.2;
+const WIDTH = 900 * 1.2; // 1300 is like 80% of users
 const HEIGHT = 1100 * 1.2;
+const SIDEBAR_BUFFER = 100;
 
-const DEFAULT_URL = AppPaths.resource('./apps/home/default.html');
+const DEFAULT_URL = ResourcePaths.resourceURLFromRelativeURL('./apps/home/default.html');
 
 // TODO: files in the root are always kept in the package we can just load
 // this as a native_image directly.
-export const APP_ICON = AppPaths.resource('./icon.png');
+export const APP_ICON = ResourcePaths.resourceURLFromRelativeURL('./icon.png');
 
-export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = {
+export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = Object.freeze({
     backgroundColor: '#FFF',
-    minWidth: WIDTH * 0.4,
-    minHeight: HEIGHT * 0.4,
-    width: WIDTH,
+    width: WIDTH + SIDEBAR_BUFFER,
     height: HEIGHT,
     show: false,
     // https://electronjs.org/docs/api/browser-window#new-browserwindowoptions
@@ -42,42 +40,74 @@ export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = 
 
         // We are disabling web security now as a work around for CORS issues
         // when loading fonts.  Once we resolve this we can enable webSecurity
-        // again.
+        // again.  We can completely remove this once we migrate to a complete
+        // solution for PHZ files being stored in the browser.
         webSecurity: false,
 
-        webaudio: false,
+        webaudio: true,
 
         /**
          * Use a persistent cookie session between restarts.  This is used so
          * that we keep user cookies including Google Analytics cookies.
          */
         //
-        partition: "persist:polar"
+        partition: 'persist:polar-app'
 
     }
 
-};
+});
 
 export class MainAppBrowserWindowFactory {
 
     public static createWindow(browserWindowOptions: Electron.BrowserWindowConstructorOptions = BROWSER_WINDOW_OPTIONS,
                                url = DEFAULT_URL): Promise<BrowserWindow> {
 
-        log.info("Creating window for URL: ", url);
-
-        // TODO: offset the window vs the currently focused window
-
         browserWindowOptions = Object.assign({}, browserWindowOptions);
 
         const position = this.computeXY();
 
         if (position) {
-            // add some offset to this window so that the previous window and the
-            // current one don't line up perfectly or else it seems like nothing
-            // happened or that the new window replaced the old one.
+            // add some offset to this window so that the previous window and
+            // the current one don't line up perfectly or else it seems like
+            // nothing happened or that the new window replaced the old one.
             browserWindowOptions.x = position.x;
             browserWindowOptions.y = position.y;
         }
+
+        const display = screen.getPrimaryDisplay();
+
+        // make sure minHeight, maxHeight, width, and height are NOT larger
+        // than the current screen dimensions.
+
+        interface DimensionMapping {
+            readonly original: 'minWidth' | 'minHeight' | 'width' | 'height';
+            readonly dimension: 'width' | 'height';
+            readonly defaultValue?: number;
+        }
+
+        const MIN_FACTOR = 0.4;
+
+        const dimensionMappings: DimensionMapping[] = [
+
+            {original: 'minHeight', dimension: 'height', defaultValue: display.size.width * MIN_FACTOR},
+            {original: 'minWidth', dimension: 'width', defaultValue: display.size.height * MIN_FACTOR},
+
+            {original: 'height', dimension: 'height'},
+            {original: 'width', dimension: 'width'}
+
+        ];
+
+        for (const dimensionMapping of dimensionMappings) {
+
+            const current = browserWindowOptions[dimensionMapping.original]! || dimensionMapping.defaultValue!;
+            const max = display.size[dimensionMapping.dimension];
+
+            browserWindowOptions[dimensionMapping.original]
+                = Math.min(current, max);
+
+        }
+
+        // log.notice("Creating browser window with options: ", browserWindowOptions);
 
         // Create the browser window.
         const browserWindow = new BrowserWindow(browserWindowOptions);
@@ -98,19 +128,47 @@ export class MainAppBrowserWindowFactory {
 
         browserWindow.webContents.on('new-window', (e, url) => {
             e.preventDefault();
-            shell.openExternal(url);
+            shell.openExternal(url)
+                .catch(err => log.error("Cloud open external URL", err, url));
         });
 
-        browserWindow.webContents.on('will-navigate', (e, url) => {
-            log.info("Attempt to navigate to new URL: ", url);
+        browserWindow.webContents.on('will-navigate', (e, navURL) => {
+
+            // TODO: this is a bit of a hack and these URLs shouldn't be hard
+            // coded here.  We can refactor this in the future though.
+
+            const parsedURL = new URL(navURL);
+
+            const host = parsedURL.hostname;
+
+            const allowedHosts = ["accounts.google.com",
+                                  "polar-32b0f.firebaseapp.com",
+                                  "accountchooser.com",
+                                  "www.accountchooser.com",
+                                  "localhost"];
+
+            if (host === "localhost") {
+                log.info("Always allowing localhost URL");
+                return;
+            }
+
+            if (navURL.startsWith("https://") && allowedHosts.includes(host)) {
+                log.info("Allowing URL for authentication: " + navURL);
+                return;
+            }
+
+            log.info("Attempt to navigate to new URL: ", navURL);
             // required to force the URLs clicked to open in a new browser.  The
             // user probably / certainly wants to use their main browser.
             e.preventDefault();
-            shell.openExternal(url);
+            shell.openExternal(navURL)
+                .catch(err => log.error("Cloud open external URL", err, url));
+
         });
 
-        log.info("Loading URL: ", url);
-        browserWindow.loadURL(url);
+        log.info("Loading URL: " + url);
+        browserWindow.loadURL(url)
+            .catch(err => log.error("Cloud not load URL ", err, url));
 
         return new Promise<BrowserWindow>(resolve => {
 
@@ -160,3 +218,4 @@ interface Position {
     x: number;
     y: number;
 }
+

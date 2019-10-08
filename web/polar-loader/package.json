@@ -1,0 +1,15 @@
+{
+  "name": "polar-loader",
+  "version": "1.0.3",
+  "description": "Simple Electron Package Loader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^3.1.3"
+  }
+}

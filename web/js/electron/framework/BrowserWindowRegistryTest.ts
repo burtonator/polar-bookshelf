@@ -2,7 +2,7 @@
 import * as assert from 'assert';
 import {BrowserWindowRegistry, ID, LiveWindowsProvider} from './BrowserWindowRegistry';
 import {assertJSON} from '../../test/Assertions';
-import {isPresent} from '../../Preconditions';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 describe('BrowserWindowRegistry', function() {
 
@@ -16,13 +16,13 @@ describe('BrowserWindowRegistry', function() {
 
     }
 
-    it("make sure GC works", async function () {
+    it("make sure GC works", async function() {
 
-        let mockLiveWindowsProvider = new MockLiveWindowsProvider();
+        const mockLiveWindowsProvider = new MockLiveWindowsProvider();
 
         mockLiveWindowsProvider.result = [1];
 
-        (<any>BrowserWindowRegistry).liveWindowsProvider = mockLiveWindowsProvider;
+        (<any> BrowserWindowRegistry).liveWindowsProvider = mockLiveWindowsProvider;
 
         assert.deepStrictEqual(BrowserWindowRegistry.gc(), []);
 
@@ -37,17 +37,17 @@ describe('BrowserWindowRegistry', function() {
     });
 
 
-    it("basic tagging", async function () {
+    it("basic tagging", async function() {
 
-        let mockLiveWindowsProvider = new MockLiveWindowsProvider();
+        const mockLiveWindowsProvider = new MockLiveWindowsProvider();
 
         mockLiveWindowsProvider.result = [1];
 
-        (<any>BrowserWindowRegistry).liveWindowsProvider = mockLiveWindowsProvider;
+        (<any> BrowserWindowRegistry).liveWindowsProvider = mockLiveWindowsProvider;
 
         BrowserWindowRegistry.tag(1, {name: 'test'});
 
-        let expected = {
+        const expected = {
             "tags": {
                 "name": "test"
             }

@@ -1,16 +1,26 @@
-import {BrowserWindow, WebContents} from 'electron';
+import {BrowserWindow, DownloadItem, WebContents} from 'electron';
 import {WebContentsDriver, WebContentsEvent, WebContentsEventName} from './WebContentsDriver';
 import {BrowserWindows} from '../BrowserWindows';
-import {Logger} from '../../logger/Logger';
-import {Optional} from '../../util/ts/Optional';
-import {IDimensions} from '../../util/Dimensions';
-import {configureBrowserWindowSize} from '../renderer/ContentCaptureFunctions';
-import {Functions} from '../../util/Functions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {configureBrowser} from '../renderer/ContentCaptureFunctions';
+import {Functions} from 'polar-shared/src/util/Functions';
 import {BrowserProfile} from '../BrowserProfile';
-import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions;
 import {Reactor} from '../../reactor/Reactor';
 import {PendingWebRequestsEvent} from '../../webrequests/PendingWebRequestsListener';
 import {WebContentsPromises} from '../../electron/framework/WebContentsPromises';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
+import {ToasterMessages} from '../../ui/toaster/ToasterMessages';
+import {ToasterMessageType} from '../../ui/toaster/Toaster';
+import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions;
+import base = Mocha.reporters.base;
+import {PDFImporter} from '../../apps/repository/importers/PDFImporter';
+import {FileImportClient} from '../../apps/repository/FileImportClient';
+import {ProgressTracker} from '../../util/ProgressTracker';
+import {ProgressMessages} from '../../ui/progress_bar/ProgressMessages';
+import {AppLauncher} from '../../apps/main/AppLauncher';
+import {PDFDownloadHandlers} from '../PDFDownloadHandlers';
+import {IDimensions} from "../../util/IDimensions";
 
 const log = Logger.create();
 
@@ -23,7 +33,7 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
     public browserProfile: BrowserProfile;
 
-    protected window?: BrowserWindow;
+    protected browserWindow?: BrowserWindow;
 
     protected reactor = new Reactor<WebContentsEvent>();
 
@@ -46,7 +56,16 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
     public async destroy() {
         log.info("Destroying window...");
-        Optional.of(this.window).when(window => window.close());
+
+        Optional.of(this.browserWindow)
+            .map(browserWindow => {
+
+                if (!browserWindow.isDestroyed()) {
+                    browserWindow.close();
+                }
+
+            });
+
         log.info("Destroying window...done");
     }
 
@@ -55,14 +74,17 @@ export class StandardWebContentsDriver implements WebContentsDriver {
      * @param url The URL to load.
      *
      * @param waitForFinishLoad When true, wait for the 'did-finish-load' event
-     * which is the default since the old capture system was based on the browser
-     * loading event stream and we assumed the load event would mean the page
-     * was finished rendering - which is not really true.
+     * which is the default since the old capture system was based on the
+     *     browser loading event stream and we assumed the load event would
+     *     mean the page was finished rendering - which is not really true.
      */
     public async loadURL(url: string, waitForFinishLoad: boolean = true): Promise<void> {
 
         const opts = {
 
+            // the no-cache header is needed here so that we don't load the data
+            // into the cache and then accidentally load it.
+            // extraHeaders: `pragma: no-cache, no-store\nreferer: ${url}\n`,
             extraHeaders: `pragma: no-cache\nreferer: ${url}\n`,
             userAgent: this.browserProfile.userAgent
 
@@ -70,7 +92,7 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
         const result = WebContentsPromises.once(this.webContents!).didFinishLoad();
 
-        this.webContents!.loadURL(url, opts);
+        await this.webContents!.loadURL(url, opts)
 
         if (waitForFinishLoad) {
             return result;
@@ -103,64 +125,98 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
     }
 
-    protected async initWebContents(window: BrowserWindow,
+    protected async initWebContents(browserWindow: BrowserWindow,
                                     webContents: WebContents,
                                     browserWindowOptions: BrowserWindowConstructorOptions) {
 
-        this.window = window;
+        this.browserWindow = browserWindow;
         this.webContents = webContents;
 
-        webContents.on('dom-ready', function(e) {
+        await this.initWebContentsEvents(webContents);
+
+        if ( ! browserWindowOptions.show) {
+            await BrowserWindows.onceReadyToShow(browserWindow);
+        }
+
+        await StandardWebContentsDriver.configureWebContents(webContents, this.browserProfile);
+
+    }
+
+    private async initWebContentsEvents(webContents: WebContents) {
+
+
+        const onDownloadedHandler = () => {
+
+            this.destroy()
+                .catch(err => log.error(err));
+
+        };
+
+        const onDownloadHandler = () => {
+
+            let rootWebContents = webContents;
+
+            while (rootWebContents.hostWebContents) {
+                rootWebContents = rootWebContents.hostWebContents;
+            }
+
+            const browserWindowID = rootWebContents.id;
+
+            log.info("Getting BrowserWindow from ID: " + browserWindowID);
+
+            const browserWindow = BrowserWindow.fromId(browserWindowID);
+
+            if (browserWindow) {
+                browserWindow.close();
+            } else {
+                log.warn("No browser window to clsoe");
+            }
+
+            AppLauncher.launchRepositoryApp()
+                .catch(err => log.error(err));
+
+        };
+
+        PDFDownloadHandlers.create(webContents, () => onDownloadedHandler(), () => onDownloadHandler());
+
+        webContents.on('dom-ready', (e) => {
+
             log.info("dom-ready: ", e);
-        });
 
-        window.on('close', () => {
-            log.info("Window close");
-        });
+            StandardWebContentsDriver.configureWebContents(webContents, this.browserProfile)
+                .catch((err: Error) => log.error("Could not configure web contents: ", err));
 
-        window.on('closed', () => {
-            log.info("Window closed");
-        });
-
-        webContents.on('new-window', (e, url) => {
         });
 
         webContents.on('will-navigate', (e, url) => {
-            e.preventDefault();
+            // log.info("Canceling navigation...");
+            // e.preventDefault();
         });
 
         webContents.on('did-fail-load', (event, errorCode, errorDescription, validateURL, isMainFrame) => {
             log.info("did-fail-load: " , {event, errorCode, errorDescription, validateURL, isMainFrame}, event);
         });
 
-        // if a URL is NEVER loaded we never get ready-to-show show load
-        // about:blank by default.
-        webContents.loadURL('about:blank');
-
-        if ( ! browserWindowOptions.show) {
-            await BrowserWindows.onceReadyToShow(window);
-        }
-
-        await this.configureWebContents(window.webContents);
-
     }
 
-    public async configureWebContents(webContents: WebContents) {
+    public static async configureWebContents(webContents: WebContents, browserProfile: BrowserProfile) {
 
-        log.info("Configuring window with browser: ", this.browserProfile);
+        const url = webContents.getURL();
+
+        log.info("Configuring webContents with URL: " + url);
 
         // we need to mute by default especially if the window is hidden.
         log.info("Muting audio...");
-        webContents.setAudioMuted(true);
+        webContents.setAudioMuted(! browserProfile.webaudio);
 
-        let deviceEmulation = this.browserProfile.deviceEmulation;
+        let deviceEmulation = browserProfile.deviceEmulation;
 
         deviceEmulation = Object.assign({}, deviceEmulation);
 
         log.info("Emulating device...");
         webContents.enableDeviceEmulation(deviceEmulation);
 
-        webContents.setUserAgent(this.browserProfile.userAgent);
+        webContents.setUserAgent(browserProfile.userAgent);
 
         const windowDimensions: IDimensions = {
             width: deviceEmulation.screenSize.width,
@@ -169,9 +225,9 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
         log.info("Using window dimensions: ", windowDimensions);
 
-        const screenDimensionScript = Functions.functionToScript(configureBrowserWindowSize, windowDimensions);
+        const configureBrowserScript = Functions.functionToScript(configureBrowser, windowDimensions);
 
-        await webContents.executeJavaScript(screenDimensionScript);
+        await webContents.executeJavaScript(configureBrowserScript);
 
     }
 
@@ -181,7 +237,7 @@ export class StandardWebContentsDriver implements WebContentsDriver {
 
         this.reactor.registerEvent('close');
 
-        this.window!.on('close', () => {
+        this.browserWindow!.on('close', () => {
             log.info("Firing event listener 'close'");
             this.reactor.dispatchEvent('close', {});
         });

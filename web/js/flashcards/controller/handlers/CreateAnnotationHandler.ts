@@ -3,11 +3,12 @@ import {AnnotationContainer} from '../../../metadata/AnnotationContainer';
 import {Annotation} from '../../../metadata/Annotation';
 import {IPCMessage} from '../../../ipc/handler/IPCMessage';
 import {IPCEvent} from '../../../ipc/handler/IPCEvent';
-import {Logger} from '../../../logger/Logger';
-import {AnnotationType} from '../../../metadata/AnnotationType';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
 import {Model} from '../../../model/Model';
 import {Flashcard} from '../../../metadata/Flashcard';
-import {Toaster} from '../../../toaster/Toaster';
+import {Toaster} from '../../../ui/toaster/Toaster';
+import {DocMetas} from "../../../metadata/DocMetas";
 
 const log = Logger.create();
 
@@ -32,17 +33,17 @@ export class CreateAnnotationHandler extends IPCHandler<AnnotationContainer<Anno
 
         log.info("Got create annotation message: ", annotationContainer );
 
-        let descriptor = annotationContainer.descriptor;
+        const descriptor = annotationContainer.descriptor;
 
-        if(descriptor.type === AnnotationType.FLASHCARD) {
+        if (descriptor.type === AnnotationType.FLASHCARD) {
 
-            let flashcard = new Flashcard(<Flashcard> annotationContainer.value);
+            const flashcard = new Flashcard(<Flashcard> annotationContainer.value);
 
-            if(descriptor.docFingerprint === this.model.docMeta.docInfo.fingerprint) {
+            if (descriptor.docFingerprint === this.model.docMeta.docInfo.fingerprint) {
 
                 log.info("Going to add this flashcard to the model");
 
-                let pageMeta = this.model.docMeta.getPageMeta(descriptor.pageNum);
+                const pageMeta = DocMetas.getPageMeta(this.model.docMeta, descriptor.pageNum);
 
                 // FIXME: these need to be attached to the parent annotation not
                 // stored directly on the page...

@@ -1,3 +1,19 @@
+@import url('./flexbar.css');
+
+.annotation-sidebar,
+.annotation-sidebar * {
+    font-size: 14px !important;
+}
+
+.annotation-sidebar p {
+    line-height: 1.5;
+}
+
+.annotation-sidebar h4 {
+    font-size: 24px;
+    line-height: 1.2;
+}
+
 .annotation-sidebar ::selection {
     background-color: #3297FD;
 }
@@ -52,35 +68,8 @@
     margin-top: 5px;
 }
 
-#annotation-manager .annotations:empty:before {
-    content: "No annotations";
-    height: 100px;
-    text-align: center;
-    font-size: 20px;
-    color: grey;
-    width: 100%;
-    display: block;
-    margin: 10px;
-}
-
 .annotation-sidebar .text-highlight blockquote {
     margin-bottom: 5px !important;
-}
-
-.annotation-sidebar .text-highlight blockquote,
-.annotation-sidebar .text-highlight[data-annotation-color="yellow"] blockquote {
-    border-left: 5px solid rgba(255,255,0,0.8);
-    /*background-color: rgba(255,255,0,0.1);*/
-}
-
-.annotation-sidebar .text-highlight[data-annotation-color="green"] blockquote {
-    border-left: 5px solid rgba(0,255,0,0.6);
-    /*background-color: rgba(0,255,0,0.1);*/
-}
-
-.annotation-sidebar .text-highlight[data-annotation-color="red"] blockquote {
-    border-left: 5px solid rgba(255,0,0,0.6);
-    /*background-color: rgba(0,255,0,0.1);*/
 }
 
 .annotation-sidebar .text-highlight blockquote span {
@@ -93,8 +82,12 @@
     user-select: none;
 }
 
+.annotation-sidebar .annotation-buttons .fas {
+    font-size: 14px;
+}
+
 .annotation-sidebar * button {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .annotation-sidebar .note-status-output {
@@ -123,19 +116,6 @@
     font-size: 13px !important;
 }
 
-
-.flexbar {
-    width: 100%;
-}
-
-.flexbar,
-.flexbar div {
-    display: flex;
-}
-
-.flexbar-right {
-    margin-left: auto;
-}
 
 .annotation-sidebar .comment img {
     max-width: 100%;

@@ -1,11 +1,12 @@
 import {Dimensions} from './util/Dimensions';
 import {Line} from './util/Line';
-import {Preconditions} from './Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {IRect} from 'polar-shared/src/util/rects/IRect';
 
 /**
  * Basic DOM style rect without a hard requirement to use a DOMRect.
  */
-export class Rect {
+export class Rect implements IRect {
 
     // TODO: some rects have x,y as well as left,top ... should we add them here
     // to be complete and closer to a DOMRect?
@@ -35,11 +36,11 @@ export class Rect {
      * @param axis {String} The axis to use (x or y)
      * @return {Line}
      */
-    toLine(axis: Axis) {
+    public toLine(axis: Axis) {
 
-        if(axis === "x") {
+        if (axis === "x") {
             return new Line(this.left, this.right, axis);
-        } else if(axis === "y") {
+        } else if (axis === "y") {
             return new Line(this.top, this.bottom, axis);
         } else {
             throw new Error("Wrong axis: " + axis);
@@ -68,20 +69,20 @@ export class Rect {
      * @param line {Line} The line representing the axis.
      * @return {Rect} Return a NEW rect with updated dimensions.
      */
-    adjustAxis(line: Line) {
+    public adjustAxis(line: Line) {
 
         Preconditions.assertNotNull(line, "line");
         Preconditions.assertNotNull(line.axis, "line.axis");
 
-        let result = new Rect(this);
+        const result = new Rect(this);
 
-        if(line.axis === "x") {
+        if (line.axis === "x") {
 
             result.left = line.start;
             result.right = line.end;
             result.width = line.end - line.start;
 
-        } else if(line.axis === "y") {
+        } else if (line.axis === "y") {
 
             result.top = line.start;
             result.bottom = line.end;
@@ -98,3 +99,4 @@ export class Rect {
 }
 
 export type Axis = 'x' | 'y';
+

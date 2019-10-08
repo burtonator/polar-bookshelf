@@ -1,6 +1,6 @@
 import {IPCMessage} from './IPCMessage';
 import {IPCRegistry} from './IPCRegistry';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {IPCPipe} from './IPCPipe';
 import {IPCError} from './IPCError';
 import {IPCEvent} from './IPCEvent';
@@ -46,7 +46,7 @@ export class IPCEngine<E extends IPCEvent> {
 
                         // TODO: if the result is a promise, await the promise...
 
-                    } catch(err) {
+                    } catch (err) {
 
                         log.error("Encountered error with handler: ", err);
 

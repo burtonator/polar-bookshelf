@@ -25,9 +25,13 @@ class Once {
 
         return new Promise<void>((resolve, reject) => {
 
-            this.didFinishLoad().then(() => resolve());
+            this.didFinishLoad()
+                .then(() => resolve())
+                .catch(err => reject(err));
 
-            this.didFailLoad().then((failLoad: FailLoad) => reject(failLoad));
+            this.didFailLoad()
+                .then((failLoad: FailLoad) => reject(failLoad))
+                .catch(err => reject(err));
 
         });
 

@@ -3,9 +3,9 @@ import {MutationState} from './MutationState';
 
 export class MutationTypes {
 
-    static toMutationState(mutationType: MutationType) {
+    public static toMutationState(mutationType: MutationType) {
 
-        switch(mutationType) {
+        switch (mutationType) {
             case MutationType.INITIAL:
                 return MutationState.PRESENT;
             case MutationType.SET:

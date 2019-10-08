@@ -1,4 +1,4 @@
-import {Logger} from '../web/js/logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserProfiles} from '../web/js/capture/BrowserProfiles';
 import {DiskDatastore} from '../web/js/datastore/DiskDatastore';
 import {Args} from '../web/js/electron/capture/Args';
@@ -64,7 +64,7 @@ app.on('ready', function() {
 
         await capture.start();
 
-        if(args.quit) {
+        if (args.quit) {
             log.info("Capture finished.  Quitting now");
             app.quit();
         } else {

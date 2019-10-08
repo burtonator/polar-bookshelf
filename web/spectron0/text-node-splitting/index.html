@@ -1,0 +1,87 @@
+<html>
+
+<head>
+
+    <style>
+        p {
+            /* use fixed width so that we can see if we have issues with multi
+            rows and columns */
+            width: 500px;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+<br>
+<br>
+<br>
+
+<p>
+    1.Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    2.Sed pretium, dolor sed euismod tempor, diam urna
+    3.scelerisque tortor, vel semper ligula urna vel enim. Aenean
+    4.nec facilisis libero. Sed efficitur ac ligula in varius.
+    5.Pellentesque iaculis, enim ac <em>6. dignissim</em> aliquet, turpis
+    7.purus mattis felis, eget consequat eros velit et erat. 8.Curabitur <b>9. feugiat</b> 10.suscipit leo, vel
+
+
+    ultrices tortor sodales ut. Maecenas a magna eget nunc commodo rutrum ac et
+    augue. Quisque augue sem, ultricies ac ornare non, porta a eros. Morbi
+
+    <b>hello</b>
+
+    posuere, tellus nec cursus rhoncus, nibh leo ultricies urna, eget mollis mi
+    nisl nec purus. Mauris malesuada justo vitae finibus elementum. Donec
+    vestibulum erat ac sem consectetur eleifend. Nullam at nibh sed neque
+    accumsan tincidunt nec a enim. Aliquam pharetra orci tortor, eget gravida
+    felis dictum ac. Maecenas convallis nunc ultrices massa bibendum, et
+    dignissim elit tempus. Ut in luctus dolor, et maximus nisi. Etiam non
+    euismod sem.
+
+    Vestibulum pulvinar bibendum turpis at sodales. Vestibulum consectetur nulla
+    elementum eros rhoncus, non interdum diam tristique. Praesent interdum quam
+    in lacus finibus semper. Phasellus id feugiat tortor. Integer sed molestie
+    urna, a sodales libero. Morbi egestas egestas tortor sed sagittis. Aenean et
+    tellus non quam pellentesque ultrices vel non odio.
+</p>
+
+<script>
+
+    const DEBUG = false;
+
+    if(DEBUG) {
+
+        const {TextNodeRows} = require("../../js/highlights/text/selection/TextNodeRows");
+
+        let p = document.querySelector("p");
+
+        let splitNodes = TextNodeRows.splitNode(p);
+
+        console.log("FIXME: split N nodes: " + splitNodes);
+
+        let textRegions = TextNodeRows.computeTextRegions(p);
+
+        // TODO: make our text format these via toString..
+        console.log("textRegions: ", textRegions);
+
+        let textBlocks = TextNodeRows.computeTextBlocks(textRegions);
+
+        console.log("textBlocks: ", textBlocks);
+
+        console.log("textBlocks JSON: ", textBlocks.map(current => current.toJSON()));
+
+    }
+
+   //
+    //
+    // let joinedTextBlocks = TextNodeRows.computeJoinedTextBlocks(textBlocks);
+    //
+    // console.log("joinedTextBlocks: ", joinedTextBlocks);
+
+</script>
+
+</body>
+</html>

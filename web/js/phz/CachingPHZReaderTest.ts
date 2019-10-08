@@ -1,14 +1,14 @@
 import {assert} from 'chai';
 
 import {assertJSON} from '../test/Assertions';
-import {Files} from '../util/Files';
+import {Files} from 'polar-shared/src/util/Files';
 import {ResourceFactory} from './ResourceFactory';
 import {CachingPHZReader} from './CachingPHZReader';
 import {PHZWriter} from './PHZWriter';
 import {TestingTime} from '../test/TestingTime';
 import {Time} from '../util/Time';
-import {Dictionaries} from '../util/Dictionaries';
-import {FilePaths} from '../util/FilePaths';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 
 TestingTime.freeze();
 

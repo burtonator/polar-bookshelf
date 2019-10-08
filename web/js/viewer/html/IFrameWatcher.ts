@@ -2,9 +2,9 @@
  * Assumes that you have tried to change the URL for an iframe and watches for
  * it to start loading properly.
  */
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {IFrames} from '../../util/dom/IFrames';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {DocumentReadyStates} from '../../util/dom/DocumentReadyStates';
 
 const log = Logger.create();
@@ -21,7 +21,7 @@ export class IFrameWatcher {
 
     }
 
-    start() {
+    public start() {
 
         this.execute()
             .catch(err => log.error("Failed watching for iframe: ", err ))
@@ -32,10 +32,10 @@ export class IFrameWatcher {
 
         log.debug("Waiting for iframe to load...");
 
-        log.debug("Waiting for content document...")
+        log.debug("Waiting for content document...");
         await IFrames.waitForContentDocument(this.iframe);
 
-        log.debug("Waiting for 'complete'")
+        log.debug("Waiting for 'complete'");
 
         await DocumentReadyStates.waitFor(this.iframe.contentDocument!, 'complete');
 

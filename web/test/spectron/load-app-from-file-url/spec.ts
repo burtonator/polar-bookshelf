@@ -2,7 +2,7 @@ import {WebDriverTestResultReader} from '../../../js/test/results/reader/WebDriv
 import {Spectron} from '../../../js/test/Spectron';
 
 const assert = require('assert');
-const {Functions} = require("../../../js/util/Functions");
+const {Functions} = require("polar-shared/src/util/Functions");
 
 describe('example-test', function() {
 

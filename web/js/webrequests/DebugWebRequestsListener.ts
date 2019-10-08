@@ -1,5 +1,5 @@
 import {INamedWebRequestEvent} from './WebRequestReactor';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BaseWebRequestsListener} from './BaseWebRequestsListener';
 
 const log = Logger.create();

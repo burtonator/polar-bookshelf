@@ -7,10 +7,9 @@ export class Results {
      */
     public static create<T>(result: any): Result<T> {
 
+        if (result.err !== undefined) {
 
-        if(result.err !== undefined) {
-
-            let err = new Error();
+            const err = new Error();
 
             err.message = result.err.message;
             err.name = result.err.name;
@@ -43,6 +42,15 @@ export class Results {
             err
         });
 
+    }
+
+
+    public static of<T>(value: T): Result<T> {
+        return new Result({value});
+    }
+
+    public static ofError<T>(err: Error): Result<T> {
+        return new Result({err});
     }
 
     public static execute<T>(func: () => T ): Result<T> {

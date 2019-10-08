@@ -14,28 +14,28 @@ export class MouseTracer {
         this.doc = doc;
     }
 
-    start() {
+    public start() {
 
         MouseTracer.startWithinDoc(this.doc);
 
         this.doc.querySelectorAll("iframe").forEach(iframe => {
 
-
-            if(! MouseTracer.startWithinIFrame(iframe)) {
+            if (! MouseTracer.startWithinIFrame(iframe)) {
 
                 iframe.addEventListener("load", () => {
                     MouseTracer.startWithinIFrame(iframe);
                 });
 
+                MouseTracer.startWithinIFrame(iframe);
             }
 
-        })
+        });
 
     }
 
-    static startWithinIFrame(iframe: HTMLIFrameElement): boolean {
+    private static startWithinIFrame(iframe: HTMLIFrameElement): boolean {
 
-        if(iframe.contentDocument) {
+        if (iframe.contentDocument) {
             MouseTracer.startWithinDoc(iframe.contentDocument);
             return true;
         }
@@ -44,15 +44,13 @@ export class MouseTracer {
 
     }
 
-    static startWithinDoc(doc: HTMLDocument) {
-
-        let tracerElement = MouseTracer.createTracerElement(doc);
-
-        doc.body.appendChild(tracerElement);
+    private static startWithinDoc(doc: HTMLDocument) {
 
         doc.addEventListener("mousemove", mouseEvent => {
 
-            //console.log("Got mouseEvent: ", mouseEvent);
+            const tracerElement = MouseTracer.getOrCreateTracerElement(doc);
+
+            // console.log("Got mouseEvent: ", mouseEvent);
 
             tracerElement.textContent = MouseTracer.format(mouseEvent);
 
@@ -60,24 +58,23 @@ export class MouseTracer {
 
         doc.addEventListener("mouseout", mouseEvent => {
 
-            //console.log("Got mouseEvent: ", mouseEvent);
+            const tracerElement = MouseTracer.getOrCreateTracerElement(doc);
 
-            let last = tracerElement.textContent;
+            const last = tracerElement.textContent;
 
-            tracerElement.textContent = `OUT (last was: ${last})`;
+            tracerElement.textContent = `OUT: ${last}`;
 
         });
 
         doc.addEventListener("click", mouseEvent => {
 
-            console.log(`Got mouseEvent at ${doc.location.href}: `, mouseEvent);
+            console.log(`Got mouseEvent at ${doc.location!.href}: `, mouseEvent);
 
         });
 
     }
 
-
-    static format(mouseEvent: MouseEvent) {
+    private static format(mouseEvent: MouseEvent) {
         return `screen: ${mouseEvent.screenX}, ${mouseEvent.screenY} client: ${mouseEvent.clientX}, ${mouseEvent.clientY} page: ${mouseEvent.pageX}, ${mouseEvent.pageY}`;
     }
 
@@ -85,12 +82,21 @@ export class MouseTracer {
      *
      * @return {HTMLDivElement}
      */
-    static createTracerElement(doc: HTMLDocument) {
+    private static getOrCreateTracerElement(doc: HTMLDocument) {
 
-        let div = doc.createElement("div");
+        const id = "tracer-element";
+
+        if (doc.getElementById(id)) {
+            return doc.getElementById(id)!;
+        }
+
+        const div = doc.createElement("div");
 
         div.style.cssText = "position: fixed; top: 0px; right: 0px; padding: 5px; background-color: #c6c6c6; z-index: 999999; font-size: 12px; min-width: 18em; min-height: 1em;";
         div.textContent = ' ';
+        div.setAttribute("id", id);
+
+        doc.body.appendChild(div);
 
         return div;
 

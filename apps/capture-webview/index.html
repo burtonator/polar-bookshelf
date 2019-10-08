@@ -58,11 +58,16 @@
 <div id="container">
     <div id="overlay"></div>
 
-    <webview name="content" id="content" src="./blank.html" disablewebsecurity nodeintegration="false" preload="../../web/js/capture/renderer/ContentCapture.js"></webview>
+    <webview name="content"
+             id="content"
+             src="./blank.html"
+             disablewebsecurity
+             nodeintegration="false"
+             preload="../../web/js/capture/renderer/ContentCapture.js"></webview>
 
 </div>
 
-<script>require('loader').load("./js/entry.js");</script>
+<script>require('polar-loader').load("./js/entry.js");</script>
 
 </body>
 </html>

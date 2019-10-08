@@ -8,7 +8,6 @@ export class DialogWindowMenu {
         const MENU_TEMPLATE: MenuItemConstructorOptions[] = [
             {
                 label: 'Edit',
-                role: 'edit',
                 submenu: [
                     { role: 'undo' },
                     { role: 'redo' },
@@ -22,7 +21,6 @@ export class DialogWindowMenu {
             },
             {
                 label: 'View',
-                role: 'view',
                 submenu: [
                     { role: 'reload' },
                     { role: 'togglefullscreen' },

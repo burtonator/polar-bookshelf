@@ -1,6 +1,6 @@
 import {TextHighlightRow} from './TextHighlightRow';
 import {TextRect} from '../../../metadata/TextRect';
-import {Preconditions} from '../../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import $ from '../../../ui/JQuery';
 
 /**
@@ -20,7 +20,7 @@ export class TextExtracter {
 
             textHighlightRow.rectElements.forEach(function(rectElement) {
 
-                let textSelection = new TextRect({
+                const textSelection = new TextRect({
                     rect: rectElement.rect,
                     text: $(rectElement.element).text()
                 });

@@ -1,0 +1,32 @@
+
+/*212529*/
+
+:root {
+    /*--dark: #000000;*/
+    --white: #ffffff;
+    /*--light: #ffffff;*/
+
+    --primary-background-color: #FFFFFF;
+    --primary-text-color: #000000;
+
+    --primary-background-color: #FFFFFF;
+    --primary-text-color: #000000;
+
+    --selected-background-color: #00afec;
+    --selected-text-color: #FFFFFF;
+
+}
+
+body {
+    background-color: var(--white);
+    /*color: var(--dark);*/
+}
+
+#root {
+    background-color: var(--white);
+}
+
+/*.btn-light {*/
+    /*background-color: var(--white);*/
+    /*color: var(--dark);*/
+/*}*/

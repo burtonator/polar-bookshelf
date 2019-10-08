@@ -40,15 +40,15 @@ export class CanAddNotesClient implements ICanAddNotesClient {
 
     public async execute(notes: Note[]): Promise<boolean[]> {
 
-            let body = {
-                action: "canAddNotes",
-                version: 6,
-                params: {
-                    notes
-                }
-            };
+        const body = {
+            action: "canAddNotes",
+            version: 6,
+            params: {
+                notes
+            }
+        };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         return <boolean[]> await AnkiConnectFetch.fetch(init);
 
@@ -57,8 +57,8 @@ export class CanAddNotesClient implements ICanAddNotesClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock(result: boolean[]) {
-        let client = TypeMoq.Mock.ofType<ICanAddNotesClient>();
+    public static createMock(result: boolean[]) {
+        const client = TypeMoq.Mock.ofType<ICanAddNotesClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny())).returns(() => Promise.resolve(result));
         return client.object;
     }

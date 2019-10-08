@@ -1,0 +1,77 @@
+{
+  "name": "Polar - PDF, Web, and Document Annotation",
+  "short_name": "Polar",
+  "description": "Document manager for PDF, web content, books, and notes with tagging, annotations, and highlighting.",
+  "version": "1.19.0",
+  "background": {
+    "scripts": ["background-bundle.js"],
+    "persistent": true
+  },
+  "permissions": [
+    "activeTab",
+    "fileBrowserHandler",
+    "webRequest",
+    "webRequestBlocking",
+    "webNavigation",
+    "<all_urls>",
+    "storage",
+    "tabs",
+    "tabCapture",
+    "cookies",
+    "http://localhost:8500/rest/v1/capture/trigger",
+    "contextMenus",
+    "unlimitedStorage",
+    "declarativeContent",
+    "idle",
+    "storage"
+  ],
+  "optional_permissions": [
+    "clipboardRead",
+    "clipboardWrite",
+    "history",
+    "bookmarks",
+    "documentScan",
+    "identity",
+    "notifications",
+    "tts",
+    "geolocation"
+  ],
+  "content_scripts": [{
+    "matches": [
+      "http://*/*",
+      "https://*/*",
+      "ftp://*/*",
+      "file://*/*"
+    ],
+    "run_at": "document_start",
+    "all_frames": true,
+    "js": ["content-bundle.js"]
+  }],
+  "externally_connectable": {
+    "matches": [
+      "*://*.getpolarized.io/*",
+      "*://app.getpolarized.io/*",
+      "*://localapp.getpolarized.io/*"
+    ]
+  },
+  "file_browser_handlers": [{
+    "id": "open-as-pdf",
+    "default_title": "Open with Polar",
+    "file_filters": [
+      "filesystem:*.pdf"
+    ]
+  }],
+  "browser_action": {
+    "name": "Click to save with Polar",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "manifest_version": 2
+}
+
+

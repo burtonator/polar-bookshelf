@@ -2,7 +2,7 @@ import {ipcRenderer, BrowserWindow} from 'electron';
 import {WritablePipe, WritablePipeFunction} from '../pipes/Pipe';
 import {ElectronContext, ElectronContextType, ElectronRendererContext} from './ElectronContext';
 import {ElectronContexts} from './ElectronContexts';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

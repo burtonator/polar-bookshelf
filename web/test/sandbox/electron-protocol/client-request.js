@@ -1,7 +1,6 @@
 
 const r = require('request');
 const zlib = require('zlib');
-const text = require('text-encoding');
 const stream = require('stream')
 
 const electron = require('electron');

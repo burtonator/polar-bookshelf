@@ -31,7 +31,7 @@ export class UpdateNoteFieldsClient implements IUpdateNoteFieldsClient {
 
     public async execute(updateNote: UpdateNote): Promise<void> {
 
-        let body = {
+        const body = {
             action: "updateNoteFields",
             version: 6,
             params: {
@@ -39,7 +39,7 @@ export class UpdateNoteFieldsClient implements IUpdateNoteFieldsClient {
             }
         };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         await AnkiConnectFetch.fetch(init);
 
@@ -48,8 +48,8 @@ export class UpdateNoteFieldsClient implements IUpdateNoteFieldsClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock() {
-        let client = TypeMoq.Mock.ofType<IUpdateNoteFieldsClient>();
+    public static createMock() {
+        const client = TypeMoq.Mock.ofType<IUpdateNoteFieldsClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny())).returns(() => Promise.resolve());
         return client.object;
     }

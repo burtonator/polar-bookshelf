@@ -4,9 +4,9 @@ export class LogLevels {
 
     public static fromName(name: string): LogLevel {
 
-        let result = (<any>LogLevel)[name];
+        const result = (<any> LogLevel)[name];
 
-        if(! result) {
+        if (! result) {
             throw new Error("Invalid name: " + name);
         }
 

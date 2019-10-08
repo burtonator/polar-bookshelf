@@ -5,15 +5,15 @@ export class AddNotesClient implements IAddNotesClient {
 
     public async execute(notes: Note[]): Promise<number[]> {
 
-            let body = {
-                action: "addNotes",
-                version: 6,
-                params: {
-                    notes
-                }
-            };
+        const body = {
+            action: "addNotes",
+            version: 6,
+            params: {
+                notes
+            }
+        };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         return <number[]> await AnkiConnectFetch.fetch(init);
 
@@ -22,8 +22,8 @@ export class AddNotesClient implements IAddNotesClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock(result: number[]) {
-        let client = TypeMoq.Mock.ofType<IAddNotesClient>();
+    public static createMock(result: number[]) {
+        const client = TypeMoq.Mock.ofType<IAddNotesClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny())).returns(() => Promise.resolve(result));
         return client.object;
     }

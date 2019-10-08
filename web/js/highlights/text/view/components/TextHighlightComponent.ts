@@ -1,16 +1,17 @@
-import {DocMeta} from '../../../../metadata/DocMeta';
 import {DocFormat} from '../../../../docformat/DocFormat';
-import {TextHighlight} from '../../../../metadata/TextHighlight';
-import {PageMeta} from '../../../../metadata/PageMeta';
 import {AnnotationEvent} from '../../../../annotations/components/AnnotationEvent';
-import {Preconditions} from '../../../../Preconditions';
-import {Dictionaries} from '../../../../util/Dictionaries';
-import {Rect} from '../../../../Rect';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
 import {Component} from '../../../../components/Component';
 import {DocFormatFactory} from '../../../../docformat/DocFormatFactory';
 import {Rects} from '../../../../Rects';
-import {Logger} from '../../../../logger/Logger';
-import {HighlightColor} from '../../../../metadata/BaseHighlight';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {HighlightColors} from 'polar-shared/src/metadata/HighlightColor';
+import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
+import {HighlightColor} from "polar-shared/src/metadata/IBaseHighlight";
+import {IRect} from 'polar-shared/src/util/rects/IRect';
+import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
 
 const log = Logger.create();
 
@@ -21,17 +22,17 @@ export class TextHighlightComponent extends Component {
     /**
      *
      */
-    private docMeta?: DocMeta;
+    private docMeta?: IDocMeta;
 
     /**
      *
      */
-    private textHighlight?: TextHighlight = undefined;
+    private textHighlight?: ITextHighlight = undefined;
 
     /**
      *
      */
-    private pageMeta?: PageMeta;
+    private pageMeta?: IPageMeta;
 
     /**
      * The page we're working with.
@@ -77,7 +78,7 @@ export class TextHighlightComponent extends Component {
 
         log.debug("render()");
 
-        Dictionaries.forDict<Rect>(this.textHighlight!.rects, (id, highlightRect) => {
+        Dictionaries.forDict<IRect>(this.textHighlight!.rects, (id, highlightRect) => {
 
             const pageElement = Preconditions.assertPresent(this.pageElement);
             const pageMeta = Preconditions.assertPresent(this.pageMeta);
@@ -106,8 +107,14 @@ export class TextHighlightComponent extends Component {
             highlightElement.className = `text-highlight annotation text-highlight-${textHighlight.id}`;
 
             highlightElement.style.position = "absolute";
-            // highlightElement.style.backgroundColor = `yellow`;
+            (highlightElement.style as any).mixBlendMode = 'multiply';
+
+            const backgroundColor = HighlightColors.toBackgroundColor(color, 0.5);
+
+            highlightElement.style.backgroundColor = backgroundColor;
             // highlightElement.style.opacity = `0.5`;
+
+            // toBackgroundColor
 
             if (this.docFormat.name === "pdf") {
                 // this is only needed for PDF and we might be able to use a transform

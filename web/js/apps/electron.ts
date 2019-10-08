@@ -1,21 +1,8 @@
 import {Launcher} from './Launcher';
-import {Logger} from '../logger/Logger';
-
-import {IListenablePersistenceLayer} from '../datastore/IListenablePersistenceLayer';
-import {DefaultPersistenceLayerFactory} from '../datastore/factories/DefaultPersistenceLayerFactory';
-import {RemotePersistenceLayerFactory} from '../datastore/factories/RemotePersistenceLayerFactory';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 
-async function persistenceLayerFactory(): Promise<IListenablePersistenceLayer> {
-
-    // let electronPersistenceLayer = ElectronPersistenceLayerFactory.create();
-    // return new PersistenceLayerDispatcher(PersistenceLayerWorkers.create(), electronPersistenceLayer);
-
-    return await RemotePersistenceLayerFactory.create();
-
-}
-
-new Launcher(persistenceLayerFactory).launch()
+new Launcher().launch()
     .then(() => log.info("App now loaded."))
     .catch(err => log.error(err));

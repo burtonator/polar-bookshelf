@@ -17,14 +17,14 @@ describe('DecksSync', function() {
 
     let syncProgress: SyncProgress | undefined;
 
-    let syncProgressListener: SyncProgressListener = _syncProgress => {
+    const syncProgressListener: SyncProgressListener = _syncProgress => {
         console.log(_syncProgress);
         syncProgress = _syncProgress;
     };
 
     let syncQueue: SyncQueue;
 
-    beforeEach(function () {
+    beforeEach(function() {
 
         abortable = {
             aborted: false
@@ -39,15 +39,15 @@ describe('DecksSync', function() {
 
     });
 
-    it("basic sync", async function () {
+    it("basic sync", async function() {
 
-        let deckDescriptors: DeckDescriptor[] = [
+        const deckDescriptors: DeckDescriptor[] = [
             {
                 name: "Test Deck"
             }
         ];
 
-        let createdDescriptors = decksSync.enqueue(deckDescriptors);
+        const createdDescriptors = decksSync.enqueue(deckDescriptors);
 
         await syncQueue.execute();
 

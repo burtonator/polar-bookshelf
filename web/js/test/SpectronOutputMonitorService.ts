@@ -1,5 +1,5 @@
-//import {Application} from 'spectron';
-import {Preconditions} from '../Preconditions';
+// import {Application} from 'spectron';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 const TIMEOUT = 250;
 
@@ -70,12 +70,12 @@ export class SpectronOutputMonitorService {
 
                     console.log(`render: ${log.timestamp} ${log.source} ${log.level}: ${log.message}` );
 
-                })
+                });
 
-            })
+            });
 
         } else {
-
+            // noop
         }
 
     }

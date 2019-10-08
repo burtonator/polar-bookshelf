@@ -1,26 +1,27 @@
 import {DocInfo} from './DocInfo';
-import {PageMeta} from './PageMeta';
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {AnnotationInfos} from './AnnotationInfos';
-import {AnnotationInfo} from './AnnotationInfo';
 import {Attachment} from './Attachment';
+import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
+import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 
 /**
  * Root metadata for a document including page metadata, and metadata for
  * the specific document.
  */
-export class DocMeta extends SerializedObject implements  IDocMeta {
+export class DocMeta extends SerializedObject implements IDocMeta {
 
-    public docInfo: DocInfo;
-    public pageMetas: {[id: number]: PageMeta};
+    public docInfo: IDocInfo;
+    public pageMetas: {[id: string]: IPageMeta};
     public annotationInfo = AnnotationInfos.create();
     public version = 2;
 
     public attachments: {[id: string]: Attachment} = {};
 
-    // constructor(template?: DocMeta) {
+    // constructor(template?: IDocMeta) {
     //
     //     super(template);
     //
@@ -34,17 +35,17 @@ export class DocMeta extends SerializedObject implements  IDocMeta {
     //
     // }
 
-    constructor(docInfo: DocInfo, pageMetas: {[id: number]: PageMeta}) {
+    constructor(docInfo: IDocInfo, pageMetas: {[id: number]: IPageMeta}) {
         super();
         this.docInfo = docInfo;
         this.pageMetas = pageMetas;
     }
 
-    getPageMeta(num: number) {
+    public getPageMeta(num: number) {
 
-        num = Preconditions.assertNotNull(num, "num");
+        num = Preconditions.assertPresent(num, "num");
 
-        let pageMeta = this.pageMetas[num];
+        const pageMeta = this.pageMetas[num];
 
         if (!pageMeta) {
             throw new Error("No pageMeta for page: " + num);
@@ -54,37 +55,13 @@ export class DocMeta extends SerializedObject implements  IDocMeta {
 
     }
 
-    validate() {
+    public validate() {
         Preconditions.assertInstanceOf(this.docInfo, DocInfo, "docInfo");
-        Preconditions.assertNotNull(this.pageMetas, "pageMetas");
+        Preconditions.assertPresent(this.pageMetas, "pageMetas");
         Preconditions.assertNumber(this.version, "version");
     }
 
 }
 
-export interface IDocMeta {
-
-    /**
-     * The DocInfo which includes information like title, nrPages, etc.
-     */
-    docInfo: DocInfo;
 
 
-    /**
-     * A sparse dictionary of page number to page metadata.
-     *
-     */
-    pageMetas: {[id: number]: PageMeta};
-
-    /**
-     * The annotation info for this document including the last annotation
-     * time, progress, etc.
-     */
-    annotationInfo: AnnotationInfo;
-
-    /**
-     * The version of this DocMeta version.
-     */
-    version: number;
-
-}

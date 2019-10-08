@@ -1,10 +1,10 @@
-
-
 import {ipcRenderer} from "electron";
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {TestResult} from './renderer/TestResult';
 import {IPCMessage} from '../../ipc/handler/IPCMessage';
-import {Optional} from '../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {app} from 'electron';
 
 const log = Logger.create();
 
@@ -16,25 +16,22 @@ const log = Logger.create();
  */
 export class TestResultService {
 
-    constructor() {
-
-    }
-
-
     /**
      * Start the service by listening to messages posted.
      */
-    start(): void {
+    public start(): void {
+
+        Preconditions.assertPresent(ipcRenderer, "No ipcRenderer");
 
         ipcRenderer.on('test-result', (event: Electron.Event, data: any) => {
 
-            let ipcMessage = IPCMessage.create(data);
+            const ipcMessage = IPCMessage.create(data);
 
-            if(ipcMessage.type === "write") {
-                this.onWrite(ipcMessage);
+            if (ipcMessage.type === "write") {
+                 this.onWrite(ipcMessage);
             }
 
-            if(ipcMessage.type === "ping") {
+            if (ipcMessage.type === "ping") {
                 this.onPing(event, ipcMessage);
             }
 
@@ -46,30 +43,28 @@ export class TestResultService {
 
     }
 
-    onPing(event: Electron.Event, ipcMessage: IPCMessage<any>) {
+    public onPing(event: Electron.Event, ipcMessage: IPCMessage<any>) {
 
-        let pongMessage = new IPCMessage("pong", true);
+        const pongMessage = new IPCMessage("pong", true);
 
         event.sender.send(ipcMessage.computeResponseChannel(), pongMessage);
 
     }
 
-    onWrite(data: any) {
+    public onWrite(data: any) {
 
-        if(! Optional.present(TestResult.get())) {
+        if (! Optional.present(TestResult.get())) {
 
-            let ipcMessage = IPCMessage.create(data);
+            const ipcMessage = IPCMessage.create(data);
 
-            if(Optional.present(ipcMessage.value)) {
+            if (Optional.present(ipcMessage.value)) {
 
                 TestResult.set(ipcMessage.value);
 
                 log.info("Received test result: " + JSON.stringify(TestResult.get()));
 
-            } else if(data.err) {
-
+            } else if (data.err) {
                 // TODO: right now we do not set the err...
-
             } else {
                 log.error("Given neither result nor err: ", data);
             }

@@ -1,9 +1,11 @@
-import {isPresent, Preconditions} from '../../../web/js/Preconditions';
-import {IDocInfo} from '../../../web/js/metadata/DocInfo';
-import {Optional} from '../../../web/js/util/ts/Optional';
+import {isPresent, Preconditions} from 'polar-shared/src/Preconditions';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {RepoDocInfo} from './RepoDocInfo';
-import {ISODateTimeString} from '../../../web/js/metadata/ISODateTimeStrings';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
 import {DocInfos} from '../../../web/js/metadata/DocInfos';
+import {RepoAnnotation} from "./RepoAnnotation";
+import {Tag} from "../../../web/js/tags/Tags";
+import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
 
 export class RepoDocInfos {
 
@@ -11,7 +13,7 @@ export class RepoDocInfos {
         return isPresent(repoDocInfo.filename);
     }
 
-    public static convertFromDocInfo(docInfo: IDocInfo): RepoDocInfo {
+    public static convert(docInfo: IDocInfo): RepoDocInfo {
 
         Preconditions.assertPresent(docInfo, "docInfo");
 
@@ -49,6 +51,20 @@ export class RepoDocInfos {
                 .validateBoolean()
                 .getOrElse(false),
 
+            tags: Optional.of(docInfo.tags)
+                .getOrElse({}),
+
+            site: Optional.of(docInfo.url)
+                .map(url => new URL(url).hostname)
+                .getOrUndefined(),
+
+            url: docInfo.url,
+
+            nrAnnotations: Optional.of(docInfo.nrAnnotations)
+                .getOrElse(0),
+
+            hashcode: docInfo.hashcode,
+
             docInfo
 
         };
@@ -75,6 +91,16 @@ export class RepoDocInfos {
         }
 
         return current;
+
+    }
+
+    public static toTags(repoDocInfo?: RepoDocInfo): Tag[] {
+
+        if (repoDocInfo) {
+            return Object.values(repoDocInfo.tags || {});
+        }
+
+        return [];
 
     }
 

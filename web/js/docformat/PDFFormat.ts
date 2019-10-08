@@ -1,57 +1,55 @@
-import {CurrentState, DocFormat} from './DocFormat';
-import {Preconditions} from '../Preconditions';
+import {CurrentDocState, DocFormat} from './DocFormat';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 
 declare var window: any;
 
 export class PDFFormat extends DocFormat {
 
-    public readonly name: string;
+    public readonly name = 'pdf';
 
     constructor() {
         super();
-        this.name = "pdf";
     }
 
     /**
      * Get the current doc fingerprint or null if it hasn't been loaded yet.
      */
-    currentDocFingerprint() {
+    public currentDocFingerprint(): string | undefined {
 
         if (window.PDFViewerApplication &&
             window.PDFViewerApplication.pdfDocument &&
-            window.PDFViewerApplication.pdfDocument.pdfInfo &&
-            window.PDFViewerApplication.pdfDocument.pdfInfo.fingerprint != null) {
+            window.PDFViewerApplication.pdfDocument._pdfInfo &&
+            window.PDFViewerApplication.pdfDocument._pdfInfo.fingerprint != null) {
 
-            return window.PDFViewerApplication.pdfDocument.pdfInfo.fingerprint;
+            return Optional.of(window.PDFViewerApplication.pdfDocument._pdfInfo.fingerprint).getOrUndefined();
 
         }
+
+        return undefined;
 
     }
 
     /**
      * Get the current state of the doc.
      */
-    currentState(event: any): CurrentState {
-
-        Preconditions.assertNotNull(event, "event");
+    public currentState(): CurrentDocState {
 
         return {
             nrPages: window.PDFViewerApplication.pagesCount,
             currentPageNumber: window.PDFViewerApplication.pdfViewer.currentPageNumber,
-            pageElement: event.target.parentElement
-        }
+        };
 
     }
 
-    supportThumbnails() {
+    public supportThumbnails() {
         return true;
     }
 
-    targetDocument(): HTMLDocument | null {
+    public targetDocument(): HTMLDocument | null {
         return document;
     }
 
-    currentScale() {
+    public currentScale() {
         return window.PDFViewerApplication.pdfViewer._currentScale;
     }
 

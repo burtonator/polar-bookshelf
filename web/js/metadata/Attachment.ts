@@ -1,38 +1,17 @@
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
-import {ISODateTimeString} from './ISODateTimeStrings';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {IAttachment} from "polar-shared/src/metadata/IAttachment";
+import {BackendFileRef} from "polar-shared/src/datastore/BackendFileRef";
 
-export class Attachment extends SerializedObject {
+export class Attachment extends SerializedObject implements IAttachment {
 
-    /**
-     * The unique ID for this object.
-     */
-    public readonly id: string;
-
-    /**
-     * The mime type of this attachment. image/png, etc
-     */
-    public readonly type: string;
-
-    /**
-     * The base64 encoded data for this attachment.
-     */
-    public readonly data: string;
-
-    /**
-     * The time this object was created
-     *
-     */
-    public readonly created: ISODateTimeString;
+    public readonly fileRef: BackendFileRef;
 
     public constructor(opts: any) {
 
         super(opts);
 
-        this.id = opts.id;
-        this.type = opts.type;
-        this.data = opts.data;
-        this.created = opts.created;
+        this.fileRef = opts.fileRef;
 
         this.init(opts);
 
@@ -43,11 +22,9 @@ export class Attachment extends SerializedObject {
 
         super.validate();
 
-        Preconditions.assertPresent(this.id, "id");
-        Preconditions.assertPresent(this.type, "type");
-        Preconditions.assertPresent(this.data, "data");
-        Preconditions.assertPresent(this.created, "created");
+        Preconditions.assertPresent(this.fileRef, "data");
 
     }
 
 }
+

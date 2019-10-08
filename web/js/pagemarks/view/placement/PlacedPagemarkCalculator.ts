@@ -2,7 +2,7 @@
 import {Axis, Rect} from '../../../Rect';
 import {Pagemark} from '../../../metadata/Pagemark';
 import {PagemarkRects} from '../../../metadata/PagemarkRects';
-import {Preconditions} from '../../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Rects} from '../../../Rects';
 import {PlacedPagemark} from './PlacedPagemark';
 import {Line} from '../../../util/Line';

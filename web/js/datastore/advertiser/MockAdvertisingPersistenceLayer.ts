@@ -1,5 +1,5 @@
-import {IPersistenceLayer} from '../IPersistenceLayer';
-import {IListenablePersistenceLayer} from '../IListenablePersistenceLayer';
+import {PersistenceLayer, PersistenceLayerID} from '../PersistenceLayer';
+import {ListenablePersistenceLayer} from '../ListenablePersistenceLayer';
 import {AbstractAdvertisingPersistenceLayer} from './AbstractAdvertisingPersistenceLayer';
 import {PersistenceLayerEvent} from '../PersistenceLayerEvent';
 
@@ -9,18 +9,31 @@ import {PersistenceLayerEvent} from '../PersistenceLayerEvent';
  */
 export class MockAdvertisingPersistenceLayer
     extends AbstractAdvertisingPersistenceLayer
-    implements IListenablePersistenceLayer {
+    implements ListenablePersistenceLayer {
 
-    constructor(persistenceLayer: IPersistenceLayer) {
+    public readonly id: PersistenceLayerID = 'mock';
+
+    private readonly noDispatchEvent: boolean;
+
+    constructor(persistenceLayer: PersistenceLayer, noDispatchEvent: boolean = false) {
         super(persistenceLayer);
+        this.noDispatchEvent = noDispatchEvent;
     }
 
     public async init(): Promise<void> {
+        // noop
+    }
 
-
+    public async stop(): Promise<void> {
+        // noop
     }
 
     public broadcastEvent(event: PersistenceLayerEvent): void {
+
+        if (this.noDispatchEvent) {
+            return;
+        }
+
         // NOTE that technically this violates our main contract that persistence
         // layers don't re-notify themselves.  I need to revisit this because
         // it might make sense to allow them to notify themselves but just be

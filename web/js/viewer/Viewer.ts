@@ -1,5 +1,5 @@
 import {DocDetail} from '../metadata/DocDetail';
-import {notNull} from '../Preconditions';
+import {notNull} from 'polar-shared/src/Preconditions';
 
 export abstract class Viewer {
 
@@ -10,6 +10,12 @@ export abstract class Viewer {
     public changeScale(scale: number) {
         throw new Error("Not supported by this viewer.");
     }
+
+    protected getFile(): string {
+        const url = new URL(window.location.href);
+        return notNull(url.searchParams.get("file"));
+    }
+
 
     protected getFilename(): string {
         const url = new URL(window.location.href);

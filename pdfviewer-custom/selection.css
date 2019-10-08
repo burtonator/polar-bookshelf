@@ -1,3 +1,22 @@
 .selection-disabled ::selection {
     background-color: transparent;
 }
+
+::selection {
+
+    /*TODO: the selection background color doesn't work here for some reason.*/
+    /*We have to specify it as 'background' and can't use 'background-color'*/
+    /*thanks to twitter bootstrap conflicting but when presented on top of the*/
+    /*highlight it's coming out the wrong color almost as if it has an opacity*/
+    /*setting or rgba but it's not rgba.*/
+
+    /*background-color: rgb(0, 0, 255) !important;*/
+    /*background: rgb(0, 0, 255) !important;*/
+
+    background-color: #3297FD !important;
+    background: #3297FD !important;
+
+    /*background: #3297FD !important;*/
+    /*opacity: 1.0 !important;*/
+    /*color: #111111 !important;*/
+}

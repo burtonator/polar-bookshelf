@@ -1,4 +1,4 @@
-import {Hashcodes} from '../Hashcodes';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
 import {Resource} from './Resource';
 
 export class ResourceFactory {

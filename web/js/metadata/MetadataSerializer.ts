@@ -3,13 +3,11 @@
  * serialization but also object validation once they are deserialized.
  */
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class MetadataSerializer {
 
     public static serialize(object: any, spacing: string = "") {
-        // return JSON.stringify(object, MetadataSerializer.replacer, "");
-
         return JSON.stringify(object, null, spacing);
     }
 

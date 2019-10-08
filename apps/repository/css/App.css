@@ -126,3 +126,19 @@
     text-align: left;
     border-bottom: 1px rgba(0, 0, 0, 0.3) solid;
 }
+
+.doc-dropdown {
+  overflow: visible !important;
+}
+
+.doc-dropdown-button {
+  padding: 0 !important;;
+  margin: 0 !important;
+  border: none !important;;
+  font-size: 12px !important;;
+}
+
+
+.text-input-popover {
+  min-width: 500px;
+}

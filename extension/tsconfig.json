@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": false,
+    "alwaysStrict": true,
+    "listEmittedFiles": true,
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "strictFunctionTypes": true,
+    "sourceMap": true,
+    "target": "ES2015",
+    "module": "ES2015",
+    "moduleResolution": "classic",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowJs": false,
+    "stripInternal": true,
+    "checkJs": false,
+    "jsx": "react",
+    "esModuleInterop": true,
+
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    "forceConsistentCasingInFileNames": true,
+
+    "allowSyntheticDefaultImports": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    },
+    "lib": ["es2015", "dom", "es2017.object", "es2015.promise", "es2016.array.include"]
+
+  },
+  "include": [
+    "*.ts"
+  ],
+  "exclude": [
+
+  ],
+  "types": [
+    "mocha",
+    "reflect-metadata"
+  ],
+  "typeRoots": [
+    "./node_modules/@types"
+  ]
+}

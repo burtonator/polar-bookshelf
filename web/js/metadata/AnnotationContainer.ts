@@ -1,6 +1,6 @@
 import {Annotation} from './Annotation';
 import {AnnotationDescriptor} from './AnnotationDescriptor';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class AnnotationContainer<A extends Annotation> {
 
@@ -16,7 +16,7 @@ export class AnnotationContainer<A extends Annotation> {
     public static newInstance<A extends Annotation>(descriptor: AnnotationDescriptor,
                                                     value: A): Readonly<AnnotationContainer<A>> {
 
-        let result = new AnnotationContainer(<AnnotationContainer<A>> {
+        const result = new AnnotationContainer(<AnnotationContainer<A>> {
             descriptor, value
         });
 

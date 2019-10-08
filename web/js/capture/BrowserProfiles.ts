@@ -62,6 +62,7 @@ export class BrowserProfiles {
                     .setHeight(35000)
                     .setShow(false)
                     .setOffscreen(false)
+                    .setWebaudio(true)
                     .setNodeIntegration(true)
                     .build();
 

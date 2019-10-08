@@ -82,7 +82,7 @@ export class BrowserProfileBuilder implements BrowserProfile {
 
     public useReactor: boolean = true;
 
-    public webaudio: boolean = false;
+    public webaudio: boolean = true;
 
     public hosted: boolean = false;
 

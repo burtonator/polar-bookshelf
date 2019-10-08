@@ -1,4 +1,4 @@
-import {Logger} from '../../../web/js/logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Logging} from '../../../web/js/logger/Logging';
 import {CaptureWebviewApp} from '../../../web/js/apps/capture_webview/CaptureWebviewApp';
 

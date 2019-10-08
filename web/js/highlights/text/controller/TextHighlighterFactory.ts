@@ -1,4 +1,4 @@
-import {isPresent, Preconditions} from '../../../Preconditions';
+import {isPresent, Preconditions} from 'polar-shared/src/Preconditions';
 
 require("../../../../lib/TextHighlighter.js");
 

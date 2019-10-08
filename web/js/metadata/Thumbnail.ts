@@ -1,18 +1,12 @@
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Image} from './Image';
-import {ISODateTimeString} from './ISODateTimeStrings';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {IThumbnail} from "polar-shared/src/metadata/IThumbnail";
 
-export class Thumbnail extends Image {
+export class Thumbnail extends Image implements IThumbnail {
 
-    /**
-     * The unique ID for this object.
-     */
     public readonly id: string;
 
-    /**
-     * The time this object was created
-     *
-     */
     public created: ISODateTimeString;
 
     constructor(opts: any) {
@@ -36,3 +30,4 @@ export class Thumbnail extends Image {
     }
 
 }
+

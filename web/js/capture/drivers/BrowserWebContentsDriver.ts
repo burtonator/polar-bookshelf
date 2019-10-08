@@ -1,6 +1,6 @@
 import {AbstractWebviewWebContentsDriver} from './AbstractWebviewWebContentsDriver';
 import {BrowserProfile} from '../BrowserProfile';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

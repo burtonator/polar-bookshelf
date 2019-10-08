@@ -1,4 +1,4 @@
-import {IDocInfo} from '../../metadata/DocInfo';
+import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 
 export interface DocInfoAdvertisement {
     readonly docInfo: IDocInfo;

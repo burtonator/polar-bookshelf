@@ -2,13 +2,30 @@
 import electronPath from 'electron';
 import {SpectronOutputMonitorService} from './SpectronOutputMonitorService';
 import {TestResultReader} from './results/TestResultReader';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import process from 'process';
 
 const {Application} = require('spectron');
 
 const log = Logger.create();
 
-const TIMEOUT = 10000;
+const TIMEOUT = 600000;
+
+// String path to the Electron application executable to launch. Note: If you
+// want to invoke electron directly with your app's main script then you should
+// specify path as electron via electron-prebuilt and specify your app's main
+// script path as the first argument in the args array.
+
+// TODO: right now this is a really bad idea to enable.  For starters it doesn't
+// actually work the way I would expect and we're going to need a better way
+// to do testing of pre-installed apps.  Additionally, the log message is hidden
+// so there's no way to know what is actually going on under the surface.
+//
+// const ELECTRON_PATH: any =
+//     Optional.of(<any> process.env.POLAR_ELECTRON_PATH)
+//     .getOrElse(electronPath);
+
+const ELECTRON_PATH: any = electronPath;
 
 /**
  * Basic spectron startup and teardown for our usage.  We also start an
@@ -21,27 +38,30 @@ export class Spectron {
     /**
      * The directory to run the specs from. Usually __dirname in your spec.
      */
-    static setup(dir: string, ...args: any[]) {
+    public static setup(dir: string, ...args: any[]) {
 
-        log.info("Configuring spectron...");
+        console.log("Configuring spectron...");
 
         // TODO: since spectron requires a window to operate, we should ALWAYS
         // create a window and then return it to the user so that they can
         // work with it directly.  We should do this within setup() and require
         // a URL to load so that testing always functions properly.
 
-        let spectronOutputMonitorService : SpectronOutputMonitorService;
+        let spectronOutputMonitorService: SpectronOutputMonitorService;
 
         beforeEach(async function() {
 
-            log.info("Starting spectron with dir: " + dir);
+            this.timeout(TIMEOUT);
+
+            console.log("Starting spectron with dir: " + dir );
+            console.log("ELECTRON_PATH ", ELECTRON_PATH);
 
             this.app = new Application({
 
                 // Your electron path can be any binary
                 // i.e for OSX an example path could be '/Applications/MyApp.app/Contents/MacOS/MyApp'
                 // But for the sake of the example we fetch it from our node_modules.
-                path: electronPath,
+                path: ELECTRON_PATH,
 
                 // Assuming you have the following directory structure
 
@@ -54,9 +74,9 @@ export class Spectron {
 
             });
 
-            log.info("Starting app...");
-            let app = await this.app.start();
-            log.info("Starting app...done");
+            console.log("Starting app...");
+            const app = await this.app.start();
+            console.log("Starting app...done");
 
             spectronOutputMonitorService = new SpectronOutputMonitorService(app);
             spectronOutputMonitorService.start();
@@ -65,27 +85,30 @@ export class Spectron {
 
         });
 
-        afterEach(function () {
-            //
-            log.info("Going to shutdown now... ");
+        afterEach(async function() {
 
-            if(spectronOutputMonitorService) {
+            console.log("Going to shutdown now... ");
+
+            if (spectronOutputMonitorService) {
                 spectronOutputMonitorService.stop();
                 spectronOutputMonitorService._doLogForwarding();
             }
 
+            // TODO: there's a bug here where if mocha times out it won't allow
+            // us to startup then we can't actually stop and we leave behind
+            // windows that are invalid.
+
             if (this.app && this.app.isRunning()) {
-                log.info("Telling app to stop");
-                return this.app.stop()
+                return this.app.stop();
             } else {
-                log.info("App already stopped.");
+                console.log("App already stopped.");
             }
 
         });
 
     }
 
-    static run(callback: RunCallback) {
+    public static run(callback: RunCallback) {
 
 
     }
@@ -106,6 +129,8 @@ export interface RunCallback {
 export interface TApplication {
 
     client: TBrowser;
+
+    stop(): void;
 
 }
 

@@ -3,7 +3,7 @@ export class KeyEvents {
     /**
      * Return true if the 'meta' keys are active.
      */
-    static isKeyMetaActive(event: KeyboardEvent) {
+    public static isKeyMetaActive(event: KeyboardEvent) {
 
         if (this.isMacOS()) {
             return event.metaKey && event.altKey;
@@ -13,7 +13,7 @@ export class KeyEvents {
 
     }
 
-    static isMacOS() {
+    public static isMacOS() {
         return navigator.platform === "MacIntel";
     }
 

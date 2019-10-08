@@ -1,12 +1,12 @@
 /**
  * A generic IPC request message with a type parameter.
  */
-import {Optional} from '../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {IPCError} from './IPCError';
 import {ElectronContext} from './ElectronContext';
 import {ElectronContexts} from './ElectronContexts';
-import {Logger} from '../../logger/Logger';
-import {isPresent} from '../../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 const log = Logger.create();
 
@@ -33,8 +33,8 @@ export class IPCMessage<T> {
                 error?: IPCError,
                 context = ElectronContexts.create()) {
 
-        if(value && value instanceof IPCMessage) {
-            throw new Error("Value is already an IPCMessage")
+        if (value && value instanceof IPCMessage) {
+            throw new Error("Value is already an IPCMessage");
         }
 
         this._type = type;

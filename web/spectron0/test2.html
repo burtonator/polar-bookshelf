@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+
+        #parent {
+            width: 200px;
+            height: 200px;
+            background-color: orange;
+
+        }
+
+        #parent:focus-within {
+            background-color: red !important;
+            box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+            border: 3px solid rgba(81, 203, 238, 1) !important;
+        }
+
+        #child {
+            width: 100px;
+            height: 100px;
+            background-color: lightblue;
+
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div id="parent">
+
+    <div id="child" contentEditable="true">
+        <input type="text">
+    </div>
+
+</div>
+
+
+</body>
+</html>

@@ -1,17 +1,25 @@
 import {Dicts} from '../util/Dicts';
-import {FlashcardType} from './FlashcardType';
-import {Hashcodes} from '../Hashcodes';
-import {Preconditions} from '../Preconditions';
+import {FlashcardType} from 'polar-shared/src/metadata/FlashcardType';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Flashcard} from './Flashcard';
 import {Texts} from './Texts';
-import {Text} from './Text';
+import {Text} from 'polar-shared/src/metadata/Text';
 import {TextType} from './TextType';
 import {DocMeta} from './DocMeta';
-import {ISODateTimeStrings} from './ISODateTimeStrings';
+import {ISODateTimeStrings} from 'polar-shared/src/metadata/ISODateTimeStrings';
 import {HTMLString} from '../util/HTMLString';
-import {Ref} from './Refs';
+import {Ref} from 'polar-shared/src/metadata/Refs';
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 export class Flashcards {
+
+    public static createMutable(flashcard: Flashcard): Flashcard {
+        // TODO: an idiosyncracy of the proxies system is that it mutates the
+        // object so if it's read only it won't work.  This is a bug with
+        // Proxies so I need to also fix that bug there in the future.
+        return <Flashcard> {...flashcard};
+    }
 
     public static create(type: FlashcardType, fields: {[key: string]: Text}, archetype: string, ref: Ref) {
 
@@ -23,9 +31,21 @@ export class Flashcards {
         // TODO: implement 'machine codes' here where we have a unique code per
         // physical device.  This way two people can create the same flashcard
         // and never conflict.  This way we support distributed behavior.
-        const id = Hashcodes.createID({fields});
+        const id = Hashcodes.createID({fields, created});
 
         return Flashcard.newInstance(id, id, created, lastUpdated, type, fields, archetype, ref);
+
+    }
+
+    public static createCloze(text: HTMLString, ref: Ref) {
+
+        const archetype = "76152976-d7ae-4348-9571-d65e48050c3f";
+
+        const fields: {[key: string]: Text } = {};
+
+        fields.text = Texts.create(text, TextType.HTML);
+
+        return Flashcards.create(FlashcardType.CLOZE, fields, archetype, ref);
 
     }
 
@@ -84,7 +104,7 @@ export class MockFlashcards {
     /**
      * Attach mock flashcards on the given DocMeta for testing
      */
-    public static attachFlashcards(docMeta: DocMeta) {
+    public static attachFlashcards(docMeta: IDocMeta) {
 
         let idx = 0;
 
@@ -103,7 +123,7 @@ export class MockFlashcards {
 
             const ref = 'page:1';
 
-            const flashcard = Flashcards.create(FlashcardType.CLOZURE, fields, archetype, ref);
+            const flashcard = Flashcards.create(FlashcardType.CLOZE, fields, archetype, ref);
 
             pageMeta.flashcards[flashcard.id] = flashcard;
 

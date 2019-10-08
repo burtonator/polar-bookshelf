@@ -1,0 +1,247 @@
+<html>
+<head>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+
+    <style>
+
+        .font-name td {
+            font-weight: bold;
+            /*font-size: 15px !important;*/
+        }
+
+        * {
+            font-size: 24px;
+        }
+
+        td {
+            vertical-align: top;
+        }
+
+    </style>
+
+    <script>
+
+        const fontFamilyMapping = {
+
+            Arial: {
+                alt: "Roboto"
+            },
+
+            Helvetica: {
+                alt: "Roboto"
+            },
+
+            "Courier New": {
+                alt: "Inconsolata",
+                monospace: true
+            },
+
+            "Courier": {
+                alt: "Inconsolata",
+                monospace: true
+            },
+
+            "Lucida Console": {
+                alt: "Inconsolata",
+                monospace: true
+            },
+
+            "Monaco": {
+                alt: "Inconsolata",
+                monospace: true
+            },
+
+            monospace: {
+                alt: "Inconsolata",
+                monospace: true
+            },
+
+        }
+
+        function createElement(name, innerHTML) {
+            const result = document.createElement(name);
+            result.innerHTML = innerHTML;
+            return result;
+        }
+
+        function createLoremText() {
+
+            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Done "
+                   + "auctor diam a erat congue mattis. Morbi pellentesque urna facilisis"
+                   + "molestie porttitor. Donec faucibus velit ac turpis scelerisque, sit "
+                   + "amet interdum orci rutrum. In non orci diam. Praesent semper ex."
+
+        }
+
+        function createFontVisualization() {
+
+            const fontTable = document.getElementById('fonts');
+
+            if (!fontTable) {
+                throw new Error("No font table");
+            }
+
+            const text = createLoremText();
+
+            for (const fontFamily of Object.keys(fontFamilyMapping)) {
+
+                const altFontFamily = fontFamilyMapping[fontFamily].alt;
+
+                const header = createElement('tr', `<td>${fontFamily}</td><td>${altFontFamily}</td>`)
+                header.setAttribute("class", 'font-name');
+                fontTable.appendChild(header);
+
+                const example = createElement('tr', `<td style="font-family: ${fontFamily}">${text}</td><td style="font-family: ${altFontFamily}">${text}</td>`)
+                fontTable.appendChild(example);
+
+            }
+
+        }
+
+        window.addEventListener('load', () => {
+            createFontVisualization();
+        });
+
+    </script>
+
+
+</head>
+
+<body>
+
+<table width="100%" id="fonts">
+</table>
+
+<!--<table width="100%" id="fonts">-->
+
+    <!--<tr class="font-name">-->
+        <!--<td>-->
+            <!--Arial-->
+        <!--</td>-->
+        <!--<td>-->
+            <!--Roboto-->
+        <!--</td>-->
+    <!--</tr>-->
+
+    <!--<tr>-->
+        <!--<td style="font-family: Arial">-->
+            <!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec-->
+            <!--auctor diam a erat congue mattis. Morbi pellentesque urna facilisis-->
+            <!--molestie porttitor. Donec faucibus velit ac turpis scelerisque, sit-->
+            <!--amet interdum orci rutrum. In non orci diam. Praesent semper ex-->
+            <!--vitae posuere tincidunt. Etiam massa massa, dictum vitae molestie-->
+            <!--id, venenatis vitae quam. Curabitur congue pharetra molestie. Ut eu-->
+            <!--orci congue, luctus turpis a, suscipit dui. Integer at elit rhoncus,-->
+            <!--vulputate turpis et, mattis nisi. Sed condimentum sapien dolor,-->
+            <!--congue porttitor enim tincidunt feugiat. Ut vulputate sagittis est-->
+            <!--at ullamcorper. Ut risus purus, porta sed pharetra a, consequat-->
+            <!--congue sapien. Lorem ipsum dolor sit amet, consectetur adipiscing-->
+            <!--elit.-->
+
+            <!--Nam vitae euismod mi. Aenean mattis egestas metus, eu consequat-->
+            <!--turpis blandit eget. Fusce nisl arcu, vulputate blandit enim a,-->
+            <!--efficitur bibendum erat. Pellentesque cursus sem eu libero fermentum-->
+            <!--ornare. In facilisis pulvinar tortor, sit amet vehicula turpis-->
+            <!--auctor gravida. Quisque dolor sem, tempus id malesuada sit amet,-->
+            <!--scelerisque sit amet turpis. Nullam nec augue a velit dapibus-->
+            <!--auctor. Nam consequat, elit non aliquet mollis, urna sapien auctor-->
+            <!--nisl, maximus tempor velit tellus nec justo. In sodales dolor eros,-->
+            <!--vel eleifend ipsum sollicitudin ac.-->
+        <!--</td>-->
+
+        <!--<td style="font-family: 'Roboto', sans-serif;">-->
+            <!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec-->
+            <!--auctor diam a erat congue mattis. Morbi pellentesque urna facilisis-->
+            <!--molestie porttitor. Donec faucibus velit ac turpis scelerisque, sit-->
+            <!--amet interdum orci rutrum. In non orci diam. Praesent semper ex-->
+            <!--vitae posuere tincidunt. Etiam massa massa, dictum vitae molestie-->
+            <!--id, venenatis vitae quam. Curabitur congue pharetra molestie. Ut eu-->
+            <!--orci congue, luctus turpis a, suscipit dui. Integer at elit rhoncus,-->
+            <!--vulputate turpis et, mattis nisi. Sed condimentum sapien dolor,-->
+            <!--congue porttitor enim tincidunt feugiat. Ut vulputate sagittis est-->
+            <!--at ullamcorper. Ut risus purus, porta sed pharetra a, consequat-->
+            <!--congue sapien. Lorem ipsum dolor sit amet, consectetur adipiscing-->
+            <!--elit.-->
+
+            <!--Nam vitae euismod mi. Aenean mattis egestas metus, eu consequat-->
+            <!--turpis blandit eget. Fusce nisl arcu, vulputate blandit enim a,-->
+            <!--efficitur bibendum erat. Pellentesque cursus sem eu libero fermentum-->
+            <!--ornare. In facilisis pulvinar tortor, sit amet vehicula turpis-->
+            <!--auctor gravida. Quisque dolor sem, tempus id malesuada sit amet,-->
+            <!--scelerisque sit amet turpis. Nullam nec augue a velit dapibus-->
+            <!--auctor. Nam consequat, elit non aliquet mollis, urna sapien auctor-->
+            <!--nisl, maximus tempor velit tellus nec justo. In sodales dolor eros,-->
+            <!--vel eleifend ipsum sollicitudin ac.-->
+        <!--</td>-->
+
+    <!--</tr>-->
+
+    <!--<tr class="font-name">-->
+        <!--<td>-->
+            <!--Helvetica-->
+        <!--</td>-->
+        <!--<td>-->
+            <!--??-->
+        <!--</td>-->
+    <!--</tr>-->
+
+
+    <!--<tr>-->
+        <!--<td style="font-family: Helvetica">-->
+            <!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec-->
+            <!--auctor diam a erat congue mattis. Morbi pellentesque urna facilisis-->
+            <!--molestie porttitor. Donec faucibus velit ac turpis scelerisque, sit-->
+            <!--amet interdum orci rutrum. In non orci diam. Praesent semper ex-->
+            <!--vitae posuere tincidunt. Etiam massa massa, dictum vitae molestie-->
+            <!--id, venenatis vitae quam. Curabitur congue pharetra molestie. Ut eu-->
+            <!--orci congue, luctus turpis a, suscipit dui. Integer at elit rhoncus,-->
+            <!--vulputate turpis et, mattis nisi. Sed condimentum sapien dolor,-->
+            <!--congue porttitor enim tincidunt feugiat. Ut vulputate sagittis est-->
+            <!--at ullamcorper. Ut risus purus, porta sed pharetra a, consequat-->
+            <!--congue sapien. Lorem ipsum dolor sit amet, consectetur adipiscing-->
+            <!--elit.-->
+
+            <!--Nam vitae euismod mi. Aenean mattis egestas metus, eu consequat-->
+            <!--turpis blandit eget. Fusce nisl arcu, vulputate blandit enim a,-->
+            <!--efficitur bibendum erat. Pellentesque cursus sem eu libero fermentum-->
+            <!--ornare. In facilisis pulvinar tortor, sit amet vehicula turpis-->
+            <!--auctor gravida. Quisque dolor sem, tempus id malesuada sit amet,-->
+            <!--scelerisque sit amet turpis. Nullam nec augue a velit dapibus-->
+            <!--auctor. Nam consequat, elit non aliquet mollis, urna sapien auctor-->
+            <!--nisl, maximus tempor velit tellus nec justo. In sodales dolor eros,-->
+            <!--vel eleifend ipsum sollicitudin ac.-->
+        <!--</td>-->
+
+        <!--<td>-->
+            <!--Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec-->
+            <!--auctor diam a erat congue mattis. Morbi pellentesque urna facilisis-->
+            <!--molestie porttitor. Donec faucibus velit ac turpis scelerisque, sit-->
+            <!--amet interdum orci rutrum. In non orci diam. Praesent semper ex-->
+            <!--vitae posuere tincidunt. Etiam massa massa, dictum vitae molestie-->
+            <!--id, venenatis vitae quam. Curabitur congue pharetra molestie. Ut eu-->
+            <!--orci congue, luctus turpis a, suscipit dui. Integer at elit rhoncus,-->
+            <!--vulputate turpis et, mattis nisi. Sed condimentum sapien dolor,-->
+            <!--congue porttitor enim tincidunt feugiat. Ut vulputate sagittis est-->
+            <!--at ullamcorper. Ut risus purus, porta sed pharetra a, consequat-->
+            <!--congue sapien. Lorem ipsum dolor sit amet, consectetur adipiscing-->
+            <!--elit.-->
+
+            <!--Nam vitae euismod mi. Aenean mattis egestas metus, eu consequat-->
+            <!--turpis blandit eget. Fusce nisl arcu, vulputate blandit enim a,-->
+            <!--efficitur bibendum erat. Pellentesque cursus sem eu libero fermentum-->
+            <!--ornare. In facilisis pulvinar tortor, sit amet vehicula turpis-->
+            <!--auctor gravida. Quisque dolor sem, tempus id malesuada sit amet,-->
+            <!--scelerisque sit amet turpis. Nullam nec augue a velit dapibus-->
+            <!--auctor. Nam consequat, elit non aliquet mollis, urna sapien auctor-->
+            <!--nisl, maximus tempor velit tellus nec justo. In sodales dolor eros,-->
+            <!--vel eleifend ipsum sollicitudin ac.-->
+        <!--</td>-->
+
+    <!--</tr>-->
+
+<!--</table>-->
+
+</body>
+</html>

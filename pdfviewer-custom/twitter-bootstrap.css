@@ -12,3 +12,269 @@
 .twitter-bootstrap-enabled *::after {
     box-sizing: border-box;
 }
+
+button.dropdown-item:hover {
+    background-color: #D8D8D8;
+    background-image: none;
+}
+
+.confirm-prompt {
+
+    min-width: 550px;
+    width: 550px;
+
+}
+
+.popover {
+    /* the default max width is too small */
+    max-width: 500px !important;
+}
+
+/* custom CSS for mobile devices */
+@media only screen and (max-device-width: 480px) {
+
+    .d-none-mobile {
+        display: none;
+    }
+
+}
+
+@media only screen and (min-device-width: 480px) {
+
+    .d-none-desktop {
+        display: none;
+    }
+
+}
+
+
+.twitter-bootstrap-content *,
+.twitter-bootstrap-content {
+    font-size: 16px;
+    /*font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";;*/
+}
+
+.text-xs *,
+.text-xs {
+    font-size: 12px;
+}
+
+.text-sm input,
+.text-sm textarea,
+.text-sm button,
+.text-sm {
+    font-size: 14px;
+}
+
+.text-md input,
+.text-md textarea,
+.text-md button,
+.text-md {
+    font-size: 16px;
+}
+
+.text-lg input,
+.text-lg textarea,
+.text-lg button,
+.text-lg {
+    font-size: 18px;
+}
+
+.text-xl {
+    font-size: 20px;
+}
+
+.text-xxl {
+    font-size: 22px;
+}
+
+.text-xxxl {
+    font-size: 26px;
+}
+
+/*
+ https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
+ https://css-tricks.com/forums/topic/scaling-down-images-with-css-makes-them-blurry/
+
+ this works well for Firefox just not for Chrome right now. Hopefully in the
+ future.
+*/
+.img-crisp {
+
+    image-rendering: -moz-crisp-edges;          /* Firefox */
+    image-rendering: -o-crisp-edges;          /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;   /* IE (non-standard property) */
+}
+
+.hover-highlight:hover *,
+.hover-highlight:hover {
+    /*TODO: this is still too dark I think*/
+    background-color: var(--grey100);
+}
+
+/* text-grey */
+.text-grey900 {
+    color: var(--grey900);
+}
+
+.text-grey800 {
+    color: var(--grey800);
+}
+
+.text-grey700 {
+    color: var(--grey700);
+}
+
+.text-grey600 {
+    color: var(--grey600);
+}
+
+.text-grey500 {
+    color: var(--grey500);
+}
+
+.text-grey400 {
+    color: var(--grey400);
+}
+
+.text-grey300 {
+    color: var(--grey300);
+}
+
+.text-grey200 {
+    color: var(--grey200);
+}
+
+.text-grey100 {
+    color: var(--grey100);
+}
+
+.text-grey000 {
+    color: var(--grey000);
+}
+
+/* text-danger */
+
+.text-danger900 {
+    color: var(--danger900);
+}
+
+.text-danger800 {
+    color: var(--danger800);
+}
+
+.text-danger700 {
+    color: var(--danger700);
+}
+
+.text-danger600 {
+    color: var(--danger600);
+}
+
+.text-danger500 {
+    color: var(--danger500);
+}
+
+.text-danger400 {
+    color: var(--danger400);
+}
+
+.text-danger300 {
+    color: var(--danger300);
+}
+
+.text-danger200 {
+    color: var(--danger200);
+}
+
+.text-danger100 {
+    color: var(--danger100);
+}
+
+.text-danger000 {
+    color: var(--danger000);
+}
+
+/* bg-grey */
+
+.bg-grey900 {
+    background-color: var(--grey900);
+}
+
+.bg-grey800 {
+    background-color: var(--grey800);
+}
+
+.bg-grey700 {
+    background-color: var(--grey700);
+}
+
+.bg-grey600 {
+    background-color: var(--grey600);
+}
+
+.bg-grey500 {
+    background-color: var(--grey500);
+}
+
+.bg-grey400 {
+    background-color: var(--grey400);
+}
+
+.bg-grey300 {
+    background-color: var(--grey300);
+}
+
+.bg-grey200 {
+    background-color: var(--grey200);
+}
+
+.bg-grey100 {
+    background-color: var(--grey100);
+}
+
+.bg-grey000 {
+    background-color: var(--grey000);
+}
+
+
+:root {
+
+    --grey900: #222222;
+    --grey800: #3B3B3B;
+    --grey700: #515151;
+    --grey600: #626262;
+    --grey500: #7E7E7E;
+    --grey400: #9E9E9E;
+    --grey300: #B1B1B1;
+    --grey200: #CFCFCF;
+    --grey100: #E1E1E1;
+    --grey000: #F7F7F7;
+
+    --primary900: #002159;
+    --primary800: #01337D;
+    --primary700: #03449E;
+    --primary600: #0552B5;
+    --primary500: #0967D2;
+    --primary400: #2186EB;
+    --primary300: #47A3F3;
+    --primary200: #7CC4FA;
+    --primary100: #BAE3FF;
+    --primary000: #E6F6FF;
+
+    --danger900: #610316;
+    --danger800: #8A041A;
+    --danger700: #AB091E;
+    --danger600: #CF1124;
+    --danger500: #E12D39;
+    --danger400: #EF4E4E;
+    --danger300: #F86A6A;
+    --danger200: #FF9B9B;
+    --danger100: #FFBDBD;
+    --danger000: #FFE3E3;
+
+}
+
+

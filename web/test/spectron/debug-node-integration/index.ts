@@ -8,8 +8,8 @@ export const BROWSER_OPTIONS = {
     // NOTE: the default width and height shouldn't be changed here as it can
     // break unit tests.
 
-    //width: 1000,
-    //height: 1000,
+    // width: 1000,
+    // height: 1000,
 
     webPreferences: {
         webSecurity: false,
@@ -18,16 +18,16 @@ export const BROWSER_OPTIONS = {
 
 };
 
-let windowFactory: WindowFactory = async () => {
-    let mainWindow = new BrowserWindow(BROWSER_OPTIONS);
-    //mainWindow.webContents.toggleDevTools();
-    mainWindow.loadURL('about:blank');
+const windowFactory: WindowFactory = async () => {
+    const mainWindow = new BrowserWindow(BROWSER_OPTIONS);
+    // mainWindow.webContents.toggleDevTools();
+    await mainWindow.loadURL('about:blank');
     return mainWindow;
 };
 
 SpectronMain.run(async state => {
 
-    state.window.loadFile(__dirname + '/app.html');
+    await state.window.loadFile(__dirname + '/app.html');
 
     await state.testResultWriter.write(true);
 

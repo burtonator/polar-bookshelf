@@ -6,11 +6,11 @@ import {CapturedPHZWriter} from '../capture/CapturedPHZWriter';
 
 export class MockPHZWriter {
 
-    static async write(path: string) {
+    public static async write(path: string) {
 
-        let captured = MockCapturedContent.create();
+        const captured = MockCapturedContent.create();
 
-        let capturedPHZWriter = new CapturedPHZWriter(path);
+        const capturedPHZWriter = new CapturedPHZWriter(path);
         await capturedPHZWriter.convert(captured);
 
     }

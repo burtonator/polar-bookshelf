@@ -4,7 +4,7 @@ import {IPCHandler} from '../../../ipc/handler/IPCHandler';
 import {DialogWindowReference} from '../DialogWindowReference';
 import {IPCMessage} from '../../../ipc/handler/IPCMessage';
 import {DialogWindow, DialogWindowOptions} from '../DialogWindow';
-import {Logger} from '../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

@@ -1,5 +1,5 @@
 import {StartCaptureApp} from "../../../../web/js/capture/controller/StartCaptureApp";
-import {Logger} from '../../../../web/js/logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Logging} from '../../../../web/js/logger/Logging';
 
 const log = Logger.create();

@@ -1,8 +1,6 @@
 import {ContentCapture} from './ContentCapture';
-import {Logger} from '../../logger/Logger';
-
-const electron = require("electron");
-const ipcRenderer = electron.ipcRenderer;
+import {Logger} from 'polar-shared/src/logger/Logger';
+import electron, {ipcRenderer} from 'electron';
 
 const log = Logger.create();
 
@@ -37,9 +35,9 @@ export class ContentCaptureController {
 
         log.info("Received content capture request.");
 
-        try{
+        try {
 
-            let captured = ContentCapture.captureHTML();
+            const captured = ContentCapture.captureHTML();
 
             log.info("Content captured successfully.  Sending response...");
 
@@ -50,7 +48,7 @@ export class ContentCaptureController {
 
             log.info("Content captured successfully.  Sending response... done");
 
-        } catch(e) {
+        } catch (e) {
 
             log.error("Could not capture HTML: ", e);
 

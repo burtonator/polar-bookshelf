@@ -1,11 +1,15 @@
 import {BrowserWindow} from "electron";
 import {BrowserWindowReference} from '../ui/dialog_window/BrowserWindowReference';
 
+/**
+ * @ElectronMainContext
+ */
 export class Broadcasters {
 
     /**
      * Send the given message, to the given channel, to all current
-     * BrowserWindows.
+     * BrowserWindows.  If nothing is listening on that 'channel' the message
+     * is ignored.
      */
     public static send(channel: string, message: any, ...excluding: BrowserWindowReference[]) {
 

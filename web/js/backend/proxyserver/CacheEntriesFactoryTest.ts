@@ -6,22 +6,24 @@ import {CacheEntriesFactory} from './CacheEntriesFactory';
 import {assertJSON} from '../../test/Assertions';
 import {MockCapturedContent} from '../../capture/MockCapturedContent';
 import {CapturedPHZWriter} from '../../capture/CapturedPHZWriter';
-import {Dictionaries} from '../../util/Dictionaries';
-import {FilePaths} from '../../util/FilePaths';
-
-TestingTime.freeze();
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
+import {Files} from 'polar-shared/src/util/Files';
 
 const tmpdir = os.tmpdir();
+TestingTime.freeze();
 
 describe('CacheEntriesFactory', function() {
 
     describe('Load CHTML', function() {
 
-        let path = FilePaths.tmpfile("test-load.chtml");
+        const path = FilePaths.tmpfile("test-load.chtml");
 
         beforeEach(function(done) {
 
-            let data = {
+            TestingTime.freeze();
+
+            const data = {
                 "href": "https://jakearchibald.com/2016/streams-ftw/",
                 "mutations": {
                     "baseAdded": true,
@@ -38,17 +40,17 @@ describe('CacheEntriesFactory', function() {
 
             fs.writeFileSync(FilePaths.join(tmpdir, "test-load.json"), JSON.stringify(data, null, "  "));
 
-            fs.writeFileSync(FilePaths.join(tmpdir, "test-load.chtml"), "<html></html>")
+            fs.writeFileSync(FilePaths.join(tmpdir, "test-load.chtml"), "<html></html>");
 
             done();
 
         });
 
-        it("createFromCHTML", async function () {
+        it("createFromCHTML", async function() {
 
-            let cacheEntriesHolder = await CacheEntriesFactory.createFromCHTML(path);
+            const cacheEntriesHolder = await CacheEntriesFactory.createFromCHTML(path);
 
-            let expected = {
+            const expected = {
                 "cacheEntries": {
                     "url": {
                         "method": "GET",
@@ -76,11 +78,11 @@ describe('CacheEntriesFactory', function() {
         });
 
 
-        it("createEntriesFromFile", async function () {
+        it("createEntriesFromFile", async function() {
 
-            let cacheEntriesHolder = await CacheEntriesFactory.createEntriesFromFile(path);
+            const cacheEntriesHolder = await CacheEntriesFactory.createEntriesFromFile(path);
 
-            let expected = {
+            const expected = {
                 "cacheEntries": {
                     "url": {
                         "method": "GET",
@@ -109,22 +111,27 @@ describe('CacheEntriesFactory', function() {
 
     describe('Load PHZ', function() {
 
-        it("createFromPHZ", async function () {
+        it("createFromPHZ", async function() {
 
-            let captured = MockCapturedContent.create();
+            const captured = MockCapturedContent.create();
 
-            let path = FilePaths.tmpfile("cached-entries-factory.phz");
-            let capturedPHZWriter = new CapturedPHZWriter(path);
+            const path = FilePaths.tmpfile("cached-entries-factory.phz");
+            const capturedPHZWriter = new CapturedPHZWriter(path);
             await capturedPHZWriter.convert(captured);
 
-            let cacheEntriesHolder = await CacheEntriesFactory.createFromPHZ(path);
+            assert.ok(await Files.existsAsync(path));
+
+            const cacheEntriesHolder = await CacheEntriesFactory.createFromPHZ(path);
 
             assertJSON(cacheEntriesHolder.metadata, {
                 "title": "Unit testing node applications with TypeScript — using mocha and chai",
-                "type": "chtml",
+                "type": "phz",
                 "url": "https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2",
                 "version": "3.0.0",
                 "browser": {
+                    "inactive": false,
+                    "type": "phone",
+                    "title": "MOBILE_GALAXY_S8_WITH_CHROME_61_WIDTH_750",
                     "name": "MOBILE_GALAXY_S8_WITH_CHROME_61_WIDTH_750",
                     "description": "Galaxy S8 mobile device running Chrome 61 but with width at 750",
                     "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Mobile Safari/537.36",
@@ -160,13 +167,14 @@ describe('CacheEntriesFactory', function() {
                 "https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2"
             ];
 
-            assertJSON(Object.keys(cacheEntriesHolder.cacheEntries), expected)
+            assertJSON(Object.keys(cacheEntriesHolder.cacheEntries), expected);
 
             expected = {
                 "method": "GET",
                 "url": "https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2",
                 "headers": {},
                 "statusCode": 200,
+                "statusMessage": "OK",
                 "contentType": "text/html",
                 "mimeType": "UTF-8",
                 "encoding": "UTF-8",
@@ -187,16 +195,17 @@ describe('CacheEntriesFactory', function() {
                         "title": "Unit testing node applications with TypeScript — using mocha and chai",
                     }
                 }
-            }
+            };
 
             assertJSON(Dictionaries.sorted(cacheEntriesHolder.cacheEntries["https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2"]),
-                       Dictionaries.sorted(expected))
+                       Dictionaries.sorted(expected));
 
             expected = {
                 "method": "GET",
                 "url": "https://journal.artfuldev.com/media/46f0f788c01c4b194cefde2d9ec41eaf?postId=384ef05f32b2",
                 "headers": {},
                 "statusCode": 200,
+                "statusMessage": "OK",
                 "contentType": "text/html",
                 "mimeType": "UTF-8",
                 "encoding": "UTF-8",

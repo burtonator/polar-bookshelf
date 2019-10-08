@@ -5,6 +5,10 @@
  */
 import {Browser} from './Browser';
 
+// Electron 3.0 uses Chrome 66 by default.  Version 69 is the latest circa Oct 25 2018
+
+// TODO: clean this up.  there is a lot of code duplication here when we're
+// only adding 1 or 2 fields like width and height.
 
 const BrowserRegistry: {[name: string]: Browser} = {
 
@@ -58,6 +62,60 @@ const BrowserRegistry: {[name: string]: Browser} = {
             viewSize: {
                 width: 1024,
                 height: 786
+            },
+            viewPosition: {x: 0, y: 0},
+            deviceScaleFactor: 0,
+            scale: 1
+
+        }
+
+    }),
+
+    DESKTOP_1280: new Browser({
+
+        name: "DESKTOP_1280",
+        title: "Desktop",
+        type: 'desktop',
+        description: "Chrome 66",
+        userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36",
+        inactive: false,
+
+        deviceEmulation: {
+            screenPosition: "desktop",
+            screenSize: {
+                width: 1280,
+                height: 1024
+            },
+            viewSize: {
+                width: 1280,
+                height: 1024
+            },
+            viewPosition: {x: 0, y: 0},
+            deviceScaleFactor: 0,
+            scale: 1
+
+        }
+
+    }),
+
+    DESKTOP_1920: new Browser({
+
+        name: "DESKTOP_1920",
+        title: "Desktop",
+        type: 'desktop',
+        description: "Chrome 66",
+        userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36",
+        inactive: false,
+
+        deviceEmulation: {
+            screenPosition: "desktop",
+            screenSize: {
+                width: 1920,
+                height: 1280
+            },
+            viewSize: {
+                width: 1920,
+                height: 1280
             },
             viewPosition: {x: 0, y: 0},
             deviceScaleFactor: 0,

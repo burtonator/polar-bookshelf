@@ -1,12 +1,12 @@
 import {DialogWindowOptions, Resource, ResourceType} from '../../ui/dialog_window/DialogWindow';
 import {DialogWindowClient} from '../../ui/dialog_window/DialogWindowClient';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {TriggerEvent} from '../../contextmenu/TriggerEvent';
 import {Nullable} from '../../util/ts/Nullable';
 import {AnnotationTriggerEvents} from './AnnotationTriggerEvents';
 import {IPCClient} from '../../ipc/handler/IPCClient';
 import {IPCEvent} from '../../ipc/handler/IPCEvent';
-import {Toaster} from '../../toaster/Toaster';
+import {Toaster} from '../../ui/toaster/Toaster';
 
 const log = Logger.create();
 
@@ -72,15 +72,15 @@ export class AnnotationsController {
 
         log.info("Sending annotation descriptor...");
 
-        let annotationDescriptors
+        const annotationDescriptors
             = AnnotationTriggerEvents.getAnnotationDescriptors(triggerEvent);
 
-        if(annotationDescriptors.length == 0) {
-            log.warn("No annotation descriptors.")
+        if (annotationDescriptors.length === 0) {
+            log.warn("No annotation descriptors.");
             return;
         }
 
-        let annotationDescriptor = annotationDescriptors[0];
+        const annotationDescriptor = annotationDescriptors[0];
 
         await this.ipcClient.get().execute('/create-flashcard/api/create', annotationDescriptor);
 

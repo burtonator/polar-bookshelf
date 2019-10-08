@@ -5,13 +5,13 @@ export class MockSelections {
     /**
      *
      */
-    static createSyntheticSelection(start: NodeOffset, end: NodeOffset) {
+    public static createSyntheticSelection(start: NodeOffset, end: NodeOffset) {
 
-        let selection = window.getSelection();
+        const selection = window.getSelection()!;
 
         selection.empty();
 
-        let range = document.createRange();
+        const range = document.createRange();
 
         range.setStart(start.node, start.offset);
 

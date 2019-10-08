@@ -5,7 +5,7 @@
  */
 import {SyncState} from './SyncState';
 import {SyncTaskResult} from './SyncTask';
-import {Optional} from '../../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 
 export interface SyncProgress {
 

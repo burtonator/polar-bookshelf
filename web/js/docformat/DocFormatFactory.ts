@@ -8,9 +8,6 @@ import {DocFormat} from './DocFormat';
  */
 export class DocFormatFactory {
 
-    /**
-     *
-     */
     public static getInstance(): DocFormat {
 
         const polarDocFormat = DocFormatFactory.getPolarDocFormat();

@@ -1,0 +1,18 @@
+
+/*212529*/
+
+:root {
+    --dark: #ffffff;
+    --white: #2B2B2B;
+    --light: #2B2B2B;
+}
+
+body {
+    background-color: var(--white);
+    color: var(--dark);
+}
+
+.btn-light {
+    background-color: var(--white);
+    color: var(--dark);
+}

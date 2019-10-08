@@ -3,36 +3,47 @@ import {DocInfoAdvertisement} from './DocInfoAdvertisement';
 import {DocInfoAdvertiser} from './DocInfoAdvertiser';
 import {DocInfoAdvertisementListenerService} from './DocInfoAdvertisementListenerService';
 import {PersistenceLayerEvent} from '../PersistenceLayerEvent';
-import {IPersistenceLayer} from '../IPersistenceLayer';
-import {IListenablePersistenceLayer} from '../IListenablePersistenceLayer';
+import {PersistenceLayer} from '../PersistenceLayer';
+import {ListenablePersistenceLayer} from '../ListenablePersistenceLayer';
 import {AbstractAdvertisingPersistenceLayer} from './AbstractAdvertisingPersistenceLayer';
+import {ErrorListener} from '../Datastore';
+import {DatastoreInitOpts} from '../Datastore';
 
 /**
  * A PersistenceLayer that allows the user to receive advertisements regarding
- * updates to the internal data.
+ * updates to the PersistenceLayer from any window in the system.
+ *
+ * @ElectronRendererContext
  */
 export class AdvertisingPersistenceLayer
     extends AbstractAdvertisingPersistenceLayer
-    implements IListenablePersistenceLayer {
-
+    implements ListenablePersistenceLayer {
 
     private readonly docInfoAdvertisementListenerService = new DocInfoAdvertisementListenerService();
 
-    constructor(persistenceLayer: IPersistenceLayer) {
-        super(persistenceLayer);
+    public readonly id = 'advertising';
+
+    constructor(delegate: PersistenceLayer) {
+        super(delegate);
     }
 
-    public async init(): Promise<void> {
+    public async init(errorListener?: ErrorListener, opts?: DatastoreInitOpts): Promise<void> {
 
         this.docInfoAdvertisementListenerService
             .addEventListener((adv) => this.onDocInfoAdvertisement(adv));
 
         this.docInfoAdvertisementListenerService.start();
-        return this.persistenceLayer.init();
+
+        await this.delegate.init(errorListener, opts);
 
     }
 
-    public broadcastEvent(event: PersistenceLayerEvent): void {
+    public async stop(): Promise<void> {
+        this.docInfoAdvertisementListenerService.stop();
+        return this.delegate.stop();
+    }
+
+    protected broadcastEvent(event: PersistenceLayerEvent): void {
 
         DocInfoAdvertiser.send({
             docInfo: event.docInfo,

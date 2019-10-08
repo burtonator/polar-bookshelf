@@ -1,7 +1,7 @@
 import {Pagemark} from './Pagemark';
-import {PagemarkType} from './PagemarkType';
+import {PagemarkType} from 'polar-shared/src/metadata/PagemarkType';
 import {PagemarkRect} from './PagemarkRect';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Rect} from '../Rect';
 import {Rects} from '../Rects';
 
@@ -51,7 +51,7 @@ export class PagemarkRects {
      * @param rect {Rect}
      * @return {PagemarkRect}
      */
-    static createFromRect(rect: any) {
+    public static createFromRect(rect: any) {
 
         return new PagemarkRect({
             left: rect.left,
@@ -87,8 +87,8 @@ export class PagemarkRects {
 
         Preconditions.assertInstanceOf(boxRect, Rect, "boxRect");
 
-        let xAxis = boxRect.toLine("x").multiply(100 / containerRect.width);
-        let yAxis = boxRect.toLine("y").multiply(100 / containerRect.height);
+        let xAxis = boxRect.toLine("x").multiply(100 / containerRect.width).floor();
+        let yAxis = boxRect.toLine("y").multiply(100 / containerRect.height).floor();
 
         return this.createFromLines(xAxis, yAxis);
 

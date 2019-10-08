@@ -1,4 +1,4 @@
-import {Strings} from '../../util/Strings';
+import {Strings} from "polar-shared/src/util/Strings";
 
 export class FilenameFormatter {
 

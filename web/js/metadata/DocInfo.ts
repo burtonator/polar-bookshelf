@@ -3,10 +3,16 @@
  * with this object which makes it lightweight to pass around.
  */
 import {SerializedObject} from './SerializedObject';
-import {PagemarkType} from './PagemarkType';
-import {Preconditions} from '../Preconditions';
-import {ISODateTimeString} from './ISODateTimeStrings';
-import {Tag} from '../tags/Tag';
+import {PagemarkType} from 'polar-shared/src/metadata/PagemarkType';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {ISODateString, ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {Hashcode} from 'polar-shared/src/metadata/Hashcode';
+import {ReadingOverview} from 'polar-shared/src/metadata/ReadingOverview';
+import {Attachment} from './Attachment';
+import {Backend} from 'polar-shared/src/datastore/Backend';
+import {Tag} from '../tags/Tags';
+import {DocMutating, IDocInfo, ShareStrategy, StoredResource} from "polar-shared/src/metadata/IDocInfo";
+import {Visibility} from "polar-shared/src/datastore/Visibility";
 
 export class DocInfo extends SerializedObject implements IDocInfo {
 
@@ -23,9 +29,27 @@ export class DocInfo extends SerializedObject implements IDocInfo {
     public properties: {[id: string]: string} = {};
     public archived: boolean = false;
     public flagged: boolean = false;
+    public backend?: Backend;
     public filename?: string;
     public added?: ISODateTimeString;
     public tags?: {[id: string]: Tag} = {};
+    public nrComments?: number;
+    public nrNotes?: number;
+    public nrFlashcards?: number;
+    public nrTextHighlights?: number;
+    public nrAreaHighlights?: number;
+    public nrAnnotations?: number;
+    public uuid?: string;
+    public hashcode?: Hashcode;
+    public referrer?: string;
+    public shareStrategy?: ShareStrategy;
+    public storedResources?: Set<StoredResource>;
+    public mutating?: DocMutating;
+    public published?: ISODateString | ISODateTimeString;
+    public doi?: string;
+    public readingPerDay?: ReadingOverview;
+    public visibility?: Visibility;
+    public attachments: {[id: string]: Attachment} = {};
 
     constructor(val: IDocInfo) {
 
@@ -41,7 +65,7 @@ export class DocInfo extends SerializedObject implements IDocInfo {
     public setup() {
 
         this.progress = Preconditions.defaultValue(this.progress, 0);
-        this.pagemarkType = Preconditions.defaultValue(this.pagemarkType, PagemarkType.SINGLE_COLUMN);
+        this.pagemarkType = this.pagemarkType || PagemarkType.SINGLE_COLUMN;
         this.properties = Preconditions.defaultValue(this.properties, {});
 
     }
@@ -53,98 +77,4 @@ export class DocInfo extends SerializedObject implements IDocInfo {
 
 }
 
-export interface IDocInfo {
-
-    /**
-     * The number of pages in this document.
-     */
-    nrPages: number;
-
-    /**
-     * A fingerprint for the document created from PDF.js
-     */
-    fingerprint: string;
-
-    /**
-     * The progress of this document (until completion) from 0 to 100.
-     *
-     * By default the document is zero percent complete.
-     */
-    progress: number;
-
-    /**
-     * Specify the pagemark type we should use to render this document.
-     *
-     * Usually SINGLE_COLUMN as the default but some documents need to be
-     * double or single column - especially research PDFs.
-     *
-     */
-    pagemarkType: PagemarkType;
-
-    /**
-     * The title for the document.
-     */
-    title?: string;
-
-    /**
-     * The subtitle for the document.
-     */
-    subtitle?: string;
-
-    /**
-     * The description for the document.
-     */
-    description?: string;
-
-    /**
-     * The network URL for the document where we originally fetched it.
-     */
-    url?: string;
-
-    /**
-     * The last time this document was opened or null if it's never been
-     * opened.
-     */
-    lastOpened?: ISODateTimeString;
-
-    /**
-     * The last time this document was opened or null if it's never been
-     * opened.
-     */
-    lastUpdated?: ISODateTimeString;
-
-    /**
-     * Arbitrary name/value properties set by 3rd party extensions for this
-     * document.  Anki, etc may set these properties directly.
-     */
-    properties: {[id: string]: string};
-
-    /**
-     * True if this document is marked 'archived'.  The user has completed
-     * reading it and no longer wants it to appear front and center in the
-     * repository UI.
-     */
-    archived: boolean;
-
-    /**
-     * True if this document was starred for prioritization.
-     */
-    flagged: boolean;
-
-    /**
-     * The filename of this doc in the .stash directory.
-     */
-    filename?: string;
-
-    /**
-     * The time this document was added to the repository.
-     */
-    added?: ISODateTimeString;
-
-    /**
-     * Singular key/value pairs where the id is the lowercase representation
-     * of a tag and value is the human/string representation.
-     */
-    tags?: {[id: string]: Tag};
-
-}
+export type DocInfoLike = DocInfo | IDocInfo;

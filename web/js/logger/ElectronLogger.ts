@@ -1,8 +1,8 @@
 /**
  * Simple logger that just writes to the console.
  */
-import {ILogger} from './ILogger';
-import {Files} from '../util/Files';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
+import {Files} from 'polar-shared/src/util/Files';
 import {ElectronContextTypes} from '../electron/context/ElectronContextTypes';
 import {ElectronContextType} from '../electron/context/ElectronContextType';
 import {Directories} from '../datastore/Directories';
@@ -58,7 +58,7 @@ export class ElectronLoggers {
             // *** configure file
 
             // set the directory name properly
-            delegate.transports.file.file = `${directories.logsDir}/polar.log`;
+            delegate.transports.file.writeFile = `${directories.logsDir}/polar.log`;
             delegate.transports.file.format = "[{y}-{m}-{d} {h}:{i}:{s}.{ms} {z}] [{level}] {text}";
 
             delegate.transports.file.level = "info";

@@ -5,15 +5,16 @@ rulesDirectory:
 #- path/to/custom/rules/directory/
 #- another/path/
 rules:
-  max-line-length:
-    options: [140]
+  # disabling as intellij won't let me disable this option
+  max-line-length: false
   new-parens: true
   no-arg: true
   no-bitwise: true
   no-conditional-assignment: true
   no-consecutive-blank-lines: false
+  space-before-function-paren: false
   no-console:
-    severity: warning
+    severity: none
     options:
     - debug
     - info
@@ -48,29 +49,44 @@ rules:
 
   no-namespace: false
 
-  member-ordering:
-    options:
-      order:
-        - public-instance-field
-        - protected-instance-field
-        - private-instance-field
-        - public-instance-method
-        - protected-instance-method
-        - private-instance-method
+  radix: false
 
-        - public-static-field
-        - protected-static-field
-        - private-static-field
-
-        - public-static-method
-        - protected-static-method
-        - private-static-method
+#  member-ordering:
+#    options:
+#      order:
+#        - public-instance-field
+#        - protected-instance-field
+#        - private-instance-field
+#        - public-instance-method
+#        - protected-instance-method
+#        - private-instance-method
+#
+#        - public-static-field
+#        - protected-static-field
+#        - private-static-field
+#
+#        - public-static-method
+#        - protected-static-method
+#        - private-static-method
 
   interface-name: false
 
   no-angle-bracket-type-assertion: false
 
   no-empty-interface: false
+
+  member-ordering: false
+
+  no-unused-expression: true
+
+  no-floating-promises: true
+
+  await-promise: true
+
+  # this is actually more annoying than not.  Shadowed variables can be annoying
+  # but I find having to rename them more annoying and that these don't actually
+  # cause bugs in production.
+  no-shadowed-variable: false
 
 jsRules:
   max-line-length:

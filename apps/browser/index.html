@@ -5,7 +5,8 @@
     <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
     <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap-reboot.min.css">
 
-    <link rel="stylesheet" href="../../node_modules/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../../pdfviewer-custom/progress.css">
 
     <style>
 
@@ -103,6 +104,8 @@
 
     </style>
 
+    <title>Capture Web Content</title>
+
 </head>
 
 <body>
@@ -120,19 +123,20 @@
         <!-- NOTE do not set nodeintegration="false" as the presents of the
              attribute is all that's used, not the actual value -->
 
-        <webview autosize="true"
+        <webview autosize
                  name="content"
                  id="content"
                  src="./splash.html"
                  disablewebsecurity
-                 preload="../../web/js/capture/renderer/ContentCapture.js"></webview>
+                 class="border mb-2"
+                 preload="../../web/js/capture/renderer/CapturePreload.js"></webview>
 
     <!--</div>-->
 
 
 </div>
 
-<script>require('loader').load("./js/entry.js");</script>
+<script>require('polar-loader').load("./js/entry.js");</script>
 
 </body>
 </html>

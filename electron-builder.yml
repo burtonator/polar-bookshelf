@@ -1,7 +1,7 @@
 productName: Polar Bookshelf
 # TODO: unfortunately this needs to be set.  Not sure why but it reverted to
-# using nightly versions when not set.  It should use package.json youwwou
-electronVersion: 3.0.4
+# using nightly versions when not set.  It should use package.json
+electronVersion: 5.0.11
 appId: io.inputneuron/polar
 compression: normal
 npmRebuild: false
@@ -19,14 +19,16 @@ mac:
     - target: dmg
     - target: zip
   fileAssociations:
-    - ext: "pdf"
-      role: "Viewer"
+    - ext: pdf
+      role: Viewer
 
 linux:
+  # TODO: consider using a custom productName here of polar-bookshelf to fix
+  # a bug on Linux with the application windows.
   artifactName: ${name}-${version}-${arch}.${ext}
   synopsis: Polar Bookshelf
   description: Polar Bookshelf
-  category: Reference
+  category: Office
   target:
     - target: deb
     - target: tar.gz
@@ -37,32 +39,58 @@ linux:
   # to specify the icons.
 
   fileAssociations:
-    - ext: "pdf"
+    - ext: pdf
+      mimeType: application/pdf
 
 nsis:
   artifactName: ${name}-${version}-${arch}.${ext}
 
+appx:
+  artifactName: ${name}-${version}-${arch}.${ext}
+  applicationId: polar
+  identityName: 25130KevinBurton.PolarBookshelf
+  publisher: CN=D3591277-F57D-4C75-B342-D158E6C4AAF5
+  publisherDisplayName: Kevin Burton
+
 win:
   artifactName: ${name}-${version}-${arch}.${ext}
   target:
+
+    # Building on Linux requires nsis packages and they're built in a
+    # docker container for windows.
+
     - target: nsis
-  #  - target: portable
+
+    # appx packages are built for Windows on Windows and are designed
+    # for the windows store.
+
+    - target: appx
+
+    #- target: portable
   icon: ./icons/icon-512x512.png
   fileAssociations:
-    - ext: "pdf"
+    - ext: pdf
+      description: Polar PDF
   publisherName: Spinn3r
 
 snap:
-
   confinement: "strict"
   grade: "stable"
   stagePackages:
     - "default"
   plugs:
-    - "default"
-    - "home"
+    - default
+    - home
     #- "X11"
     #- "wayland"
+    # additional plugs to pick up the GTK theme and icons from the system, mouse cursor theme still not fixed
+    - { "gtk-3-themes": { "interface": "content", "target": "$SNAP/data-dir/themes", "default-provider": "gtk-common-themes:gtk-3-themes" }, }
+    - { "icon-themes": { "interface": "content", "target": "$SNAP/data-dir/icons", "default-provider": "gtk-common-themes:icon-themes" }, }
+    - { "sound-themes": { "interface": "content", "target": "$SNAP/data-dir/sounds", "default-provider": "gtk-common-themes:sounds-themes" }, }
+    # NOTE that this requires manual approval via snapcraft...
+    #- { "browser-sandbox": { "interface": "browser-support", "allow-sandbox": true }, }
+  environment:
+    DISABLE_WAYLAND: 1 #use XWayland
 
 # https://www.electron.build/configuration/publish
 # https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
@@ -71,3 +99,4 @@ publish:
   publishAutoUpdate: true
 
 asar: true
+afterPack: "./electron-builder-afterpack.js"

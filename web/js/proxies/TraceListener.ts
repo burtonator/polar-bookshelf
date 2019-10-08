@@ -16,3 +16,5 @@ export abstract class TraceListener {
     public abstract onMutation(traceEvent: TraceEvent): void;
 
 }
+
+export type TraceListenerFunction = (traceEvent: TraceEvent) => void;

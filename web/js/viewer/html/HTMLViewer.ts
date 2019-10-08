@@ -1,7 +1,7 @@
 import $ from '../../ui/JQuery';
 import {Viewer} from '../Viewer';
-import {Logger} from '../../logger/Logger';
-import {notNull} from '../../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {notNull} from 'polar-shared/src/Preconditions';
 import {Model} from '../../model/Model';
 import {PHZMetadata} from '../../phz/PHZMetadata';
 import {DocDetail} from '../../metadata/DocDetail';
@@ -13,8 +13,18 @@ import {BackgroundFrameResizer} from './BackgroundFrameResizer';
 import {Descriptors} from './Descriptors';
 import {IFrameWatcher} from './IFrameWatcher';
 import {FrameResizer} from './FrameResizer';
+import {RendererAnalytics} from '../../ga/RendererAnalytics';
+import {DocMetas} from '../../metadata/DocMetas';
+import {DirectPHZLoader} from '../../phz/DirectPHZLoader';
+import {LoadStrategy} from '../../apps/main/file_loaders/PHZLoader';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {Captured} from '../../capture/renderer/Captured';
+import {IFrames} from '../../util/dom/IFrames';
+import {Documents} from './Documents';
 
 const log = Logger.create();
+
+const ENABLE_VIDEO = true;
 
 export class HTMLViewer extends Viewer {
 
@@ -24,13 +34,16 @@ export class HTMLViewer extends Viewer {
 
     private textLayer: HTMLElement = document.createElement('div');
 
-    private requestParams: RequestParams | null = null;
-
     private htmlFormat: any;
 
     private frameResizer?: FrameResizer;
 
     private readonly model: Model;
+
+    private loadStrategy: LoadStrategy | undefined;
+
+    // tslint:disable-next-line:variable-name
+    private _docDetail: ExtendedDocDetail | undefined;
 
     constructor(model: Model) {
         super();
@@ -47,26 +60,29 @@ export class HTMLViewer extends Viewer {
 
         this.htmlFormat = new HTMLFormat();
 
+        RendererAnalytics.pageview("/htmlviewer");
+
         // *** start the resizer and initializer before setting the iframe
 
-        $(document).ready(async () => {
+        this.loadStrategy = LoadStrategies.loadStrategy();
 
-            this.requestParams = this._requestParams();
+        const onReady = async () => {
 
             this._captureBrowserZoom();
 
-            this._loadRequestData();
-
-            this._configurePageWidth();
+            const docDetail = this._docDetail = await this.doLoad();
 
             this.frameResizer = new FrameResizer(this.contentParent, this.content);
 
-            // TODO migrate to IFrames.waitForContentDocument()
-            new IFrameWatcher(this.content, () => {
+            const onIFrameLoaded = () => {
 
                 log.info("Loading page now...");
 
-                const backgroundFrameResizer = new BackgroundFrameResizer(this.contentParent, this.content);
+                const backgroundFrameResizer
+                    = new BackgroundFrameResizer(this.contentParent,
+                                                 this.content,
+                                                 () => this.onResized());
+
                 backgroundFrameResizer.start();
 
                 const frameInitializer = new FrameInitializer(this.content, this.textLayer);
@@ -74,11 +90,47 @@ export class HTMLViewer extends Viewer {
 
                 this.startHandlingZoom();
 
-            }).start();
+                this.configurePageDimensions(docDetail);
+
+            };
+
+            new IFrameWatcher(this.content, () => onIFrameLoaded())
+                .start();
+
+            window.addEventListener("resize", () => {
+                this.doZoom();
+                this.frameResizer!.resize(true)
+                    .catch(err => log.error("Unable to resize: ", err));
+
+            });
 
             await Services.start(new LinkHandler(this.content));
 
+        };
+
+        $(document).ready(() => {
+            onReady()
+                .catch(err => log.error("Could not load doc: ", err));
         });
+
+    }
+
+    private onResized() {
+
+        const docMeta = this.model.docMeta;
+
+        const pageMeta = DocMetas.getPageMeta(docMeta, 1);
+
+        if (! pageMeta.pageInfo.dimensions) {
+
+            const width = this.content.offsetWidth;
+            const height = this.content.offsetHeight;
+
+            pageMeta.pageInfo.dimensions = {width, height};
+
+        }
+
+        // ViewerScreenshots.doScreenshot();
 
     }
 
@@ -89,6 +141,7 @@ export class HTMLViewer extends Viewer {
 
         $(document).keydown(function(event: KeyboardEvent) {
 
+            // TODO: use the code here not the 'which'
             if (event.ctrlKey && (event.which === 61 ||
                                   event.which === 107 ||
                                   event.which === 173 ||
@@ -120,21 +173,9 @@ export class HTMLViewer extends Viewer {
 
     private startHandlingZoom() {
 
-        const htmlViewer = this;
-
         $(".polar-zoom-select")
-            .change(function() {
-                $( "select option:selected" ).each(function() {
-                    const zoom = $( this ).val();
-
-                    htmlViewer.changeScale(parseFloat(zoom));
-
-                });
-
-                // make sure the select doesn't have focus so that we can scroll.
-                log.info("Blurring the select to allow keyboard/mouse nav.");
-                $(this).blur();
-
+            .change(() => {
+                this.doZoom();
             });
     }
 
@@ -143,13 +184,11 @@ export class HTMLViewer extends Viewer {
      *
      * Otherwise, use the defaults.
      */
-    private _configurePageWidth() {
+    private configurePageDimensions(docDetail: ExtendedDocDetail) {
 
-        const descriptor = notNull(this.requestParams).descriptor;
+        log.info("Loading with descriptor: ", docDetail.metadata);
 
-        log.info("Loading with descriptor: ", descriptor);
-
-        const docDimensions = Descriptors.calculateDocDimensions(descriptor);
+        const docDimensions = Descriptors.calculateDocDimensions(docDetail.metadata);
 
         log.info(`Configuring page with width=${docDimensions.width} and minHeight=${docDimensions.minHeight}`);
 
@@ -158,8 +197,32 @@ export class HTMLViewer extends Viewer {
         });
 
         document.querySelectorAll(".page, iframe").forEach((element) => {
-            (element as HTMLElement).style.minHeight = `${docDimensions.minHeight}px`;
+
+            const htmlElement = element as HTMLElement;
+            const minHeightElement = htmlElement.parentElement!;
+
+            minHeightElement.style.minHeight = `${docDimensions.minHeight}px`;
+
         });
+
+    }
+
+    public doZoom() {
+
+        const selectElement: HTMLSelectElement | null
+            = document.querySelector(".polar-zoom-select");
+
+        if (selectElement === null) {
+            console.log("No select");
+            return;
+        }
+
+        const zoom = selectElement.options[selectElement.selectedIndex].value;
+
+        this.changeScale(parseFloat(zoom));
+
+        // make sure the select doesn't have focus so that we can scroll.
+        selectElement.blur();
 
     }
 
@@ -169,12 +232,8 @@ export class HTMLViewer extends Viewer {
 
         this._changeScaleMeta(scale);
         this._changeScale(scale);
-        this._resizeFrame();
         this._removeAnnotations();
         this._signalScale();
-
-        // FIXME: perform a resize on the iframe since the hosted content
-        // should be larger and we need to expand its size.
 
     }
 
@@ -203,27 +262,17 @@ export class HTMLViewer extends Viewer {
 
         // iframeParentElement.removeChild(iframe);
 
-        // FIXME: run an algorithm to maek sure there are no elements between two
-        // paths in the DOM that have any scrollHeight > their height.
+        // TODO: run an algorithm to make sure there are no elements between
+        // two paths in the DOM that have any scrollHeight > their height.
 
         const contentParent = notNull(document.querySelector("#content-parent"));
         (contentParent as HTMLElement).style.transform = `scale(${scale})`;
 
-        const host = contentParent.parentElement!;
-        const scrollHeight = host.parentElement!.scrollHeight;
+        const height = parseInt(this.content.getAttribute('data-original-height')!);
+        const newHeight = height * scale;
 
-        host.style.height = `${scrollHeight}px`;
-
-        // iframeParentElement.appendChild(iframe);
-
-    }
-
-    private _resizeFrame() {
-
-        // setTimeout(() => {
-        //     console.log("FIXME resizing");
-        //     this.frameResizer!.resize(true);
-        // }, 1000);
+        this.frameResizer!.resize(true, newHeight)
+            .catch(err => log.error("Unable to change scale: ", err));
 
     }
 
@@ -256,62 +305,168 @@ export class HTMLViewer extends Viewer {
     }
 
     /**
-     * Get the request params as a dictionary.
+     * Load the actual content for the page.
      */
-    private _requestParams(): RequestParams {
-
-        const url = new URL(window.location.href);
-
-        return {
-            file: notNull(url.searchParams.get("file")),
-            descriptor: JSON.parse(notNull(url.searchParams.get("descriptor"))),
-            fingerprint: notNull(url.searchParams.get("fingerprint"))
-        };
-
-    }
-
-
-    private _loadRequestData() {
+    private async doLoad(): Promise<ExtendedDocDetail> {
 
         // *** now setup the iframe
 
-        const params = this._requestParams();
+        const file = Optional.of(this.getFile()).getOrElse("example1.html");
 
-        let file = params.file;
+        const toStrategyHandler = () => {
 
-        if (!file) {
-            file = "example1.html";
-        }
+            if (this.loadStrategy === 'portable') {
+                return new PortableStrategyHandler();
+            } else {
+                return new ElectronStrategyHandler();
+            }
 
-        this.content.src = file;
+        };
 
-        const fingerprint = params.fingerprint;
+        const strategyHandler = toStrategyHandler();
+
+        const docDetail = await strategyHandler.doLoad(this.content, file);
+
+        // TODO: improve this so that we can detect if this is a Youtube video
+        // embed safely.
+        // if (ENABLE_VIDEO && file.indexOf("youtube.com/") !== -1) {
+            // // TODO: better regex for this in the future.
+            //
+            // const embedHTML = HTMLViewer.createYoutubeEmbed(file,
+            // this.content);  this.content.contentDocument!.body.innerHTML =
+            // embedHTML;
+            // this.content.contentWindow!.history.pushState({"html":
+            // embedHTML, "pageTitle": 'Youtube Embed'}, "", file);
+
+        // } else {
+
+        // }
+
+        const fingerprint = docDetail.fingerprint;
+
         if (!fingerprint) {
             throw new Error("Fingerprint is required");
         }
 
         this.htmlFormat.setCurrentDocFingerprint(fingerprint);
 
+        return docDetail;
+
     }
 
-    public docDetail(): DocDetail {
+    private static createYoutubeEmbed(url: string, content: HTMLIFrameElement) {
 
-        const requestParams = notNull(this.requestParams);
+        const DEFAULT_WIDTH = 560;
+        const DEFAULT_HEIGHT = 315;
+
+        const width = content.contentDocument!.body.offsetWidth;
+        const height = (DEFAULT_HEIGHT / DEFAULT_WIDTH) * width;
+
+        // get the video ID from a URL like:
+        //
+        // https://www.youtube.com/watch?v=CP1BVpF-NjY
+
+        const u = new URL(url);
+        const videoID = u.searchParams.get('v');
+
+        return `<iframe width="${width}" height="${height}" src="https://www.youtube.com/embed/${videoID}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    }
+
+    public docDetail(): DocDetail | undefined {
+        return this._docDetail;
+    }
+
+}
+
+
+class LoadStrategies {
+
+    /**
+     * Get the request params as a dictionary.
+     */
+    public static loadStrategy(): LoadStrategy {
+
+        const url = new URL(window.location.href);
+
+        const strategy = url.searchParams.get("strategy");
+        return <LoadStrategy> Optional.of(strategy).getOrElse("electron");
+
+    }
+
+}
+
+abstract class StrategyHandler {
+
+    public abstract async doLoad(content: HTMLIFrameElement, file: string): Promise<ExtendedDocDetail>;
+
+    protected getFilename(): string {
+        const url = new URL(window.location.href);
+        return notNull(url.searchParams.get("filename"));
+    }
+
+    protected getFingerprint(): string {
+        const url = new URL(window.location.href);
+        return notNull(url.searchParams.get("fingerprint"));
+    }
+
+
+}
+
+class PortableStrategyHandler extends StrategyHandler {
+
+    public async doLoad(content: HTMLIFrameElement, file: string): Promise<ExtendedDocDetail> {
+
+        const loader = await DirectPHZLoader.create(file);
+        const captured = await loader.load();
+
+        if (! captured.isPresent()) {
+            throw new Error("Unable to load page (no captured data)");
+        }
+
+        const url = captured.get().url;
+
+        IFrames.markLoadedManually(content, url);
 
         return {
-            fingerprint: requestParams.fingerprint,
-            title: requestParams.descriptor.title,
-            url: requestParams.descriptor.url,
+            fingerprint: this.getFingerprint(),
+            title: captured.get().title,
+            url,
             nrPages: 1,
-            filename: this.getFilename()
+            filename: this.getFilename(),
+            metadata: captured.get()
+        };
+
+    }
+
+
+}
+
+class ElectronStrategyHandler extends StrategyHandler  {
+
+    public async doLoad(content: HTMLIFrameElement, file: string): Promise<ExtendedDocDetail> {
+        content.src = file;
+        return this.docDetail();
+    }
+
+    public docDetail(): ExtendedDocDetail {
+
+        const url = new URL(window.location.href);
+        const metadata: Captured = JSON.parse(notNull(url.searchParams.get("descriptor")));
+
+        return {
+            fingerprint: this.getFingerprint(),
+            title: metadata.title,
+            url: metadata.url,
+            nrPages: 1,
+            filename: this.getFilename(),
+            metadata
         };
 
     }
 
 }
 
-interface RequestParams {
-    file: string;
-    descriptor: PHZMetadata;
-    fingerprint: string;
+interface ExtendedDocDetail extends DocDetail {
+    metadata: Captured;
 }
+

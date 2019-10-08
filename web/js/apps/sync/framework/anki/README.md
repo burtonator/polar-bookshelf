@@ -100,3 +100,34 @@ curl -X POST "http://127.0.0.1:8765" -H 'Content-Type: application/json' -d'
 
 curl -X POST "http://127.0.0.1:8765" -H 'Content-Type: application/json' -d'
 {"action":"findNotes","version":6,"params":{"query":"tag:polar_guid:12fakzucrT"}}'
+
+# DEBUG 
+
+
+curl -X POST "http://127.0.0.1:8765" -H 'Content-Type: application/json' -d'
+{
+  "action": "canAddNotes",
+  "version": 6,
+  "params": {
+    "notes": [
+      {
+        "guid": "1GzMun2Wkk",
+        "deckName": "Steli Efti explains how to price a product, sell it to customers, and build a sales team.",
+        "modelName": "Basic",
+        "fields": {
+          "Front": "<p>Is this a test ?&nbsp;&nbsp;&nbsp;&nbsp;</p>.",
+          "Back": "<p>Yes. I believe it is a test again.</p><p><br></p><p><img src=\"13NVnYEZjCY6dkTsxakr.png\" style=\"width: 303.094px;\"><br></p>"
+        },
+        "tags": [
+          "sales",
+          "startups",
+          "polar_guid:1GzMun2Wkk"
+        ]
+      }
+    ]
+  }
+}
+'
+
+
+FUCK ME... the can add notes thing is bullshit... 

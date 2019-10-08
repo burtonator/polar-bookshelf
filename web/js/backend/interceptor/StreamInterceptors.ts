@@ -1,10 +1,10 @@
 import {net} from "electron";
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Duplex, PassThrough, Readable, Stream} from 'stream';
 import InterceptStreamProtocolRequest = Electron.InterceptStreamProtocolRequest;
 import StreamProtocolResponse = Electron.StreamProtocolResponse;
 import * as fs from 'fs';
-import {Files} from '../../util/Files';
+import {Files} from 'polar-shared/src/util/Files';
 
 const log = Logger.create();
 
@@ -68,9 +68,10 @@ export class StreamInterceptors {
 
                 const headers = Object.assign({}, response.headers);
 
-                // we have to delete the content-encoding HTTP header becaue
-                // the net.request API already performs the gzip/deflate encoding
-                // FOR us and Chrome attempts to double decode it and then breaks.
+                // We have to delete the content-encoding HTTP header because
+                // the net.request API already performs the gzip/deflate
+                // encoding FOR us and Chrome attempts to double decode it and
+                // then breaks.
                 delete headers['content-encoding'];
 
                 const streamProtocolResponse: CorrectStreamProtocolResponse = {

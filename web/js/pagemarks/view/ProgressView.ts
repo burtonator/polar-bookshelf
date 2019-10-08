@@ -1,6 +1,6 @@
 import {Model} from '../../model/Model';
-import {Logger} from '../../logger/Logger';
-import {forDict} from '../../util/Functions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {forDict} from 'polar-shared/src/util/Functions';
 import {DocMetaDescriber} from '../../metadata/DocMetaDescriber';
 import {DocMetas} from '../../metadata/DocMetas';
 
@@ -17,7 +17,7 @@ export class ProgressView {
         this.model = model;
     }
 
-    start() {
+    public start() {
 
         log.info("Starting...");
 
@@ -25,7 +25,7 @@ export class ProgressView {
 
             log.info("onDocumentLoaded");
 
-            let docMeta = documentLoadedEvent.docMeta;
+            const docMeta = documentLoadedEvent.docMeta;
 
             forDict(docMeta.pageMetas, (key, pageMeta) => {
 
@@ -39,25 +39,25 @@ export class ProgressView {
 
     }
 
-    update() {
+    public update() {
 
         // TODO: this should listen directly to the model and the pagemarks
         // themselves.
 
-        let perc = DocMetas.computeProgress(this.model.docMeta);
+        const perc = DocMetas.computeProgress(this.model.docMeta);
 
         log.info("Percentage is now: " + perc);
 
-        let progressElement = <HTMLProgressElement>document.querySelector("#polar-progress progress");
+        const progressElement = <HTMLProgressElement> document.querySelector("#polar-progress progress");
         progressElement.value = perc;
 
         // now update the description of the doc at the bottom.
 
-        let description = DocMetaDescriber.describe(this.model.docMeta);
+        const description = DocMetaDescriber.describe(this.model.docMeta);
 
-        let docOverview = document.querySelector("#polar-doc-overview");
+        const docOverview = document.querySelector("#polar-doc-overview");
 
-        if(docOverview) {
+        if (docOverview) {
             docOverview.textContent = description;
         }
 

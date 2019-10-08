@@ -8,23 +8,23 @@ export class BrowserWindows {
      * and the hosted WebContents. This is used to find out which root windows
      * are hosting webContents.
      */
-    public static computeWebContentsToHostIndex(): WebContentsHostIndex {
-
-        const result = new WebContentsHostIndex();
-
-        const allWebContents = webContents.getAllWebContents();
-
-        for (const current of allWebContents) {
-
-            if (current.hostWebContents) {
-                result.register(current.hostWebContents, current);
-            }
-
-        }
-
-        return result;
-
-    }
+    // public static computeWebContentsToHostIndex(): WebContentsHostIndex {
+    //
+    //     const result = new WebContentsHostIndex();
+    //
+    //     const allWebContents = webContents.getAllWebContents();
+    //
+    //     for (const current of allWebContents) {
+    //
+    //         if (current.hostWebContents) {
+    //             result.register(current.hostWebContents, current);
+    //         }
+    //
+    //     }
+    //
+    //     return result;
+    //
+    // }
 
 }
 

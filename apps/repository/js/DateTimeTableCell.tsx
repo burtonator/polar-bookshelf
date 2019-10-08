@@ -1,30 +1,13 @@
 import * as React from 'react';
-import ReactTable from "react-table";
-import {Footer, Tips} from './Utils';
-import {Logger} from '../../../web/js/logger/Logger';
-import {DocLoader} from '../../../web/js/apps/main/ipc/DocLoader';
-import {Strings} from '../../../web/js/util/Strings';
-import {IListenablePersistenceLayer} from '../../../web/js/datastore/IListenablePersistenceLayer';
-import {RepoDocInfoLoader} from './RepoDocInfoLoader';
-import {AppState} from './AppState';
-import {RepoDocInfo} from './RepoDocInfo';
-import {RepoDocInfos} from './RepoDocInfos';
-import {DocRepository} from './DocRepository';
-import {TagInput} from './TagInput';
-import {Optional} from '../../../web/js/util/ts/Optional';
-import {Tag} from '../../../web/js/tags/Tag';
-import {FilterTagInput} from './FilterTagInput';
-import {AppProps} from './AppProps';
-import {FilteredTags} from './FilteredTags';
-import {isPresent} from '../../../web/js/Preconditions';
-import {Sets} from '../../../web/js/util/Sets';
-import {Tags} from '../../../web/js/tags/Tags';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {isPresent} from 'polar-shared/src/Preconditions';
 import Moment from 'react-moment';
-import {ISODateTimeString} from '../../../web/js/metadata/ISODateTimeStrings';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
 
 const log = Logger.create();
 
-export class DateTimeTableCell extends React.Component<IProps, any> {
+// TODO: this isn't really a table cell anymore.
+export class DateTimeTableCell extends React.PureComponent<IProps, any> {
 
     constructor(props: IProps, context: any) {
         super(props, context);
@@ -37,7 +20,10 @@ export class DateTimeTableCell extends React.Component<IProps, any> {
             return (
 
                 <div className={this.props.className}>
-                    <Moment withTitle={true} titleFormat="D MMM YYYY hh:MM A" fromNow>
+                    <Moment withTitle={true}
+                            titleFormat="D MMM YYYY hh:MM A"
+                            filter={(value) => value.replace(/^an? /g, '1 ')}
+                            fromNow ago>
                         {this.props.datetime!}
                     </Moment>
                 </div>

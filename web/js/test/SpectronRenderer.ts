@@ -5,15 +5,15 @@ import {RendererTestResultWriter} from './results/writer/RendererTestResultWrite
 
 export class SpectronRenderer {
 
-    static setup() {
+    public static setup() {
         new TestResultService().start();
     }
 
-    static async start(callback: RunCallback): Promise<any> {
+    public static async start(callback: RunCallback): Promise<any> {
         SpectronRenderer.setup();
-        let state = new SpectronRendererState();
+        const state = new SpectronRendererState();
 
-        let result = await callback(state);
+        const result = await callback(state);
 
         ipcRenderer.send('spectron-renderer-started', true);
 
@@ -21,7 +21,7 @@ export class SpectronRenderer {
 
     }
 
-    static run(callback: RunCallback) {
+    public static run(callback: RunCallback) {
         this.start(callback)
             .catch(err => console.error(err));
     }
@@ -29,7 +29,7 @@ export class SpectronRenderer {
 }
 
 export interface RunCallback {
-    (state: SpectronRendererState): Promise<any>
+    (state: SpectronRendererState): Promise<any>;
 }
 
 

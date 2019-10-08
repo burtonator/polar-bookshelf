@@ -37,7 +37,7 @@ export class NotesInfoClient implements INotesInfoClient {
 
     public async execute(notes: number[]): Promise<NoteInfo[]> {
 
-        let body = {
+        const body = {
             action: "notesInfo",
             version: 6,
             params: {
@@ -45,7 +45,7 @@ export class NotesInfoClient implements INotesInfoClient {
             }
         };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         return <NoteInfo[]> await AnkiConnectFetch.fetch(init);
 
@@ -54,8 +54,8 @@ export class NotesInfoClient implements INotesInfoClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock(result: NoteInfo[]) {
-        let client = TypeMoq.Mock.ofType<INotesInfoClient>();
+    public static createMock(result: NoteInfo[]) {
+        const client = TypeMoq.Mock.ofType<INotesInfoClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny())).returns(() => Promise.resolve(result));
         return client.object;
     }
@@ -72,11 +72,11 @@ interface NoteInfo {
     noteId: number;
     modelName: string;
     tags: string[];
-    fields: {[name: string]: Field}
+    fields: {[name: string]: Field};
 }
 
 interface Field {
-    value: string,
+    value: string;
     order: number;
 }
 

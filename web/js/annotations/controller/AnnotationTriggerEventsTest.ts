@@ -6,6 +6,7 @@ import {assertJSON} from '../../test/Assertions';
 describe('AnnotationTriggerEvents', function() {
 
     it("getAnnotationDescriptors", function () {
+
         let triggerEvent = TriggerEvent.create(TRIGGER_EVENT);
         let annotationDescriptors = AnnotationTriggerEvents.getAnnotationDescriptors(triggerEvent);
 

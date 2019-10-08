@@ -1,6 +1,6 @@
-import {notNull} from '../../Preconditions';
+import {notNull} from 'polar-shared/src/Preconditions';
 import {EventBridge} from './EventBridge';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 
@@ -18,7 +18,7 @@ export class FrameInitializer {
 
     constructor(iframe: HTMLIFrameElement, textLayer: HTMLElement) {
 
-        if(!iframe) {
+        if (!iframe) {
             throw new Error("No iframe");
         }
 
@@ -27,18 +27,18 @@ export class FrameInitializer {
 
     }
 
-    start() {
+    public start() {
 
         notNull(this.iframe.contentDocument)
             .addEventListener("readystatechange", this.onReadyStateChange.bind(this));
 
-        this._checkLoaded();
+        this.checkLoaded();
 
     }
 
-    _checkLoaded() {
+    private checkLoaded() {
 
-        if(!this.loaded) {
+        if (!this.loaded) {
             this.loaded = true;
             this.onLoad();
             log.info("FrameInitializer: Document has finished loading");
@@ -46,10 +46,10 @@ export class FrameInitializer {
 
     }
 
-    onReadyStateChange() {
+    public onReadyStateChange() {
 
-        if(notNull(this.iframe.contentDocument).readyState === "complete") {
-            this._checkLoaded();
+        if (notNull(this.iframe.contentDocument).readyState === "complete") {
+            this.checkLoaded();
         }
 
     }
@@ -57,35 +57,36 @@ export class FrameInitializer {
     /**
      *
      */
-    onLoad() {
+    private onLoad() {
 
         log.info("Frame loaded.  Sending pagesinit on .page");
-        this.dispatchPagesInit();
         this.startEventBridge();
         this.updateDocTitle();
+        this.dispatchPagesInit();
 
     }
 
-    updateDocTitle() {
-        let title = notNull(this.iframe.contentDocument).title;
+    private updateDocTitle() {
+        const title = notNull(this.iframe.contentDocument).title;
         log.info("Setting title: " + title);
         document.title = title;
     }
 
-    dispatchPagesInit() {
+    private dispatchPagesInit() {
 
-        let event = new Event('pagesinit', {bubbles: true});
+        const event = new Event('pagesinit', {bubbles: true});
 
         // Dispatch the event.
         notNull(document.querySelector(".page")).dispatchEvent(event);
 
     }
 
-    startEventBridge() {
+    private startEventBridge() {
 
         document.querySelectorAll(".page").forEach(pageElement => {
-            let eventBridge = new EventBridge(<HTMLElement>pageElement, this.iframe);
-            eventBridge.start();
+            const eventBridge = new EventBridge(<HTMLElement> pageElement, this.iframe);
+            eventBridge.start()
+                .catch(err => log.error("Could not run eventBridge: ", err));
         });
     }
 

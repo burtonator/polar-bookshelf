@@ -1,11 +1,15 @@
 import {WebController} from '../../controller/WebController';
 import {Model} from '../../model/Model';
 import {DocFormat} from '../../docformat/DocFormat';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {DocFormatFactory} from '../../docformat/DocFormatFactory';
 import {KeyEvents} from '../../KeyEvents';
 import {Elements} from '../../util/Elements';
 import {RendererAnalytics} from '../../ga/RendererAnalytics';
+import {Percentages} from '../../util/Percentages';
+import {PagemarkMode} from 'polar-shared/src/metadata/PagemarkMode';
+import {TriggerEvent} from '../../contextmenu/TriggerEvent';
+import {DocMetas} from '../../metadata/DocMetas';
 
 const log = Logger.create();
 
@@ -29,8 +33,29 @@ export class PagemarkCoverageEventListener {
     public start() {
 
         log.info("Starting...");
-        this.model.registerListenerForDocumentLoaded(this.onDocumentLoaded.bind(this));
+
+        this.model.registerListenerForDocumentLoaded(() => this.onDocumentLoaded());
+        window.addEventListener("message", event => this.onMessageReceived(event), false);
+
         log.info("Starting...done");
+
+    }
+
+    // for message send from the context menu
+    private onMessageReceived(event: any) {
+
+        log.info("Received message: ", event);
+
+        const triggerEvent = event.data;
+
+        switch (event.data.type) {
+
+            case "create-pagemark-to-point":
+                this.onContextMenuCreatePagemarkToPoint(triggerEvent)
+                    .catch(err => log.error(err));
+                break;
+
+        }
 
     }
 
@@ -38,18 +63,20 @@ export class PagemarkCoverageEventListener {
 
         log.info("Document loaded... installing listeners...");
 
-        document.addEventListener("keyup", this.keyListener.bind(this));
-        document.addEventListener("keydown", this.keyListener.bind(this));
+        document.addEventListener("keyup", event => this.keyListener(event));
+        document.addEventListener("keydown", event => this.keyListener(event));
 
-        const pages = document.querySelectorAll(".page");
-        pages.forEach(pageElement => {
-            pageElement.addEventListener("click", this.mouseListener.bind(this));
-        });
+        const pageElements: HTMLElement[]
+            = Array.from(document.querySelectorAll(".page"));
 
-        if(pages.length === 0) {
+        for (const pageElement of pageElements) {
+            pageElement.addEventListener("click", event => this.mouseListener(event));
+        }
+
+        if (pageElements.length === 0) {
             log.warn("No pages found for click listener.");
         } else {
-            log.debug("Added click listener to N pages: " + pages.length);
+            log.debug("Added click listener to N pages: " + pageElements.length);
         }
 
         log.info("Document loaded... installing listeners...done");
@@ -69,7 +96,7 @@ export class PagemarkCoverageEventListener {
 
     }
 
-    async mouseListener(event: MouseEvent) {
+    private async mouseListener(event: MouseEvent) {
 
         if (!event) {
             throw new Error("no event");
@@ -79,35 +106,63 @@ export class PagemarkCoverageEventListener {
             return;
         }
 
-        await this.onActivated(event);
+        await this.onMouseEventCreatePagemarkToPoint(event);
+
+    }
+
+    private async onContextMenuCreatePagemarkToPoint(triggerEvent: TriggerEvent) {
+
+        try {
+
+            const pageElement = this.docFormat.getPageElementFromPageNum(triggerEvent.pageNum);
+            const pageNum = triggerEvent.pageNum;
+            const verticalOffsetWithinPageElement = triggerEvent.points.pageOffset.y;
+
+            this.createPagemarkAtPoint(pageNum, pageElement, verticalOffsetWithinPageElement)
+                .catch(err => log.error("Failed to create pagemark: ", err));
+
+        } finally {
+            RendererAnalytics.event({category: 'user', action: 'created-pagemark-via-context-menu'});
+        }
 
     }
 
     // https://stackoverflow.com/questions/3234256/find-mouse-position-relative-to-element
-    async onActivated(event: MouseEvent) {
+    private async onMouseEventCreatePagemarkToPoint(event: MouseEvent) {
 
-        // FIXME: move this to a static function that's also covered by the
-        // context menu
+        try {
 
-        // this should always be .page since we're using currentTarget
-        let pageElement = Elements.untilRoot(event.currentTarget, ".page");
+            // this should always be .page since we're using currentTarget
+            const pageElement = Elements.untilRoot(<HTMLElement> event.currentTarget, ".page");
+            const pageNum = this.docFormat.getPageNumFromPageElement(pageElement);
+            const eventTargetOffset = Elements.getRelativeOffsetRect(<HTMLElement> event.target, pageElement);
+            const verticalOffsetWithinPageElement = eventTargetOffset.top + event.offsetY;
 
-        let pageHeight = pageElement.clientHeight;
+            this.createPagemarkAtPoint(pageNum, pageElement, verticalOffsetWithinPageElement)
+                .catch(err => log.error("Failed to create pagemark: ", err));
 
-        let eventTargetOffset = Elements.getRelativeOffsetRect(<HTMLElement> event.target, pageElement);
+        } finally {
+            RendererAnalytics.event({category: 'user', action: 'created-pagemark-via-keyboard'});
+        }
 
-        let mouseY = eventTargetOffset.top + event.offsetY;
+    }
 
-        let percentage = (mouseY / pageHeight) * 100;
+    private async createPagemarkAtPoint(pageNum: number,
+                                        pageElement: HTMLElement,
+                                        verticalOffsetWithinPageElement: number) {
 
-        log.info("percentage: ", percentage);
+        const pageHeight = pageElement.clientHeight;
 
-        let pageNum = this.docFormat.getPageNumFromPageElement(pageElement);
+        const percentage = Percentages.calculate(verticalOffsetWithinPageElement, pageHeight, {noRound: true});
 
-        RendererAnalytics.event({category: 'user', action: 'created-pagemark-via-keyboard'});
+        log.info("percentage for pagemark: ", percentage);
 
-        this.controller.erasePagemark(pageNum);
-        await this.controller.createPagemark(pageNum, {percentage});
+        const docMeta = this.model.docMeta;
+
+        await DocMetas.withBatchedMutations(docMeta, async () => {
+            this.model.erasePagemark(pageNum);
+            await this.model.createPagemarksForRange(pageNum, percentage);
+        });
 
     }
 

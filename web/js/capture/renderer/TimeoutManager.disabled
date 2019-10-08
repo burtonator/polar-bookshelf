@@ -1,0 +1,70 @@
+const {TimeoutEvent} = require("./TimeoutEvent");
+
+export type SetTimeoutFunction = (handler: TimerHandler, timeout?: number, ...args: any[]) => number;
+
+/**
+ * Creates a way to handle callbacks on setTimeout and listen to the state of
+ * which are pending.  We're planning on using this in the future to keep track
+ * of page loads that are pending.
+ */
+export class TimeoutManager {
+
+    private listener: () => void;
+
+    /**
+     * The total number of pending timeouts.
+     */
+    private pending: number = 0;
+
+    private setTimeoutDelegate: SetTimeoutFunction | undefined;
+
+    /**
+     *
+     * @param listener {Function}
+     */
+    constructor(listener: () => void) {
+
+        this.listener = listener;
+
+    }
+
+    register() {
+        this.setTimeoutDelegate = window.setTimeout;
+        window.setTimeout = this.setTimeout;
+    }
+
+    unregister() {
+        window.setTimeout = this.setTimeoutDelegate!;
+    }
+
+    setTimeout(callback: () => void, timeout: number, ...args: any) {
+
+        ++this.pending;
+        this.fireListener(timeout);
+
+        this.setTimeoutDelegate((...args) => {
+
+            try {
+                callback(...args);
+            } finally {
+                --this.pending;
+                this.fireListener(timeout);
+            }
+
+        }, timeout, ...args);
+
+    }
+
+    fireListener(timeout) {
+
+        let timeoutEvent = new TimeoutEvent({
+            pending: this.pending,
+            timeout
+        });
+
+        this.listener(timeoutEvent);
+
+    }
+
+}
+

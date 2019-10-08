@@ -6,8 +6,7 @@ import {TextHighlightRecords} from '../../../metadata/TextHighlightRecords';
 import {Rect} from '../../../Rect';
 import {TextRect} from '../../../metadata/TextRect';
 import {TestingTime} from '../../../test/TestingTime';
-
-const {Proxies} = require("../../../proxies/Proxies");
+import {Proxies} from '../../../proxies/Proxies';
 
 TestingTime.freeze();
 
@@ -17,19 +16,21 @@ describe('TextHighlightModel', function() {
 
     describe('Listen for new highlights', function() {
 
-        it("Initial values", function () {
+        it("Initial values", function() {
 
-            let docMeta = createDocMeta();
+            TestingTime.freeze();
 
-            let textHighlightModel = new TextHighlightModel();
+            const docMeta = createDocMeta();
 
-            let mutations: any[] = [];
+            const textHighlightModel = new TextHighlightModel();
+
+            const mutations: any[] = [];
 
             textHighlightModel.registerListener(docMeta, (textHighlightEvent) => {
                 mutations.push(summarize(textHighlightEvent));
             } );
 
-            let expected = [
+            const expected = [
                 {
                     "pageNum": 1,
                     "textHighlight": {
@@ -59,7 +60,8 @@ describe('TextHighlightModel', function() {
                         "images": {},
                         "notes": {},
                         "questions": {},
-                        "flashcards": {}
+                        "flashcards": {},
+                        "color": "yellow"
                     },
                     "mutationType": "INITIAL"
                 }
@@ -69,25 +71,27 @@ describe('TextHighlightModel', function() {
 
         });
 
-        it("New text highlights on new pages", function () {
+        it("New text highlights on new pages", function() {
 
-            let docMeta = createDocMeta();
+            TestingTime.freeze();
 
-            let textHighlightModel = new TextHighlightModel();
+            const docMeta = createDocMeta();
+
+            const textHighlightModel = new TextHighlightModel();
 
             let mutations: any[] = [];
 
-            textHighlightModel.registerListener(docMeta, function (textHighlightEvent) {
+            textHighlightModel.registerListener(docMeta, function(textHighlightEvent) {
                 mutations.push(summarize(textHighlightEvent));
             } );
 
             mutations = [];
 
-            let textHighlightRecord = createTextHighlightRecord();
+            const textHighlightRecord = createTextHighlightRecord();
 
-            docMeta.getPageMeta(3).textHighlights[textHighlightRecord.id] = textHighlightRecord.value;
+            DocMetas.getPageMeta(docMeta, 3).textHighlights[textHighlightRecord.id] = textHighlightRecord.value;
 
-            let expected = [
+            const expected = [
                 {
                     "pageNum": 3,
                     "textHighlight": {
@@ -118,6 +122,7 @@ describe('TextHighlightModel', function() {
                         "notes": {},
                         "questions": {},
                         "flashcards": {},
+                        "color": "yellow"
                     },
                     "mutationType": "SET"
                 }
@@ -152,7 +157,7 @@ function createDocMeta() {
 
     const textHighlightRecord = createTextHighlightRecord();
 
-    docMeta.getPageMeta(1).textHighlights[textHighlightRecord.id] = textHighlightRecord.value;
+    DocMetas.getPageMeta(docMeta, 1).textHighlights[textHighlightRecord.id] = textHighlightRecord.value;
 
     return Proxies.create(docMeta);
 
@@ -160,9 +165,9 @@ function createDocMeta() {
 
 function createTextHighlightRecord() {
 
-    let rects: Rect[] = [ new Rect({top: 100, left: 100, right: 200, bottom: 200, width: 100, height: 100}) ];
-    let textSelections: TextRect[] = [new TextRect({text: "hello world"})];
-    let text = "hello world";
+    const rects: Rect[] = [ new Rect({top: 100, left: 100, right: 200, bottom: 200, width: 100, height: 100}) ];
+    const textSelections: TextRect[] = [new TextRect({text: "hello world"})];
+    const text = "hello world";
 
     return TextHighlightRecords.create(rects, textSelections, {TEXT: text});
 

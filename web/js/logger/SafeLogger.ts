@@ -1,7 +1,7 @@
 /**
  * Simple logger that just writes to the console.
  */
-import {ILogger} from './ILogger';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
 
 /**
  * A logger that calls a delegate with try/catch and then does a console.error

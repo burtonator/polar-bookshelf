@@ -3,15 +3,22 @@ import {DocMeta} from './DocMeta';
 import {DocMetas} from './DocMetas';
 import {MetadataSerializer} from './MetadataSerializer';
 import {assertJSON} from '../test/Assertions';
-import {PagemarkType} from './PagemarkType';
+import {PagemarkType} from 'polar-shared/src/metadata/PagemarkType';
 import {TestingTime} from '../test/TestingTime';
 import {TextHighlights} from './TextHighlights';
-
-const {Proxies} = require("../proxies/Proxies");
+import {Proxies} from '../proxies/Proxies';
+import {MockDocMetas} from './DocMetas';
+import {Pagemarks} from './Pagemarks';
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 TestingTime.freeze();
 
 describe('DocMetas', function() {
+
+    beforeEach(function() {
+        Pagemarks.sequences.id = 0;
+        Pagemarks.sequences.batch = 0;
+    });
 
     describe('JSON', function() {
 
@@ -20,11 +27,33 @@ describe('DocMetas', function() {
             const fingerprint = "0x001";
 
             const docMeta = DocMetas.createWithinInitialPagemarks(fingerprint, 14);
+            console.log(JSON.stringify(docMeta, null, "  "));
+
             DocMetas.addPagemarks(docMeta, {nrPages: 1, offsetPage: 4, percentage: 50});
 
             const json = MetadataSerializer.serialize(docMeta, "  ");
 
-            const actual = DocMetas.deserialize(json);
+            const actual = DocMetas.deserialize(json, fingerprint);
+
+            assertJSON(docMeta, actual);
+
+            assert.equal(actual instanceof DocMeta, true);
+
+
+        });
+
+        it("One page", function() {
+
+            const fingerprint = "0x001";
+
+            const docMeta = DocMetas.create(fingerprint, 1);
+            console.log(JSON.stringify(docMeta, null, "  "));
+
+            // DocMetas.addPagemarks(docMeta, {nrPages: 1, offsetPage: 1, percentage: 50});
+
+            const json = MetadataSerializer.serialize(docMeta, "  ");
+
+            const actual = DocMetas.deserialize(json, fingerprint);
 
             assertJSON(docMeta, actual);
 
@@ -37,12 +66,27 @@ describe('DocMetas', function() {
 
             const json = "{}";
 
-            const docMeta = DocMetas.deserialize(json);
+            const docMeta = DocMetas.deserialize(json, '0x000');
 
             assert.equal(docMeta instanceof DocMeta, true);
 
         });
 
+
+
+    });
+
+    it('No whitespace option', function() {
+
+        // make sure no whitespace is used
+        const fingerprint = "0x001";
+
+        const docMeta = MockDocMetas.createMockDocMeta(fingerprint);
+        const json = DocMetas.serialize(docMeta, "");
+
+        assert.isTrue(json.startsWith("{\"annotationInfo\":{},\"version\":2,\"attachments\":{}"));
+
+        assert.equal(json.indexOf("\n"), -1);
 
 
     });
@@ -56,88 +100,118 @@ describe('DocMetas', function() {
             const nrPages = 2;
             let docMeta = DocMetas.createWithinInitialPagemarks(fingerprint, nrPages);
 
+            docMeta.docInfo.uuid = "__canonicalized__";
+
             const json = DocMetas.serialize(docMeta, "  ");
 
             const expected = {
                     "annotationInfo": {},
-                    "version": 2,
                     "attachments": {},
                     "docInfo": {
-                        "progress": 100,
-                        "pagemarkType": "SINGLE_COLUMN",
-                        "properties": {},
+                        "added": "2012-03-02T11:38:49.321Z",
                         "archived": false,
-                        "flagged": false,
-                        "tags": {},
-                        "nrPages": 2,
+                        "attachments": {},
                         "fingerprint": "0x001",
-                        "added": "2012-03-02T11:38:49.321Z"
+                        "flagged": false,
+                        "nrPages": 2,
+                        "pagemarkType": "SINGLE_COLUMN",
+                        "progress": 100,
+                        "properties": {},
+                        "readingPerDay": {
+                            "2012-03-02": 2
+                        },
+                        "tags": {},
+                        "uuid": "__canonicalized__"
                     },
                     "pageMetas": {
                         "1": {
-                            "pagemarks": {
-                                "12Vf1bAzeo": {
-                                    "id": "12Vf1bAzeo",
-                                    "created": "2012-03-02T11:38:49.321Z",
-                                    "lastUpdated": "2012-03-02T11:38:49.321Z",
-                                    "type": "SINGLE_COLUMN",
-                                    "percentage": 100,
-                                    "column": 0,
-                                    "rect": {
-                                        "left": 0,
-                                        "top": 0,
-                                        "width": 100,
-                                        "height": 100
-                                    },
-                                    "notes": {},
-                                    "mode": "READ"
-                                }
-                            },
-                            "notes": {},
-                            "comments": {},
-                            "questions": {},
-                            "flashcards": {},
-                            "textHighlights": {},
                             "areaHighlights": {},
-                            "screenshots": {},
-                            "thumbnails": {},
+                            "comments": {},
+                            "flashcards": {},
+                            "notes": {},
                             "pageInfo": {
                                 "num": 1
                             },
-                        },
-                        "2": {
                             "pagemarks": {
-                                "12Vf1bAzeo": {
-                                    "id": "12Vf1bAzeo",
-                                    "created": "2012-03-02T11:38:49.321Z",
-                                    "lastUpdated": "2012-03-02T11:38:49.321Z",
-                                    "type": "SINGLE_COLUMN",
-                                    "percentage": 100,
+                                "1s2gw2Mkwb": {
+                                    "batch": "1Y9CcEHSxc",
                                     "column": 0,
+                                    "created": "2012-03-02T11:38:49.321Z",
+                                    "guid": "1s2gw2Mkwb",
+                                    "id": "1s2gw2Mkwb",
+                                    "lastUpdated": "2012-03-02T11:38:49.321Z",
+                                    "mode": "READ",
+                                    "notes": {},
+                                    "percentage": 100,
                                     "rect": {
+                                        "height": 100,
                                         "left": 0,
                                         "top": 0,
-                                        "width": 100,
-                                        "height": 100
+                                        "width": 100
                                     },
-                                    "notes": {},
-                                    "mode": "READ"
+                                    "type": "SINGLE_COLUMN"
                                 }
                             },
-                            "notes": {},
-                            "comments": {},
                             "questions": {},
-                            "flashcards": {},
-                            "textHighlights": {},
-                            "areaHighlights": {},
+                            "readingProgress": {
+                                "1QLX4U7vTU": {
+                                    "created": "2012-03-02T11:38:49.321Z",
+                                    "id": "1QLX4U7vTU",
+                                    "progress": 100,
+                                    "progressByMode": {
+                                        "READ": 100
+                                    }
+                                }
+                            },
                             "screenshots": {},
-                            "thumbnails": {},
+                            "textHighlights": {},
+                            "thumbnails": {}
+                        },
+                        "2": {
+                            "areaHighlights": {},
+                            "comments": {},
+                            "flashcards": {},
+                            "notes": {},
                             "pageInfo": {
                                 "num": 2
                             },
-
+                            "pagemarks": {
+                                "126nS8PMqF": {
+                                    "batch": "1yNbsiPseh",
+                                    "column": 0,
+                                    "created": "2012-03-02T11:38:49.321Z",
+                                    "guid": "126nS8PMqF",
+                                    "id": "126nS8PMqF",
+                                    "lastUpdated": "2012-03-02T11:38:49.321Z",
+                                    "mode": "READ",
+                                    "notes": {},
+                                    "percentage": 100,
+                                    "rect": {
+                                        "height": 100,
+                                        "left": 0,
+                                        "top": 0,
+                                        "width": 100
+                                    },
+                                    "type": "SINGLE_COLUMN"
+                                }
+                            },
+                            "questions": {},
+                            "readingProgress": {
+                                "1VtUQQJoXr": {
+                                    "created": "2012-03-02T11:38:49.321Z",
+                                    "id": "1VtUQQJoXr",
+                                    "progress": 100,
+                                    "progressByMode": {
+                                        "READ": 100
+                                    }
+                                }
+                            },
+                            "screenshots": {},
+                            "textHighlights": {},
+                            "thumbnails": {}
                         }
-                    }
+                    },
+                    "version": 2
                 }
             ;
 
@@ -145,18 +219,18 @@ describe('DocMetas', function() {
 
             assertJSON(json, expected);
 
-            docMeta = DocMetas.deserialize(json);
+            docMeta = DocMetas.deserialize(json, fingerprint);
 
             // now we have to trace it like it would be in production..
             docMeta = Proxies.create(docMeta);
 
             assertJSON(docMeta, expected);
 
-            const pageMeta = docMeta.getPageMeta(1);
+            const pageMeta = DocMetas.getPageMeta(docMeta, 1);
 
             (pageMeta as any).pagemarks = {};
 
-            assert.deepEqual(docMeta.getPageMeta(1).pagemarks, {});
+            assert.deepEqual(DocMetas.getPageMeta(docMeta, 1).pagemarks, {});
 
         });
 
@@ -172,7 +246,7 @@ describe('DocMetas', function() {
                 let docMeta = createUpgradeDoc();
 
                 assert.notEqual(docMeta.docInfo, null);
-                delete (docMeta.getPageMeta(1) as any).textHighlights;
+                delete (DocMetas.getPageMeta(docMeta, 1) as any).textHighlights;
 
                 delete docMeta.docInfo.pagemarkType;
 
@@ -185,30 +259,36 @@ describe('DocMetas', function() {
             it("Pagemark without rect", function() {
                 let docMeta = createUpgradeDoc();
 
-                delete docMeta.getPageMeta(1).pagemarks["12Vf1bAzeo"].rect ;
+                console.log(Object.keys(DocMetas.getPageMeta(docMeta, 1).pagemarks));
+
+                assertJSON(Object.keys(DocMetas.getPageMeta(docMeta, 1).pagemarks), ["1s2gw2Mkwb"]);
+
+                delete DocMetas.getPageMeta(docMeta, 1).pagemarks["1s2gw2Mkwb"].rect ;
 
                 docMeta = DocMetas.upgrade(docMeta);
 
                 const expected = {
-                        "12Vf1bAzeo": {
-                            "id": "12Vf1bAzeo",
-                            "created": "2012-03-02T11:38:49.321Z",
-                            "lastUpdated": "2012-03-02T11:38:49.321Z",
-                            "type": "SINGLE_COLUMN",
-                            "percentage": 100,
+                        "1s2gw2Mkwb": {
+                            "batch": "1Y9CcEHSxc",
                             "column": 0,
-                            "notes": {},
+                            "created": "2012-03-02T11:38:49.321Z",
+                            "guid": "1s2gw2Mkwb",
+                            "id": "1s2gw2Mkwb",
+                            "lastUpdated": "2012-03-02T11:38:49.321Z",
                             "mode": "READ",
+                            "notes": {},
+                            "percentage": 100,
                             "rect": {
+                                "height": 100,
                                 "left": 0,
                                 "top": 0,
-                                "width": 100,
-                                "height": 100
-                            }
+                                "width": 100
+                            },
+                            "type": "SINGLE_COLUMN"
                         }
                     };
 
-                assertJSON(docMeta.getPageMeta(1).pagemarks, expected);
+                assertJSON(DocMetas.getPageMeta(docMeta, 1).pagemarks, expected);
 
             });
 
@@ -216,11 +296,11 @@ describe('DocMetas', function() {
 
                 let docMeta = createUpgradeDoc();
 
-                delete (docMeta.getPageMeta(1) as any).textHighlights;
+                delete (DocMetas.getPageMeta(docMeta, 1) as any).textHighlights;
 
                 docMeta = DocMetas.upgrade(docMeta);
 
-                assert.deepEqual(docMeta.getPageMeta(1).textHighlights, {});
+                assert.deepEqual(DocMetas.getPageMeta(docMeta, 1).textHighlights, {});
 
             });
 
@@ -228,11 +308,11 @@ describe('DocMetas', function() {
 
                 let docMeta = createUpgradeDoc();
 
-                delete (docMeta.getPageMeta(1) as any).pagemarks;
+                delete (DocMetas.getPageMeta(docMeta, 1) as any).pagemarks;
 
                 docMeta = DocMetas.upgrade(docMeta);
 
-                assert.deepEqual(docMeta.getPageMeta(1).pagemarks, {});
+                assert.deepEqual(DocMetas.getPageMeta(docMeta, 1).pagemarks, {});
 
             });
 
@@ -240,32 +320,36 @@ describe('DocMetas', function() {
 
                 let docMeta = createUpgradeDoc();
 
-                (<any> (docMeta.getPageMeta(1).pagemarks["12Vf1bAzeo"].id)) = null;
+                console.log(JSON.stringify(DocMetas.getPageMeta(docMeta, 1).pagemarks, null, "  "));
+
+                assertJSON(Object.keys(DocMetas.getPageMeta(docMeta, 1).pagemarks), ["1s2gw2Mkwb"]);
+
+                (<any> (DocMetas.getPageMeta(docMeta, 1).pagemarks["1s2gw2Mkwb"].id)) = null;
 
                 docMeta = DocMetas.upgrade(docMeta);
 
                 const expected = {
-                        "12Vf1bAzeo": {
-                            "id": "12Vf1bAzeo",
-                            "created": "2012-03-02T11:38:49.321Z",
-                            "lastUpdated": "2012-03-02T11:38:49.321Z",
-                            "type": "SINGLE_COLUMN",
-                            "percentage": 100,
+                        "1s2gw2Mkwb": {
+                            "batch": "1Y9CcEHSxc",
                             "column": 0,
+                            "created": "2012-03-02T11:38:49.321Z",
+                            "guid": "1s2gw2Mkwb",
+                            "id": "1s2gw2Mkwb",
+                            "lastUpdated": "2012-03-02T11:38:49.321Z",
+                            "mode": "READ",
+                            "notes": {},
+                            "percentage": 100,
                             "rect": {
+                                "height": 100,
                                 "left": 0,
                                 "top": 0,
-                                "width": 100,
-                                "height": 100
+                                "width": 100
                             },
-                            "notes": {},
-                            "mode": "READ"
-
+                            "type": "SINGLE_COLUMN"
                         }
-                    }
-                ;
+                    };
 
-                assertJSON(docMeta.getPageMeta(1).pagemarks, expected);
+                assertJSON(DocMetas.getPageMeta(docMeta, 1).pagemarks, expected);
 
             });
 
@@ -273,7 +357,7 @@ describe('DocMetas', function() {
 
                 let docMeta = createUpgradeDoc();
 
-                delete docMeta.getPageMeta(1).textHighlights["12pNUv1Y9S"].id;
+                delete DocMetas.getPageMeta(docMeta, 1).textHighlights["12pNUv1Y9S"].id;
 
                 docMeta = DocMetas.upgrade(docMeta);
 
@@ -310,7 +394,8 @@ describe('DocMetas', function() {
                     }
                 };
 
-                assertJSON(docMeta.getPageMeta(1).textHighlights, expected);
+                
+                assertJSON(DocMetas.getPageMeta(docMeta, 1).textHighlights, expected);
 
             });
 
@@ -320,7 +405,7 @@ describe('DocMetas', function() {
 
 });
 
-function createUpgradeDoc() {
+function createUpgradeDoc(): IDocMeta {
 
     const fingerprint = "0x001";
     const nrPages = 1;
@@ -328,7 +413,7 @@ function createUpgradeDoc() {
 
     const textHighlight = TextHighlights.createMockTextHighlight();
 
-    docMeta.getPageMeta(1).textHighlights[textHighlight.id] = textHighlight;
+    DocMetas.getPageMeta(docMeta, 1).textHighlights[textHighlight.id] = textHighlight;
 
     return docMeta;
 

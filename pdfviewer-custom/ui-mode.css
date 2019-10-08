@@ -1,0 +1,9 @@
+html.ui-mode-dark {
+    filter: invert(85%);
+    /*filter: sepia(100%);*/
+    background-color: var(--white);
+}
+
+html.ui-mode-dark img {
+    -webkit-filter: invert(114%) !important;
+}

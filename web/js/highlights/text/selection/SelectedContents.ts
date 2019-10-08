@@ -1,14 +1,13 @@
-/**
- *
- */
 import {Ranges} from './Ranges';
 import {SelectedContent} from './SelectedContent';
 import {Selections} from './Selections';
 import {RectTexts} from '../controller/RectTexts';
-import {HTMLSanitizer} from './HTMLSanitizer';
+import {HTMLSanitizer} from 'polar-html/src/sanitize/HTMLSanitizer';
+import {TextNodeRows} from "./TextNodeRows";
 
-const {TextNodeRows} = require("./TextNodeRows");
-
+/**
+ *
+ */
 export class SelectedContents {
 
     /**
@@ -19,16 +18,16 @@ export class SelectedContents {
      * @param win {Window}
      * @return {SelectedContent}
      */
-    static compute(win: Window) {
+    public static compute(win: Window) {
 
-        let selection = win.getSelection();
+        const selection = win.getSelection()!;
 
         // get all the ranges and clone them so they can't vanish.
-        let ranges = Ranges.cloneRanges(Selections.toRanges(selection));
+        const ranges = Ranges.cloneRanges(Selections.toRanges(selection));
 
         // now get the text and the sanitized HTML
-        let text = selection.toString();
-        let html =  HTMLSanitizer.sanitize(SelectedContents.toHTML(ranges));
+        const text = selection.toString();
+        const html =  HTMLSanitizer.sanitize(SelectedContents.toHTML(ranges));
 
         let textNodes: Node[] = [];
 
@@ -45,13 +44,13 @@ export class SelectedContents {
 
         textNodes = TextNodeRows.fromTextNodes(textNodes);
 
-        let rectTexts = RectTexts.toRectTexts(textNodes);
+        const rectTexts = RectTexts.toRectTexts(textNodes);
 
         return new SelectedContent({
             text,
             html,
             rectTexts
-        })
+        });
 
     }
 
@@ -59,7 +58,7 @@ export class SelectedContents {
      * Compute the given ranges as HTML, factoring in sanitization as well.
      * @param ranges
      */
-    static toHTML(ranges: Range[]) {
+    public static toHTML(ranges: Range[]) {
         return ranges.map(range => Ranges.toHTML(range)).join("");
     }
 

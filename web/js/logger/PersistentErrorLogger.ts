@@ -1,10 +1,10 @@
 /**
  * Simple logger that just writes to the console.
  */
-import {ILogger} from './ILogger';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
 import {FileLogger} from './FileLogger';
 import {Directories} from '../datastore/Directories';
-import {FilePaths} from '../util/FilePaths';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 
 /**
  * A logger which writes to disk but ONLY if they are errors.  This is needed

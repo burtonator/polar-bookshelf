@@ -4,7 +4,7 @@
  */
 import {BrowserWindow} from 'electron';
 import {BrowserWindowRegistry, BrowserWindowTag, TagMap} from './BrowserWindowRegistry';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

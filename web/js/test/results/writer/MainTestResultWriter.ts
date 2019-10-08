@@ -1,7 +1,7 @@
-import {Logger} from '../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserWindow} from "electron";
 import {TestResultWriter} from '../TestResultWriter';
-import {Functions} from '../../../util/Functions';
+import {Functions} from 'polar-shared/src/util/Functions';
 import {TestResult} from '../renderer/TestResult';
 
 const log = Logger.create();

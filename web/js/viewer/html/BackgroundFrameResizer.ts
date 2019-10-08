@@ -1,10 +1,16 @@
-import {Logger} from '../../logger/Logger';
-import {Preconditions} from '../../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {FrameResizer} from './FrameResizer';
+import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
 
 const log = Logger.create();
 
 const MAX_RESIZES = 25;
+
+/**
+ * Set a reasonable max height.  100k is about 50x pages.
+ */
+const MAX_HEIGHT = 100000;
 
 /**
  * Listens to the main iframe load and resizes it appropriately based on the
@@ -18,7 +24,7 @@ const MAX_RESIZES = 25;
 export class BackgroundFrameResizer {
 
     private readonly parent: HTMLElement;
-    private readonly iframe: HTMLIFrameElement;
+    private readonly host: HTMLIFrameElement | Electron.WebviewTag;
 
     // how long between polling should we wait to expand the size.
     private readonly timeoutInterval = 250;
@@ -27,30 +33,50 @@ export class BackgroundFrameResizer {
 
     private frameResizer: FrameResizer;
 
-    constructor(parent: HTMLElement, iframe: HTMLIFrameElement) {
+    private onResized: OnResizedCallback;
+
+    constructor(parent: HTMLElement,
+                host: HTMLIFrameElement | Electron.WebviewTag,
+                onResized: OnResizedCallback = NULL_FUNCTION) {
 
         this.parent = Preconditions.assertPresent(parent);
-        this.iframe = Preconditions.assertPresent(iframe);
+        this.host = Preconditions.assertPresent(host);
+        this.onResized = onResized;
 
-        this.frameResizer = new FrameResizer(parent, iframe);
+        this.frameResizer = new FrameResizer(parent, host);
 
     }
 
     public start() {
-        this.resizeParentInBackground();
+
+        this.resizeParentInBackground()
+            .catch(err => log.error("Could not resize in background: ", err));
+
     }
 
-    private resizeParentInBackground() {
+    private async resizeParentInBackground() {
 
         if (this.resizes > MAX_RESIZES) {
             log.info("Hit MAX_RESIZES: " + MAX_RESIZES);
-            this.doBackgroundResize(true);
+            const height = await this.doBackgroundResize(true);
+            this.onResized(height);
+
             return;
-        } else {
-            this.doBackgroundResize(false);
         }
 
-        setTimeout(() => this.resizeParentInBackground(), this.timeoutInterval);
+        const height = await this.doBackgroundResize(false);
+
+        if (height && height > MAX_HEIGHT) {
+            log.info("Hit MAX_HEIGHT: " + MAX_HEIGHT);
+            return;
+        }
+
+        setTimeout(() => {
+
+            this.resizeParentInBackground()
+                .catch(err => log.error("Unable to resize in background: ", err));
+
+        }, this.timeoutInterval);
 
     }
 
@@ -61,12 +87,14 @@ export class BackgroundFrameResizer {
      * way, if we're doing any sort of caching or throttling of resize, we can
      * just force it one last time.
      */
-    private doBackgroundResize(force: boolean) {
+    private async doBackgroundResize(force: boolean) {
 
         ++this.resizes;
 
-        this.frameResizer.resize(force);
+        return this.frameResizer.resize(force);
 
     }
 
 }
+
+type OnResizedCallback = (height: number | undefined) => void;

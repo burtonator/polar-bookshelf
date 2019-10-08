@@ -1,9 +1,10 @@
 import {DocMeta} from './DocMeta';
-import {forDict} from '../util/Functions';
+import {forDict} from 'polar-shared/src/util/Functions';
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 export class DocMetaDescriber {
 
-    public static describe(docMeta: DocMeta) {
+    public static describe(docMeta: IDocMeta) {
 
         let nrPagemarks = 0;
         let nrTextHighlights = 0;

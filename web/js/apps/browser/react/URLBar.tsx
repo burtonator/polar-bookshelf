@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Input} from 'reactstrap';
-import {Logger} from '../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

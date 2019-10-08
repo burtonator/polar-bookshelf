@@ -1,8 +1,8 @@
 import {INamedWebRequestEvent, IWebRequestDetails} from './WebRequestReactor';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BaseWebRequestsListener} from './BaseWebRequestsListener';
 import {RequestState} from './RequestState';
-import {Progress} from '../util/Progress';
+import {ProgressCalculator} from '../util/ProgressCalculator';
 
 const log = Logger.create();
 
@@ -160,7 +160,7 @@ export class PendingWebRequestsListener extends BaseWebRequestsListener {
          *
          * @type {number}
          */
-        const progress = Progress.calculate(finished, started);
+        const progress = ProgressCalculator.calculate(finished, started);
 
         if (pending < 5) {
             log.debug("The following pending requests remain: \n", this.pendingRequests);

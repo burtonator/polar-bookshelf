@@ -1,25 +1,24 @@
 /**
  * A cache entry backed by a phz file.
  */
-import {CacheEntry, DataCallback} from "./CacheEntry";
+import {CacheEntry, DataCallback, ICacheEntry} from "./CacheEntry";
 import {PHZReader} from '../../phz/PHZReader';
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {ResourceEntry} from '../../phz/ResourceEntry';
+import {CompressedReader} from "../../phz/CompressedReader";
 
-export class PHZCacheEntry extends CacheEntry {
+export class PHZCacheEntry extends CacheEntry implements IPHZCacheEntry {
 
-    public phzReader: PHZReader;
+    public phzReader: CompressedReader;
 
     public resourceEntry: ResourceEntry;
 
-    constructor(opts: any) {
+    constructor(opts: IPHZCacheEntry) {
 
         super(opts);
 
         this.phzReader = opts.phzReader;
         this.resourceEntry = opts.resourceEntry;
-
-        Object.assign(this, opts);
 
         Preconditions.assertNotNull(this.phzReader, "phzReader");
         Preconditions.assertNotNull(this.resourceEntry, "resourceEntry");
@@ -49,5 +48,10 @@ export class PHZCacheEntry extends CacheEntry {
 
 }
 
+export interface IPHZCacheEntry extends ICacheEntry {
 
+    phzReader: CompressedReader;
 
+    resourceEntry: ResourceEntry;
+
+}

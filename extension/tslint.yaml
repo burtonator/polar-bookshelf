@@ -1,0 +1,81 @@
+---
+extends: "tslint:recommended"
+#defaultSeverity: warn
+rulesDirectory:
+#- path/to/custom/rules/directory/
+#- another/path/
+rules:
+  max-line-length:
+    options: [140]
+  new-parens: true
+  no-arg: true
+  no-bitwise: true
+  no-conditional-assignment: true
+  no-consecutive-blank-lines: false
+  no-console:
+    severity: warning
+    options:
+    - debug
+    - info
+    - log
+    - time
+    - timeEnd
+    - trace
+  # I think this is generally too strict for us for now.
+  quotemark: false
+
+  # this seems a bit silly / strict but maybe in the future.
+  object-literal-sort-keys: false
+
+  ordered-imports: false
+
+  only-arrow-functions: false
+
+  object-literal-key-quotes: false
+
+  trailing-comma: false
+
+  no-trailing-whitespace: false
+  #    options:
+  #      ignore-comments
+
+  # can't enable this until we're on typescript everywhere
+  no-var-requires: false
+
+  max-classes-per-file: false
+
+  arrow-parens: false
+
+  no-namespace: false
+
+  radix: false
+
+  #  member-ordering:
+  #    options:
+  #      order:
+  #        - public-instance-field
+  #        - protected-instance-field
+  #        - private-instance-field
+  #        - public-instance-method
+  #        - protected-instance-method
+  #        - private-instance-method
+  #
+  #        - public-static-field
+  #        - protected-static-field
+  #        - private-static-field
+  #
+  #        - public-static-method
+  #        - protected-static-method
+  #        - private-static-method
+
+  interface-name: false
+
+  no-angle-bracket-type-assertion: false
+
+  no-empty-interface: false
+
+  member-ordering: false
+
+jsRules:
+  max-line-length:
+    options: [140]

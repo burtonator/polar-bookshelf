@@ -1,5 +1,5 @@
 import {CacheRegistry} from '../proxyserver/CacheRegistry';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {CachingStreamInterceptor} from './CachingStreamInterceptor';
 import {Protocols} from './Protocols';
 import {StreamInterceptors} from './StreamInterceptors';

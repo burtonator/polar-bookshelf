@@ -1,4 +1,5 @@
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 
 export class Cmdline {
 
@@ -18,7 +19,7 @@ export class Cmdline {
             throw new Error("Args not an array");
         }
 
-        let arg: string | null =
+        const arg: string | null =
             args.filter((arg) => arg != null && filter(arg))
                 .reduce((accumulator: string | null, currentValue) => accumulator = currentValue != null ? currentValue : null, null);
 
@@ -26,12 +27,12 @@ export class Cmdline {
 
     }
 
-    static isDoc(arg: string): boolean {
-        return arg.endsWith(".pdf") || arg.endsWith(".chtml") || arg.endsWith(".phz")
+    public static isDoc(arg: string): boolean {
+        return FilePaths.hasExtension(arg, "pdf") || FilePaths.hasExtension(arg, "chtml") || FilePaths.hasExtension(arg, "phz");
     }
 
-    static isURL(arg: string): boolean {
-        return arg.startsWith("http:") || arg.startsWith("https:") || arg.startsWith("file:")
+    public static isURL(arg: string): boolean {
+        return arg.startsWith("http:") || arg.startsWith("https:") || arg.startsWith("file:");
     }
 
 }

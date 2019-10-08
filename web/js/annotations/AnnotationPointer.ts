@@ -2,7 +2,7 @@
  * Represents a reference to an annotation which includes all the information
  * we need to work with the annotation.
  */
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class AnnotationPointer {
 

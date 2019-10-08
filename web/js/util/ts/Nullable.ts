@@ -6,7 +6,7 @@ export class Nullable<T> {
 
     private value?: T = undefined;
 
-    get(): T {
+    public get(): T {
 
         if(this.value === undefined || this.value == null) {
             throw new Error("Value is undefined");
@@ -16,7 +16,7 @@ export class Nullable<T> {
 
     }
 
-    getOrElse(value: T): T {
+    public getOrElse(value: T): T {
 
         if (this.value !== undefined && this.value !== null) {
             return this.value;
@@ -26,11 +26,11 @@ export class Nullable<T> {
 
     }
 
-    isPresent(): boolean {
+    public isPresent(): boolean {
         return this.value !== undefined && this.value !== null;
     }
 
-    set(value: T): void {
+    public set(value: T): void {
         this.value = value;
     }
 

@@ -4,15 +4,27 @@ import {assertJSON} from '../test/Assertions';
 
 describe('Texts', function() {
 
-    it("basic", async function () {
+    it("basic", async function() {
 
-        let text = Texts.create("asdf", TextType.HTML);
+        const text = Texts.create("asdf", TextType.HTML);
 
-        let expected = {
+        const expected = {
             "HTML": "asdf"
         };
 
         assertJSON(text, expected);
+
+    });
+
+    xit("toText", async function() {
+
+        const input = Texts.create("<p>this is <b>the</b>text</p>", TextType.HTML);
+
+        const expected = {
+            "HTML": "asdf"
+        };
+
+        assertJSON(Texts.toPlainText(input), "");
 
     });
 

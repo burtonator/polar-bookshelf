@@ -34,15 +34,15 @@ export class StoreMediaFileClient implements IStoreMediaFileClient {
 
     public async execute(filename: string, data: string): Promise<void> {
 
-            let body = {
-                action: "storeMediaFile",
-                version: 6,
-                params: {
-                    filename, data
-                }
-            };
+        const body = {
+            action: "storeMediaFile",
+            version: 6,
+            params: {
+                filename, data
+            }
+        };
 
-        let init = { method: 'POST', body: JSON.stringify(body) };
+        const init = { method: 'POST', body: JSON.stringify(body) };
 
         await AnkiConnectFetch.fetch(init);
 
@@ -51,8 +51,8 @@ export class StoreMediaFileClient implements IStoreMediaFileClient {
     /**
      * Create a mock that returns the given result.
      */
-    static createMock() {
-        let client = TypeMoq.Mock.ofType<IStoreMediaFileClient>();
+    public static createMock() {
+        const client = TypeMoq.Mock.ofType<IStoreMediaFileClient>();
         client.setup(x => x.execute(TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(() => Promise.resolve());
         return client.object;
     }

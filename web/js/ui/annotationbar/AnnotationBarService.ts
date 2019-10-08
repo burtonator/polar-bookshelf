@@ -1,5 +1,5 @@
 import {DocumentLoadedEvent, Model} from '../../model/Model';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {ControlledPopupProps} from '../popup/ControlledPopup';
 import {SimpleReactor} from '../../reactor/SimpleReactor';
 import {TriggerPopupEvent} from '../popup/TriggerPopupEvent';
@@ -8,9 +8,11 @@ import {CommentCreatedEvent} from '../../comments/react/CommentCreatedEvent';
 import {CommentPopupBars} from '../../comments/react/CommentPopupBars';
 import {AnnotationBarCallbacks, CommentTriggerEvent, OnCommentCallback, OnHighlightedCallback} from './AnnotationBar';
 import {HighlightCreatedEvent} from '../../comments/react/HighlightCreatedEvent';
-import {AnnotationBars} from './AnnotationBars';
 import {TypedMessage} from '../../util/TypedMessage';
 import {PopupStateEvent} from '../popup/PopupStateEvent';
+import {RendererAnalytics} from '../../ga/RendererAnalytics';
+import {ControlledAnnotationBars} from './ControlledAnnotationBars';
+import {Docs} from '../../metadata/Docs';
 
 const log = Logger.create();
 
@@ -33,8 +35,6 @@ export class AnnotationBarService {
 
                 if (annotationType === 'text-highlight') {
 
-                    console.log("FIXME: 3");
-
                     // trigger the popup here so we can change the types.
 
                 }
@@ -49,8 +49,6 @@ export class AnnotationBarService {
 
     }
 
-
-
     private onDocumentLoaded(event: DocumentLoadedEvent) {
         log.debug("Creating annotation bar");
 
@@ -64,16 +62,15 @@ export class AnnotationBarService {
         const commentPopupBarCallbacks: CommentPopupBarCallbacks = {
 
             onComment: (commentCreatedEvent: CommentCreatedEvent) => {
-                console.log("FIXME: comment created", commentCreatedEvent);
             }
 
         };
 
         CommentPopupBars.create(commentBarControlledPopupProps, commentPopupBarCallbacks);
 
-        // FIXME: just tie the visibility of the popup to the visiblity of the
-        // region.. when the region vanishes then just close the popup OR the text
-        // area is close obviously.
+        // TODO: just tie the visibility of the popup to the visiblity of the
+        // region.. when the region vanishes then just close the popup OR the
+        // text area is close obviously.
 
         const popupStateEventDispatcher = new SimpleReactor<PopupStateEvent>();
         const triggerPopupEventDispatcher = new SimpleReactor<TriggerPopupEvent>();
@@ -108,7 +105,10 @@ export class AnnotationBarService {
 
         const onHighlighted: OnHighlightedCallback = (highlightCreatedEvent: HighlightCreatedEvent) => {
 
-            // TODO: this is just a hack for now.  We should send a dedicated object.
+            RendererAnalytics.event({category: 'annotations', action: 'text-highlight-created-via-annotation-bar'});
+
+            // TODO: this is just a hack for now.  We should send a dedicated
+            // object.
             delete (<any> highlightCreatedEvent).activeSelection;
 
             const message: TypedMessage<HighlightCreatedEvent> = {
@@ -125,7 +125,12 @@ export class AnnotationBarService {
             onComment
         };
 
-        AnnotationBars.create(annotationBarControlledPopupProps, annotationBarCallbacks, 1);
+        const persistenceLayer = this.model.persistenceLayerProvider();
+        const doc = Docs.create(event.docMeta, persistenceLayer.capabilities().permission);
+
+        if (doc.mutable) {
+            ControlledAnnotationBars.create(annotationBarControlledPopupProps, annotationBarCallbacks);
+        }
 
     }
 

@@ -1,14 +1,21 @@
-import {Model} from '../../../model/Model';
+import {DocumentLoadedEvent, Model} from '../../../model/Model';
 import {DocFormat} from '../../../docformat/DocFormat';
-import {Logger} from '../../../logger/Logger';
-import {Preconditions} from '../../../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {DocFormatFactory} from '../../../docformat/DocFormatFactory';
 import {ContextMenuLocation} from '../../../contextmenu/ContextMenuLocation';
 import {AnnotationRects} from '../../../metadata/AnnotationRects';
 import {AreaHighlights} from '../../../metadata/AreaHighlights';
 import {AnnotationPointers} from '../../../annotations/AnnotationPointers';
 import {TriggerEvent} from '../../../contextmenu/TriggerEvent';
-import {Optional} from '../../../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {AreaHighlightDeleteOpts} from '../../../metadata/AreaHighlights';
+import {AreaHighlightRects} from '../../../metadata/AreaHighlightRects';
+import {DoWriteOpts} from '../../../metadata/AreaHighlights';
+import {AreaHighlight} from '../../../metadata/AreaHighlight';
+import {Rects} from '../../../Rects';
+import {DocMetas} from "../../../metadata/DocMetas";
+import {Arrays} from "polar-shared/src/util/Arrays";
 
 
 const log = Logger.create();
@@ -40,19 +47,19 @@ export class AreaHighlightController {
 
     }
 
-    onDocumentLoaded() {
-        log.info("onDocumentLoaded: ", this.model.docMeta);
-    }
+    public start() {
 
-    start() {
-
-        this.model.registerListenerForDocumentLoaded(this.onDocumentLoaded.bind(this));
+        this.model.registerListenerForDocumentLoaded((event) => this.onDocumentLoaded(event));
 
         window.addEventListener("message", event => this.onMessageReceived(event), false);
 
     }
 
-    onMessageReceived(event: MessageEvent) {
+    private onDocumentLoaded(event: DocumentLoadedEvent) {
+        log.info("onDocumentLoaded: ", event.docMeta);
+    }
+
+    private onMessageReceived(event: MessageEvent) {
 
         if (event.data && event.data.type === "create-area-highlight") {
             this.onCreateAreaHighlight(event.data);
@@ -64,14 +71,12 @@ export class AreaHighlightController {
 
     }
 
-    /**
-     *
-     */
     private onCreateAreaHighlight(contextMenuLocation: ContextMenuLocation) {
 
         log.info("Creating area highlight: ", contextMenuLocation);
 
-        const annotationRect = AnnotationRects.createFromEvent(contextMenuLocation);
+        const rectFromEvent = AnnotationRects.createFromEvent(contextMenuLocation);
+        const annotationRect = AreaHighlights.toCorrectScale(Rects.createFromBasicRect(rectFromEvent));
 
         log.info("annotationRect", annotationRect);
 
@@ -80,7 +85,7 @@ export class AreaHighlightController {
         log.info("areaHighlight", areaHighlight);
 
         const docMeta = this.model.docMeta;
-        const pageMeta = docMeta.getPageMeta(contextMenuLocation.pageNum);
+        const pageMeta =  DocMetas.getPageMeta(docMeta, contextMenuLocation.pageNum);
 
         pageMeta.areaHighlights[areaHighlight.id] = areaHighlight;
 
@@ -91,10 +96,23 @@ export class AreaHighlightController {
         const annotationPointers
             = AnnotationPointers.toAnnotationPointers(".area-highlight", triggerEvent);
 
-        Optional.first(...annotationPointers).map(annotationPointer => {
-            const pageMeta = this.model.docMeta.getPageMeta(annotationPointer.pageNum);
-            delete pageMeta.areaHighlights[annotationPointer.id];
-        });
+        const annotationPointer = Arrays.first(annotationPointers);
+
+        if (annotationPointer) {
+
+            const datastore = this.model.persistenceLayerProvider();
+            const pageMeta = DocMetas.getPageMeta(this.model.docMeta, annotationPointer.pageNum);
+            const areaHighlight = pageMeta.areaHighlights[annotationPointer.id];
+            const {docMeta} = this.model;
+
+            const opts: AreaHighlightDeleteOpts = {
+                datastore, areaHighlight, pageMeta, docMeta
+            };
+
+            AreaHighlights.delete(opts)
+                .catch(err => log.error("Unable to delete area highlight: ", err));
+
+        }
 
     }
 

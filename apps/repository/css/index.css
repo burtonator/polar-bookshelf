@@ -16,6 +16,7 @@ html, body {
   padding: 0;
   font-family: sans-serif;
   overflow-x: hidden;
+  height: 100%;
 }
 
 .rounded {
@@ -27,11 +28,11 @@ html, body {
 }
 
 #doc-table {
-  margin: 5px;
+  /*margin: 5px;*/
 }
 
 #doc-repository header {
-  margin: 5px;
+  margin: 5px 5px 0 5px;
 
 }
 
@@ -44,16 +45,6 @@ html, body {
   font-weight: bold;
 }
 
-#doc-repository header {
-  display: table;
-  width: 100%;
-}
-
-#doc-repository header > div {
-  display: table-cell;
-  vertical-align: middle;
-}
-
 #header-title h1 {
   margin-top: auto;
   margin-bottom: auto;
@@ -62,13 +53,8 @@ html, body {
   width: 55px;
 }
 
-#header-filter {
-  text-align: right;
-  padding-right: 10px;
-}
-
 #header-filter input[type=text] {
-  width: 200px;
+  width: 225px;
   padding: 3px;
 }
 
@@ -96,6 +82,11 @@ footer .buttons .button {
   padding: 5px;
   display: inline;
 }
+
+.doc-button {
+    font-size: 16px;
+}
+
 .doc-button:hover {
   cursor: pointer;
 }
@@ -119,24 +110,6 @@ footer .buttons .button {
 
 .doc-button-inactive:hover {
   color: grey;
-}
-
-.header-filter-boxes {
-    display: table;
-    float: right;
-}
-
-.header-filter-box {
-    display: table-cell;
-    vertical-align: middle;
-    padding: 5px;
-}
-
-.header-filter-box > div {
-
-    display: table-cell;
-    vertical-align: middle;
-
 }
 
 .header-filter-box label {
@@ -169,11 +142,20 @@ footer .buttons .button {
     margin-left: 5px;
 }
 
+.tag-input-popover .popover-inner,
 .tag-input-popover {
     width: 500px !important;
-    max-width: 9999px !important;
+    max-width: calc(100vw - 5px) !important;
 }
 
 .tag-input-popover label {
     font-weight: bold;
+}
+
+b, strong {
+    font-weight: bold;
+}
+
+:focus {
+    outline: none;
 }

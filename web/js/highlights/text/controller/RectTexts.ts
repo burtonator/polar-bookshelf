@@ -11,7 +11,7 @@ export class RectTexts {
      *
      * @param textNodes
      */
-    static toRectTexts(textNodes: Node[]) {
+    public static toRectTexts(textNodes: Node[]) {
         return textNodes.map(RectTexts.toRectText)
                         .filter(current => current.boundingPageRect.width > 0 && current.boundingPageRect.height > 0);
     }
@@ -23,20 +23,20 @@ export class RectTexts {
      * @param textNode {Node}
      * @return {RectText}
      */
-    static toRectText(textNode: Node) {
+    public static toRectText(textNode: Node) {
 
-        let range = TextNodes.getRange(textNode);
+        const range = TextNodes.getRange(textNode);
 
         // FIXME: this is wrong and we are using teh wrong scroll position.
 
-        let win = textNode.ownerDocument.defaultView;
+        const win = textNode.ownerDocument!.defaultView!;
 
-        let scrollPoint = new Point({
+        const scrollPoint = new Point({
             x: win.scrollX,
             y: win.scrollY
         });
 
-        let boundingClientRect = range.getBoundingClientRect();
+        const boundingClientRect = range.getBoundingClientRect();
 
         // FIXMEL this is the bug because it copies toJSON
         let boundingPageRect = Rects.validate(boundingClientRect);

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+
+        body {
+            background-color: grey;
+        }
+
+        #page {
+            width: 800px;
+            height: 1000px;
+            margin: auto;
+            background-color: white;
+            border: solid 1px black;
+        }
+
+        #page-inner {
+            width: 50%;
+            height: 50%;
+            background-color: lightblue;
+            opacity: 0.1;
+
+            border: solid 2px black;
+
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div id="page">
+
+    <div id="page-inner">
+
+    </div>
+
+</div>
+
+<script>
+    function test() {
+        document.getElementById("hidden").select();
+        document.execCommand("copy");
+        console.log("copied")
+        navigator.clipboard.writeText("this is a test");
+    }
+</script>
+
+<div>
+    <input type="text" value="hidden-text" id="hidden" style="display: none;">
+    <button onClick="test();">click</button>
+</div>
+
+</body>
+</html>

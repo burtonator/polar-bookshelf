@@ -1,0 +1,22 @@
+<html>
+
+<head>
+
+
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+    const {remote} = require('electron');
+    const path = require('path');
+    const appPath = remote.getGlobal("appPath");
+    require(path.join(appPath, "content.js"));
+</script>
+
+</body>
+</html>
+
+
+

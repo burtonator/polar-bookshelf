@@ -1,8 +1,8 @@
 /**
  * A basic append-only file logger.
  */
-import {ILogger} from './ILogger';
-import {Files} from '../util/Files';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
+import {Files} from 'polar-shared/src/util/Files';
 import * as util from 'util';
 
 export class FileLogger implements ILogger {

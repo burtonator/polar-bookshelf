@@ -1,6 +1,7 @@
 import Split from 'split.js';
+import {WindowEvents} from '../../util/dom/WindowEvents';
 
-const INITIAL_SIZES: number[] = [70, 30];
+const INITIAL_SIZES: number[] = [68, 32];
 
 /**
  * A simple splitter that takes to elements or selectors and makes them vertical
@@ -27,19 +28,29 @@ export class Splitter {
         this.split = Split([this.left, this.right], {
             sizes: INITIAL_SIZES,
             minSize: 0,
-            gutterSize: 7
+            gutterSize: 7,
+            // TODO: this probably shouldn't be here as we added it for resizing
+            // but this is only needed by the annotation sidebar for now..
+            onDrag: () => this.onDrag()
         });
 
         this.sizes = INITIAL_SIZES;
 
     }
 
-    public toggle() {
+    /**
+     * Toggle the splitter and return true if it's expanded and false if it's
+     */
+    public toggle(): SplitterState {
 
-        if (this.isCollapsed()) {
+        const collapsed = this.isCollapsed();
+
+        if (collapsed) {
             this.expand();
+            return 'expanded';
         } else {
             this.collapse();
+            return 'collapsed';
         }
 
     }
@@ -57,18 +68,34 @@ export class Splitter {
             this.split.collapse(1);
         }
 
+        this.forceResize();
+
     }
 
     public isCollapsed() {
-        return Math.floor(this.split.getSizes()[1]) <= 0;
+
+        const size = this.split.getSizes()[1];
+        const floorSize = Math.floor(size);
+
+        return floorSize <= 0;
     }
 
-    private expand() {
-        this.split.setSizes(this.sizes);
+    public expand() {
+        this.split.setSizes(INITIAL_SIZES);
+        this.forceResize();
+    }
 
+    private forceResize() {
+        WindowEvents.sendResizeEvent();
+    }
+
+    private onDrag() {
+        this.forceResize();
     }
 
 }
+
+export type SplitterState = 'expanded' | 'collapsed';
 
 export type Side = 'left' | 'right';
 

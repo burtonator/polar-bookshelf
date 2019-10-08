@@ -4,7 +4,7 @@
  */
 import {Image} from './Image';
 import {Author} from './Author';
-import {ISODateTimeString} from './ISODateTimeStrings';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
 
 export interface DocDetail {
 

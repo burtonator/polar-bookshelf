@@ -1,7 +1,7 @@
 /**
  * Represents the fact that an IPC error failed.
  */
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 export class IPCError {
 

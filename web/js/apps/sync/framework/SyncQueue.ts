@@ -1,3 +1,14 @@
+import {SyncProgressListener} from './SyncProgressListener';
+import {Abortable} from './Abortable';
+import {SyncProgress} from './SyncProgress';
+import {SyncState} from './SyncState';
+import {SyncTask} from './SyncTask';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Percentages} from '../../../util/Percentages';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+
+const log = Logger.create();
+
 /**
  * A queue that supports adding tasks and executing/draining draining all tasks.
  *
@@ -5,17 +16,6 @@
  * the user performs various steps and between each step it drains the queue by
  * executing all tasks.
  */
-import {SyncProgressListener} from './SyncProgressListener';
-import {Abortable} from './Abortable';
-import {SyncProgress} from './SyncProgress';
-import {SyncState} from './SyncState';
-import {SyncTask} from './SyncTask';
-import {Logger} from '../../../logger/Logger';
-import {Percentages} from '../../../util/Percentages';
-import {Optional} from '../../../util/ts/Optional';
-
-const log = Logger.create();
-
 export class SyncQueue {
 
     private readonly pending: SyncTask[] = [];
@@ -52,7 +52,7 @@ export class SyncQueue {
     /**
      * Add tasks that need executing.
      */
-    add(...task: SyncTask[]) {
+    public add(...task: SyncTask[]) {
         this.pending.push(...task);
         ++this.total;
     }
@@ -60,15 +60,16 @@ export class SyncQueue {
     /**
      * Execute all tasks in the queue.
      */
-    async execute() {
+    public async execute() {
 
         let syncTask: SyncTask | undefined;
 
         let idx = 0;
 
-        while((syncTask = this.pending.shift()) !== undefined) {
+        // noinspection TsLint
+        while ((syncTask = this.pending.shift()) !== undefined) {
 
-            if(this.abortable.aborted) {
+            if (this.abortable.aborted) {
                 log.info("Aborting sync.");
                 return;
             }
@@ -96,18 +97,18 @@ export class SyncQueue {
 
     }
 
-    fireSyncProgress() {
+    public size() {
+        return this.pending.length;
+    }
 
-        if(this.syncProgress.percentage === 100) {
+    private fireSyncProgress() {
+
+        if (this.syncProgress.percentage === 100) {
             this.syncProgress.state = SyncState.COMPLETED;
         }
 
         this.syncProgressListener(Object.freeze(Object.assign({}, this.syncProgress)));
 
-    }
-
-    size() {
-        return this.pending.length;
     }
 
 }

@@ -1,15 +1,19 @@
 import {IResult} from '../util/Result';
 import {Results} from '../util/Results';
 import {Filenames} from '../util/Filenames';
-import {FilePaths} from '../util/FilePaths';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 import {CapturedPHZWriter} from './CapturedPHZWriter';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserProfile} from './BrowserProfile';
 import WebContents = Electron.WebContents;
 import {Directories} from '../datastore/Directories';
 import {CaptureResult} from './CaptureResult';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
+import {Captured} from './renderer/Captured';
 
 const log = Logger.create();
+
+const MAX_TITLE_LENGTH = 50;
 
 export class ContentCaptureExecutor {
 
@@ -29,8 +33,8 @@ export class ContentCaptureExecutor {
         // this more aggressively.
         try {
 
-            const result: IResult<any> = await webContents.executeJavaScript("ContentCapture.execute()");
-            captured = Results.create<any>(result).get();
+            const result: IResult<Captured> = await webContents.executeJavaScript("ContentCapture.execute()");
+            captured = Results.create<Captured>(result).get();
 
         } catch (e) {
 
@@ -45,8 +49,13 @@ export class ContentCaptureExecutor {
         // record the browser that was used to render this page.
         captured.browser = browserProfile;
 
+        const url = captured.url;
+
+        const title = (captured.title || "").substring(0, MAX_TITLE_LENGTH);
+
+        const hash = Hashcodes.createID(url);
         const stashDir = this.directories.stashDir;
-        const filename = Filenames.sanitize(captured.title);
+        const filename = hash + '-' + Filenames.sanitize(title);
 
         const phzPath = FilePaths.join(stashDir, filename) + '.phz';
 
@@ -65,6 +74,7 @@ export class ContentCaptureExecutor {
         return {
             path: phzPath
         };
+
     }
 
 }

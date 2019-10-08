@@ -1,22 +1,20 @@
 import {Model} from '../model/Model';
-import {isPresent, notNull, Preconditions} from '../Preconditions';
+import {isPresent, notNull, Preconditions} from 'polar-shared/src/Preconditions';
 import {DocFormatFactory} from '../docformat/DocFormatFactory';
 import {ContextMenuController} from '../contextmenu/ContextMenuController';
 import {KeyEvents} from '../KeyEvents';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Viewer} from '../viewer/Viewer';
 import {DocTitleController} from './DocTitleController';
 import {PagemarkController} from '../pagemarks/controller/PagemarkController';
-import {SyncController} from './SyncController';
 import {Controller} from './Controller';
 import {TextHighlightController} from '../highlights/text/controller/TextHighlightController';
-import {FlashcardsController} from '../flashcards/controller/FlashcardsController';
-import {AnnotationsController} from '../annotations/controller/AnnotationsController';
 import {DocFormat} from '../docformat/DocFormat';
 import {AreaHighlightController} from '../highlights/area/controller/AreaHighlightController';
 import {PagemarkCoverageEventListener} from '../pagemarks/controller/PagemarkCoverageEventListener';
 import {DocDetails} from '../metadata/DocDetails';
-import {Optional} from '../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {ClipboardCleanser} from '../ui/ClipboardCleanser';
 
 
 const log = Logger.create();
@@ -44,8 +42,7 @@ export class WebController extends Controller {
 
         new PagemarkController(model).start();
         new DocTitleController(this.model).start();
-        new SyncController(this.model).start();
-
+        ClipboardCleanser.register();
     }
 
     public async start() {
@@ -54,6 +51,10 @@ export class WebController extends Controller {
         await this.listenForKeyBindings();
 
         // new MouseTracer(document).start();
+
+        if (this.docFormat.name === 'pdf') {
+            this.detectDocumentLoaded('start');
+        }
 
     }
 
@@ -132,28 +133,30 @@ export class WebController extends Controller {
 
         const container = notNull(document.getElementById('viewerContainer'));
 
-        container.addEventListener('pagesinit', this.detectDocumentLoadedEventListener.bind(this));
-        container.addEventListener('updateviewarea', this.detectDocumentLoadedEventListener.bind(this));
+        for (const eventName of ['pagesinit', 'updateviewarea']) {
+            container.addEventListener(eventName, (event) => this.detectDocumentLoaded(eventName));
+
+        }
 
         // run manually the first time in case we get lucky of we're running HTML
         // this.detectDocumentLoadedEventListener();
 
     }
 
-    public detectDocumentLoadedEventListener(event: Event) {
+    private detectDocumentLoaded(eventName: string) {
 
-        // FIXME: technically we're detecting a new document LOADING not LOADED...
+        // TODO: technically we're detecting a new document LOADING not LOADED...
         // fix this so that I get a distinct onDocumentLoaded event too...
 
         const currentDocFingerprint = this.docFormat.currentDocFingerprint();
 
         if (currentDocFingerprint !== undefined && currentDocFingerprint !== this.docFingerprint) {
 
-            log.info("controller: New document loaded!");
+            log.info("controller: New document loaded: " + eventName);
 
             const newDocumentFingerprint = currentDocFingerprint;
 
-            const currentDocState = this.docFormat.currentState(event);
+            const currentDocState = this.docFormat.currentState();
 
             this.onNewDocumentFingerprint(newDocumentFingerprint, currentDocState.nrPages, currentDocState.currentPageNumber);
 
@@ -172,7 +175,6 @@ export class WebController extends Controller {
 
     }
 
-    // FIXME: remake this binding to CreatePagemarkEntirePage
     public async keyBindingPagemarkEntirePage(event: KeyboardEvent) {
 
         log.info("Marking entire page as read.");
@@ -230,6 +232,7 @@ export class WebController extends Controller {
             }
 
         } else {
+            // noop
         }
 
     }
@@ -244,9 +247,9 @@ export class WebController extends Controller {
 
         new PagemarkCoverageEventListener(this, this.model).start();
 
-        new FlashcardsController(this.model).start();
+        // new FlashcardsController(this.model).start();
 
-        await new AnnotationsController().start();
+        // await new AnnotationsController().start();
 
         new AreaHighlightController(this.model).start();
 

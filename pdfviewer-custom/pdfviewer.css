@@ -9,3 +9,7 @@
 .polar-pdfviewer #viewer {
     padding-top: 10px;
 }
+
+.polar-pdfviewer #polar-header-body {
+    margin-right: 10px;
+}

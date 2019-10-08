@@ -77,7 +77,7 @@ class MockExecutor {
                 return;
             }
 
-            this.completions.push({resolve, reject})
+            this.completions.push({resolve, reject});
 
         });
 

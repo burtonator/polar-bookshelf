@@ -1,16 +1,14 @@
 import {TextType} from './TextType';
 import {VersionedObject} from './VersionedObject';
-import {Text} from './Text';
+import {Text} from 'polar-shared/src/metadata/Text';
 import {Texts} from './Texts';
+import {INote} from "polar-shared/src/metadata/INote";
 
 /**
  * Private note describing this object.  Meant to last a long time.
  */
-export class Note extends VersionedObject {
+export class Note extends VersionedObject implements INote {
 
-    /**
-     * The content of this note.
-     */
     public content: Text;
 
     constructor(val: Note) {
@@ -40,3 +38,4 @@ export class Note extends VersionedObject {
     }
 
 }
+

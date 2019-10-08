@@ -1,4 +1,4 @@
-import {AnnotationType} from './AnnotationType';
+import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
 
 export class AnnotationTypes {
 

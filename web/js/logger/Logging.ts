@@ -1,21 +1,27 @@
-import {LoggerDelegate} from './LoggerDelegate';
+import {LoggerDelegate} from 'polar-shared/src/logger/LoggerDelegate';
 import {FilteredLogger} from './FilteredLogger';
-import {ConsoleLogger} from './ConsoleLogger';
+import {ConsoleLogger} from 'polar-shared/src/logger/ConsoleLogger';
 import {LevelAnnotatingLogger} from './annotating/LevelAnnotatingLogger';
 import {VersionAnnotatingLogger} from './annotating/VersionAnnotatingLogger';
-import {ILogger} from './ILogger';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
 import {Directories} from '../datastore/Directories';
 import {LogLevel} from './LogLevel';
-import {Files} from '../util/Files';
+import {Files} from 'polar-shared/src/util/Files';
 import {LogLevels} from './LogLevels';
-import {Optional} from '../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {MultiLogger} from './MultiLogger';
 import {SentryLogger} from './SentryLogger';
-import {FilePaths} from '../util/FilePaths';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
 import {ElectronContextType} from '../electron/context/ElectronContextType';
 import {ElectronContextTypes} from '../electron/context/ElectronContextTypes';
 import {ToasterLogger} from './ToasterLogger';
 import {PersistentErrorLogger} from './PersistentErrorLogger';
+
+import process from 'process';
+import {MemoryLogger} from './MemoryLogger';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {AppRuntime} from '../AppRuntime';
+import {GALogger} from './GALogger';
 
 /**
  * Maintains our general logging infrastructure.  Differentiated from Logger
@@ -28,9 +34,29 @@ export class Logging {
      */
     public static async init() {
 
-        const target: ILogger = await this.createTarget();
+        const level = this.configuredLevel();
+
+        const target: ILogger = await this.createTarget(level);
 
         await this.initWithTarget(target);
+
+    }
+
+    /**
+     * Initialize a logger suitable for testing.
+     */
+    public static initForTesting() {
+
+        const level = this.configuredLevel();
+
+        const target = new ConsoleLogger();
+
+        const delegate =
+            new FilteredLogger(
+                new VersionAnnotatingLogger(
+                    new LevelAnnotatingLogger(target)), level);
+
+        LoggerDelegate.set(delegate);
 
     }
 
@@ -51,24 +77,46 @@ export class Logging {
 
     }
 
-    public static async createTarget(): Promise<ILogger> {
+    public static async createTarget(level: LogLevel): Promise<ILogger> {
 
         const loggers: ILogger[] = [];
 
-        // *** first logger is sentry...
-        loggers.push(new SentryLogger());
+        const electronContext = ElectronContextTypes.create();
+
+        if (level === LogLevel.WARN && SentryLogger.isEnabled() && AppRuntime.isElectron()) {
+            // SentryLogger enabled for INFO will lock us up.
+            // *** first logger is sentry but only if we are not running within
+            // a SNAP container.
+            loggers.push(new SentryLogger());
+        }
 
         // *** next up is the Toaster Logger to visually show errors.
-        if (ElectronContextTypes.create() === ElectronContextType.RENDERER) {
+
+        if (['electron-renderer'].includes(AppRuntime.get())) {
             // use a ToasterLogger when running in the renderer context so that
             // we can bring up error messages for the user.
             loggers.push(new ToasterLogger());
         }
 
+        if (['electron-renderer', 'browser'].includes(AppRuntime.get())) {
+            // use a ToasterLogger when running in the renderer context so that
+            // we can bring up error messages for the user.
+            loggers.push(new GALogger());
+        }
+
+        if (electronContext === ElectronContextType.RENDERER) {
+            // when in the renderer use the memory logger so that we can show
+            // logs in the log view
+            loggers.push(new MemoryLogger());
+        }
+
         // *** now include the persistent error log so that we can get error
         // reports from users.
 
-        loggers.push(await PersistentErrorLogger.create());
+        if (level === LogLevel.WARN && AppRuntime.isElectron()) {
+            // PersistentErrorLogger enabled for INFO will lock us up.
+            loggers.push(await PersistentErrorLogger.create());
+        }
 
         // *** last is the primary log. Either disk or the console.
 
@@ -84,10 +132,7 @@ export class Logging {
         const loggingConfig = await this.loggingConfig();
 
         if (loggingConfig.target === LoggerTarget.CONSOLE) {
-            return new ConsoleLogger();
-        // } else if(loggerTarget === LoggerTarget.DISK) {
-        //     let directories = new Directories();
-        //     return await ElectronLoggers.create(directories.logsDir);
+        return new ConsoleLogger();
         } else {
             throw new Error("Invalid target: " + loggingConfig.target);
         }
@@ -96,39 +141,81 @@ export class Logging {
 
     private static async loggingConfig(): Promise<LoggingConfig> {
 
-        const directories = await new Directories().init();
+        if (AppRuntime.isElectron()) {
 
-        const path = FilePaths.join(directories.configDir, 'logging.json');
+            const directories = await new Directories().init();
 
-        if (await Files.existsAsync(path)) {
+            const path = FilePaths.join(directories.configDir, 'logging.json');
 
-            const buffer = await Files.readFileAsync(path);
-            const json = buffer.toString('utf8');
-            let config = JSON.parse(json) as LoggingConfig;
+            if (await Files.existsAsync(path)) {
 
-            if (typeof config.level === 'string') {
+                const buffer = await Files.readFileAsync(path);
+                const json = buffer.toString('utf8');
+                let config = JSON.parse(json) as LoggingConfig;
 
-                // needed to convert the symbol back to the enum.  Not sure
-                // this is very clean though and wish there was a better way
-                // to do this.
+                if (typeof config.level === 'string') {
 
-                config = { level: LogLevels.fromName(config.level),
-                           target: config.target };
+                    // needed to convert the symbol back to the enum.  Not sure
+                    // this is very clean though and wish there was a better way
+                    // to do this.
+
+                    config = {
+                        level: LogLevels.fromName(config.level),
+                        target: config.target
+                    };
+
+                }
+
+                return config;
 
             }
-
-            return config;
 
         }
 
         return {
-
             target: LoggerTarget.CONSOLE,
-
-            level: Optional.of(process.env.POLAR_LOG_LEVEL)
-                    .map(level => LogLevels.fromName(level))
-                    .getOrElse(LogLevel.WARN)
+            level: this.configuredLevel()
         };
+
+    }
+
+    private static configuredLevel(): LogLevel {
+
+        const isRendererContext = typeof window !== 'undefined';
+
+        const fromENV = (): Optional<string> => {
+            return Optional.of(process.env.POLAR_LOG_LEVEL);
+        };
+
+        const fromStorage = (storage: Storage): Optional<string> => {
+            return Optional.of(storage.getItem("POLAR_LOG_LEVEL"));
+        };
+
+        const fromLocalStorage = (): Optional<string> => {
+
+            if (isRendererContext) {
+                return fromStorage(window.localStorage);
+            }
+
+            return Optional.empty();
+
+        };
+
+        const fromSessionStorage = (): Optional<string> => {
+
+            if (isRendererContext) {
+                return fromStorage(window.sessionStorage);
+            }
+
+            return Optional.empty();
+
+        };
+
+        const level = Optional.first<string>(fromENV(), fromLocalStorage(), fromSessionStorage())
+            .map(level => LogLevels.fromName(level))
+            .getOrElse(LogLevel.WARN);
+
+        return level;
 
     }
 
@@ -146,3 +233,21 @@ export interface LoggingConfig {
     readonly target: LoggerTarget;
     readonly level: LogLevel;
 }
+
+
+export interface LogMessage {
+
+    /**
+     * A unique number for this LogMessage, just needs to be unique to the
+     * process and we should be able to use a simple nonce.
+     */
+    readonly idx: number;
+
+    readonly timestamp: ISODateTimeString;
+
+    readonly level: LogLevelName;
+    readonly msg: string;
+    readonly args: ReadonlyArray<any>;
+}
+
+export type LogLevelName = 'notice' | 'info' | 'warn' | 'error' | 'verbose' | 'debug';

@@ -5,6 +5,7 @@ import {SyncProgressListener} from './SyncProgressListener';
 import {SyncEngineDescriptor} from './SyncEngineDescriptor';
 import {PendingSyncJob} from './SyncJob';
 import {DocMetaSet} from '../../../metadata/DocMetaSet';
+import {DocMetaSupplierCollection} from '../../../metadata/DocMetaSupplierCollection';
 
 export interface SyncEngine {
 
@@ -16,6 +17,6 @@ export interface SyncEngine {
      * SyncJob.  Note that the job is not initially started and start() must be
      * called manually.
      */
-    sync(docMetas: DocMetaSet, progress: SyncProgressListener): PendingSyncJob;
+    sync(docMetaSupplierCollection: DocMetaSupplierCollection, progress: SyncProgressListener): Promise<PendingSyncJob>;
 
 }

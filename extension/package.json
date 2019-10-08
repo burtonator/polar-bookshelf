@@ -1,0 +1,27 @@
+{
+  "name": "polar-chrome-extension",
+  "version": "1.19.0",
+  "description": "https://github.com/yeoman/generator-chrome-extension",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "npx webpack --config=webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.1",
+    "bootstrap": "^4.3.1",
+    "cache-loader": "^2.0.1",
+    "fork-ts-checker-webpack-plugin": "^1.0.0",
+    "thread-loader": "^2.1.2",
+    "ts-loader": "^5.3.3",
+    "webpack": "^4.29.6",
+    "webpack-bundle-analyzer": "^3.1.0",
+    "webpack-cli": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.75",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
+  }
+}

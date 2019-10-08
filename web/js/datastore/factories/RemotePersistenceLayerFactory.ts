@@ -1,27 +1,23 @@
-import {Logger} from '../../logger/Logger';
-import {IListenablePersistenceLayer} from '../IListenablePersistenceLayer';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {ListenablePersistenceLayer} from '../ListenablePersistenceLayer';
 import {DefaultPersistenceLayer} from '../DefaultPersistenceLayer';
 import {AdvertisingPersistenceLayer} from '../advertiser/AdvertisingPersistenceLayer';
-import {RemoteDatastores} from '../RemoteDatastores';
+import {HybridRemoteDatastores} from '../HybridRemoteDatastores';
 
 const log = Logger.create();
 
 export class RemotePersistenceLayerFactory {
 
-    public static async create(): Promise<IListenablePersistenceLayer> {
+    public static create(): ListenablePersistenceLayer {
 
         log.info("Using remote persistence layer and disk store");
 
-        const datastore = RemoteDatastores.create();
+        const datastore = HybridRemoteDatastores.create();
 
         const defaultPersistenceLayer = new DefaultPersistenceLayer(datastore);
         const advertisingPersistenceLayer = new AdvertisingPersistenceLayer(defaultPersistenceLayer);
 
-        // note that we need to always pre-init before we return.
-        await advertisingPersistenceLayer.init();
-
         return advertisingPersistenceLayer;
-
 
     }
 

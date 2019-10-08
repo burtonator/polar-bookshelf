@@ -1,25 +1,17 @@
-import {FlashcardType} from './FlashcardType';
+import {FlashcardType} from 'polar-shared/src/metadata/FlashcardType';
 import {VersionedObject} from './VersionedObject';
-import {Text} from './Text';
-import {Preconditions} from '../Preconditions';
-import {ISODateTimeString} from './ISODateTimeStrings';
-import {Ref} from './Refs';
+import {Text} from 'polar-shared/src/metadata/Text';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {Ref} from 'polar-shared/src/metadata/Refs';
+import {IFlashcard} from "polar-shared/src/metadata/IFlashcard";
 
-export class Flashcard extends VersionedObject {
+export class Flashcard extends VersionedObject implements IFlashcard {
 
-    /**
-     * The type of this flashcard.
-     */
     public type: FlashcardType;
 
-    /**
-     * The content of this flashcard created by the user.
-     */
     public fields: {[key: string]: Text} ;
 
-    /**
-     * The archetype ID used to create this flashcard.
-     */
     public archetype: string;
 
     // TODO: we don't have a way right now to attach these to specific
@@ -70,3 +62,4 @@ export class Flashcard extends VersionedObject {
     }
 
 }
+

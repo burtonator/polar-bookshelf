@@ -1,12 +1,13 @@
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {IPageInfo} from "polar-shared/src/metadata/IPageInfo";
+import {IDimensions} from "../util/IDimensions";
 
-export class PageInfo extends SerializedObject {
+export class PageInfo extends SerializedObject implements IPageInfo {
 
-    /**
-     * The page number of this page.
-     */
     public readonly num: number;
+
+    public dimensions?: IDimensions;
 
     constructor(val: any) {
 
@@ -18,8 +19,9 @@ export class PageInfo extends SerializedObject {
 
     }
 
-    validate() {
+    public validate() {
         Preconditions.assertNumber(this.num, "num");
     }
 
 }
+

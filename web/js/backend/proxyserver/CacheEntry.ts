@@ -2,57 +2,40 @@
 // https://expressjs.com/en/4x/api.html#req
 // https://expressjs.com/en/4x/api.html#res
 
-export abstract class CacheEntry {
+import {isPresent} from 'polar-shared/src/Preconditions';
+import {Objects} from '../../util/Objects';
 
-    public method = "GET";
+export abstract class CacheEntry implements ICacheEntry {
 
-    /**
-     * The URL to request.
-     */
+    public method: string;
     public url: string;
-
-    /**
-     * The request headers.
-     *
-     * @type {{}}
-     */
     public headers: {[key: string]: string | string[]} = {};
-
-    /**
-     * The status code for this cache entry.
-     */
     public statusCode = 200;
-
-    /**
-     * The status message.
-     */
     public statusMessage = "OK";
-
-    /**
-     *
-     * The content type of this content.  Default is text/html.  We use
-     * extensions of the files based on the content type.
-     *
-     * @type {string}
-     */
     public contentType = "text/html";
-
     public mimeType = "text/html";
-
     public encoding = "UTF-8";
-
-    /**
-     * The content length of the data, if known
-     */
     public contentLength?: number;
+    public docTypeFormat?: DocTypeFormat;
 
-    protected constructor(options: any) {
+    protected constructor(options: ICacheEntry) {
 
         this.method = "GET";
 
         this.url = options.url;
 
         Object.assign(this, options);
+
+        // make sure we have defaults for everything.
+        Objects.defaults(this, {
+            method: "GET",
+            headers: {},
+            statusCode: 200,
+            statusMessage: "OK",
+            contentType: "text/html",
+            mimeType: "text/html",
+            encoding: "UTF-8",
+        });
 
     }
 
@@ -74,5 +57,64 @@ export abstract class CacheEntry {
 }
 
 export interface DataCallback {
+    // noinspection TsLint
     (data: Buffer): void;
 }
+
+export interface ICacheEntry {
+
+    method: string;
+
+    /**
+     * The URL to request.
+     */
+    url: string;
+
+    /**
+     * The request headers.
+     *
+     */
+    headers: {[key: string]: string | string[]};
+
+    /**
+     * The status code for this cache entry.
+     */
+    statusCode: number;
+
+    /**
+     * The status message.
+     */
+    statusMessage: string;
+
+    /**
+     *
+     * The content type of this content.  Default is text/html.  We use
+     * extensions of the files based on the content type.
+     *
+     * @type {string}
+     */
+    contentType: string;
+
+    /**
+     * The decoded mine type. The contentType can include an encoding so
+     * contentType can be broken down into mimeType + encoding.
+     *
+     */
+    mimeType: string;
+
+    encoding: string;
+
+    /**
+     * The content length of the data, if known
+     */
+    contentLength?: number;
+
+    docTypeFormat?: DocTypeFormat;
+
+}
+
+/**
+ * Return the document format of the underlying document by determining if
+ * it's XML or HTML
+ */
+export type DocTypeFormat = 'html' | 'xml';

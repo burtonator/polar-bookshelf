@@ -1,8 +1,8 @@
 import {DefaultPersistenceLayer} from '../DefaultPersistenceLayer';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Datastores} from '../Datastores';
 import {AdvertisingPersistenceLayer} from '../advertiser/AdvertisingPersistenceLayer';
-import {IListenablePersistenceLayer} from '../IListenablePersistenceLayer';
+import {ListenablePersistenceLayer} from '../ListenablePersistenceLayer';
 
 const log = Logger.create();
 
@@ -12,7 +12,7 @@ const log = Logger.create();
  */
 export class DefaultPersistenceLayerFactory {
 
-    public static async create(): Promise<IListenablePersistenceLayer> {
+    public static async create(): Promise<ListenablePersistenceLayer> {
 
         log.info("Using persistence layer from renderer process.");
 

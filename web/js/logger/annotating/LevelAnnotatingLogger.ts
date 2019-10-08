@@ -1,7 +1,7 @@
 /**
  * Simple logger that just writes to the console.
  */
-import {ILogger} from '../ILogger';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
 
 /**
  * Annotates log calls with the level.  Helpful when the target is the

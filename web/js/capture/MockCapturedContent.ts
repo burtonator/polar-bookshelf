@@ -1,13 +1,16 @@
+import {Captured} from "./renderer/Captured";
+
 export class MockCapturedContent {
 
-    static create() {
+    public static create(): Captured {
         return CAPTURED;
     }
 
 }
 
 // raw captured JSON for testing writing to our archives.
-const CAPTURED = {
+// noinspection TsLint: max-line-length
+const CAPTURED: any = {
     "capturedDocuments": {
         "https://journal.artfuldev.com/media/076fa5fbed4eb57c0501fa4cbf5855b3?postId=384ef05f32b2": {
             "content": "<!DOCTYPE html>\n<html><head><base href=\"https://journal.artfuldev.com/media/076fa5fbed4eb57c0501fa4cbf5855b3?postId=384ef05f32b2\"><title>package.v2.json – Medium</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><meta name=\"twitter:widgets:csp\" content=\"on\"><meta name=\"robots\" content=\"noindex\"><style>body {text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-family: \"ff-tisa-web-pro\", Georgia, Cambria, \"Times New Roman\", Times, serif; font-weight: 400; color: #333332; font-size: 18px; line-height: 1.4; margin: 0; background-color: white; overflow: hidden;}iframe {max-width: 100%;}</style></head><body><style>.gist .gist-file { margin-bottom: 0 !important; }.gist { text-rendering: auto; }</style><link rel=\"stylesheet\" href=\"https://assets-cdn.github.com/assets/gist-embed-87673c31a5b37b5e6556b63e1081ebbc.css\"><div id=\"gist80462068\" class=\"gist\">\n    <div class=\"gist-file\">\n      <div class=\"gist-data\">\n        <div class=\"js-gist-file-update-container js-task-list-container file-box\">\n  <div id=\"file-package-v2-json\" class=\"file\">\n    \n\n  <div itemprop=\"text\" class=\"blob-wrapper data type-json\">\n      <table class=\"highlight tab-size js-file-line-container\" data-tab-size=\"8\">\n      <tbody><tr>\n        <td id=\"file-package-v2-json-L1\" class=\"blob-num js-line-number\" data-line-number=\"1\"></td>\n        <td id=\"file-package-v2-json-LC1\" class=\"blob-code blob-code-inner js-file-line\"><span class=\"pl-s\"><span class=\"pl-pds\">\"</span>scripts<span class=\"pl-pds\">\"</span></span>: {</td>\n      </tr>\n      <tr>\n        <td id=\"file-package-v2-json-L2\" class=\"blob-num js-line-number\" data-line-number=\"2\"></td>\n        <td id=\"file-package-v2-json-LC2\" class=\"blob-code blob-code-inner js-file-line\">  <span class=\"pl-s\"><span class=\"pl-pds\">\"</span>test<span class=\"pl-pds\">\"</span></span>: <span class=\"pl-s\"><span class=\"pl-pds\">\"</span>mocha -r ts-node/register -r ignore-styles src/**/*.spec.ts<span class=\"pl-pds\">\"</span></span></td>\n      </tr>\n      <tr>\n        <td id=\"file-package-v2-json-L3\" class=\"blob-num js-line-number\" data-line-number=\"3\"></td>\n        <td id=\"file-package-v2-json-LC3\" class=\"blob-code blob-code-inner js-file-line\">}</td>\n      </tr>\n</tbody></table>\n\n\n  </div>\n\n  </div>\n</div>\n\n      </div>\n      <div class=\"gist-meta\">\n        <a href=\"https://gist.github.com/artfuldev/3a43f60475736a4b5fa95f20fa8c6dbd/raw/0a66cff05e639b852511e42c490dc37f784e1883/package.v2.json\" style=\"float:right\">view raw</a>\n        <a href=\"https://gist.github.com/artfuldev/3a43f60475736a4b5fa95f20fa8c6dbd#file-package-v2-json\">package.v2.json</a>\n        hosted with ❤ by <a href=\"https://github.com\">GitHub</a>\n      </div>\n    </div>\n</div>\n</body></html>",
@@ -446,10 +449,13 @@ const CAPTURED = {
         }
     },
     "title": "Unit testing node applications with TypeScript — using mocha and chai",
-    "type": "chtml",
+    "type": "phz",
     "url": "https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2",
     "version": "3.0.0",
     "browser": {
+        "inactive": false,
+        "type": "phone",
+        "title": "MOBILE_GALAXY_S8_WITH_CHROME_61_WIDTH_750",
         "name": "MOBILE_GALAXY_S8_WITH_CHROME_61_WIDTH_750",
         "description": "Galaxy S8 mobile device running Chrome 61 but with width at 750",
         "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Mobile Safari/537.36",
@@ -465,4 +471,5 @@ const CAPTURED = {
             }
         }
     }
-}
+};
+

@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sample FirebaseUI App</title>
+
+    <!-- TODO: these need to load locally before we enable firebase in production -->
+    <script src="../../../node_modules/firebase/firebase.js"></script>
+    <script src="../../../node_modules/firebaseui/dist/firebaseui.js"></script>
+    <link rel="stylesheet" href="../../../node_modules/firebaseui/dist/firebaseui.css" />
+
+</head>
+
+<body>
+
+<h1>Welcome to My Awesome App</h1>
+<div id="firebaseui-auth-container"></div>
+
+<script>require("/home/burton/projects/polar-bookshelf/web/spectron.disabled/firebase-auth/content.js");</script>
+
+<div id="sign-in-status"></div>
+<div id="sign-in"></div>
+<pre id="account-details"></pre>
+
+<button id="signOut">Sign Out</button>
+
+<script>
+    document.getElementById('signOut').addEventListener('click', function(event) {
+        firebase.auth().signOut();
+    });
+</script>
+
+</body>
+</html>

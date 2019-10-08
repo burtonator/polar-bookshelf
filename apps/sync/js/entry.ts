@@ -1,4 +1,4 @@
-import {Logger} from '../../../web/js/logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {SyncApp} from "../../../web/js/apps/sync/SyncApp";
 import {Logging} from '../../../web/js/logger/Logging';
 
@@ -8,8 +8,8 @@ async function start() {
 
     await Logging.init();
 
-    let app = new SyncApp();
-    await app.start()
+    const app = new SyncApp();
+    await app.start();
 
 }
 

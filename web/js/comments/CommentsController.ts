@@ -1,5 +1,5 @@
 import {TriggerEvent} from '../contextmenu/TriggerEvent';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {CommentPopupBoxes} from './react/CommentPopupBoxes';
 import {SimpleReactor} from '../reactor/SimpleReactor';
 import {CommentInputEvent} from './react/CommentInputEvent';

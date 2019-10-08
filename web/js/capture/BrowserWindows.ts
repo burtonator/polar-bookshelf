@@ -5,8 +5,8 @@
 // page's size, which means the actual window's size will include window frame's
 // size and be slightly larger. Default is false.
 
-import {AppPaths} from '../electron/webresource/AppPaths';
-import {Logger} from '../logger/Logger';
+import {ResourcePaths} from '../electron/webresource/ResourcePaths';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserProfile} from './BrowserProfile';
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions;
 import BrowserWindow = Electron.BrowserWindow;
@@ -15,21 +15,17 @@ const log = Logger.create();
 
 export class BrowserWindows {
 
-    static toBrowserWindowOptions(browserProfile: BrowserProfile): BrowserWindowConstructorOptions {
+    public static toBrowserWindowOptions(browserProfile: BrowserProfile): BrowserWindowConstructorOptions {
 
-        let partition = "part-" + Date.now();
-
-        let preload = AppPaths.relative("./web/js/capture/renderer/ContentCapture.js");
-
-        log.info("Loading with preload: ", preload);
+        const partition = "part-" + Date.now();
 
         return {
             minWidth: browserProfile.deviceEmulation.screenSize.width,
             minHeight: browserProfile.deviceEmulation.screenSize.height,
             width: browserProfile.deviceEmulation.screenSize.width,
             height: browserProfile.deviceEmulation.screenSize.height,
-            //maxWidth: WIDTH,
-            //maxHeight: HEIGHT,
+            // maxWidth: WIDTH,
+            // maxHeight: HEIGHT,
             show: browserProfile.show,
 
             // Enable the window to be resized larger than screen. Default is false.
@@ -39,7 +35,7 @@ export class BrowserWindows {
 
                 // the path to our content capture bundle needs to be absolute
                 // for some strange reason and this is required by Electron.
-                preload,
+                // preload,
 
                 nodeIntegration: browserProfile.nodeIntegration,
 
@@ -64,15 +60,17 @@ export class BrowserWindows {
                  * Use a session per capture so that webRequests between capture
                  * instances aren't shared.
                  */
-                partition: partition
+                partition,
+
+                webviewTag: true
 
             }
 
-        }
+        };
 
     }
 
-    static async onceReadyToShow(window: BrowserWindow): Promise<BrowserWindow> {
+    public static async onceReadyToShow(window: BrowserWindow): Promise<BrowserWindow> {
 
         return new Promise<BrowserWindow>(resolve => {
 

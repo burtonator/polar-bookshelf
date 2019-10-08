@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+# find .js and .js.map files that are actually in version control still and
+# can be removed.
+
 test_orphan() {
     path=$1
 
-    if [ -e ${path} ]; then
+    if [ -e ${path} ] && [ "$(git ls-files ${path})" != "" ]; then
         echo ${path}
     fi
 

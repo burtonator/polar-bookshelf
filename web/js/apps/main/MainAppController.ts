@@ -1,35 +1,39 @@
 import {app, BrowserWindow, dialog} from 'electron';
-import {AppPaths} from '../../electron/webresource/AppPaths';
-import {Logger} from '../../logger/Logger';
+import {ResourcePaths} from '../../electron/webresource/ResourcePaths';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Services} from '../../util/services/Services';
-import {FileLoader} from './loaders/FileLoader';
-import {Datastore} from '../../datastore/Datastore';
-import {Webserver} from '../../backend/webserver/Webserver';
 import {BROWSER_WINDOW_OPTIONS, MainAppBrowserWindowFactory} from './MainAppBrowserWindowFactory';
 import {AppLauncher} from './AppLauncher';
-import {Hashcodes} from '../../Hashcodes';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
 import {SingletonBrowserWindow} from '../../electron/framework/SingletonBrowserWindow';
 import process from 'process';
-import BrowserRegistry from '../../capture/BrowserRegistry';
-import {BrowserProfiles} from '../../capture/BrowserProfiles';
 import {Capture} from '../../capture/Capture';
+import {Directories} from '../../datastore/Directories';
+import {FileImportClient} from '../repository/FileImportClient';
+import {CaptureOpts} from '../../capture/CaptureOpts';
+import {Platform, Platforms} from '../../util/Platforms';
 import MenuItem = Electron.MenuItem;
+import {MainAppExceptionHandlers} from './MainAppExceptionHandlers';
+import {FileLoader} from './file_loaders/FileLoader';
+import {FileImportRequests} from '../repository/FileImportRequests';
+import {Webserver} from "polar-shared-webserver/src/webserver/Webserver";
 
 const log = Logger.create();
 
 export class MainAppController {
 
-    constructor(fileLoader: FileLoader, datastore: Datastore, webserver: Webserver) {
-        this.fileLoader = fileLoader;
-        this.datastore = datastore;
-        this.webserver = webserver;
-    }
-
     private readonly fileLoader: FileLoader;
 
-    private readonly datastore: Datastore;
-
     private readonly webserver: Webserver;
+
+    private readonly directories: Directories;
+
+    constructor(fileLoader: FileLoader,
+                webserver: Webserver) {
+        this.fileLoader = fileLoader;
+        this.webserver = webserver;
+        this.directories = new Directories();
+    }
 
     public async cmdCaptureWebPage() {
 
@@ -39,36 +43,16 @@ export class MainAppController {
         browserWindowOptions.height = browserWindowOptions.height! * .9;
         browserWindowOptions.center = true;
 
-        const url = AppPaths.resource('./apps/capture/start-capture/index.html');
+        const url = ResourcePaths.resourceURLFromRelativeURL('./apps/capture/start-capture/index.html');
 
         await MainAppBrowserWindowFactory.createWindow(browserWindowOptions, url);
 
     }
 
-    public async cmdCaptureWebPageWithBrowser() {
+    public async cmdCaptureWebPageWithBrowser(captureOpts: Partial<CaptureOpts> = {}) {
 
-        const browser = BrowserRegistry.DEFAULT;
-
-        const browserProfile = BrowserProfiles.toBrowserProfile(browser, 'DEFAULT');
-
-        const capture = new Capture(browserProfile);
-
-        const captureResult = await capture.start();
-
+        const captureResult = await Capture.trigger(captureOpts);
         await this.handleLoadDoc(captureResult.path);
-
-    }
-
-    /**
-     * Load a PDF file when given a full URL.  May be file, http, or https URL.
-     */
-    public async cmdOpen(item: MenuItem, focusedWindow: BrowserWindow) {
-
-        const targetWindow = focusedWindow;
-
-        const path = await this.promptDoc();
-
-        await this.loadDoc(path, targetWindow);
 
     }
 
@@ -76,13 +60,15 @@ export class MainAppController {
         await MainAppBrowserWindowFactory.createWindow();
     }
 
-    public async cmdOpenInNewWindow() {
+    public async cmdImport() {
 
-        const path = await this.promptDoc();
+        const files = await this.promptImportDocs();
 
-        const targetWindow = await MainAppBrowserWindowFactory.createWindow(BROWSER_WINDOW_OPTIONS, "about:blank");
-
-        await this.loadDoc(path, targetWindow);
+        // send the messages to the renderer context now so that we can bulk
+        // import them into the repo.
+        if (files) {
+            FileImportClient.send(FileImportRequests.fromPaths(files));
+        }
 
     }
 
@@ -97,34 +83,91 @@ export class MainAppController {
 
     public exitApp() {
 
+        // we have a collection of flags here controlling shutdown as Electron
+        // is picky in some situations regarding raising exceptions and we're
+        // still trying to track down the proper way to handle app quit.
+
+        const doProcessExit = true;
+        const doAppQuit = true;
+        const doServicesStop = true;
+
+        const doWindowGC = false;
+
+        const doCloseWindows = false;
+        const doDestroyWindows = false;
+
+        // the exception handlers need to be re-registered as I think they're
+        // being removed on exit (possibly by sentry?)
+        MainAppExceptionHandlers.register();
+
         log.info("Exiting app...");
 
-        Services.stop({
-            webserver: this.webserver,
-        });
+        if (doWindowGC) {
 
-        log.info("Closing all windows...");
+            log.info("Getting all browser windows...");
+            const browserWindows = BrowserWindow.getAllWindows();
+            log.info("Getting all browser windows...done");
 
-        BrowserWindow.getAllWindows().forEach(window => {
-            log.info("Closing window: " + window.id);
-            window.close();
-        });
+            log.info("Closing/destroying all windows...");
 
-        log.info("Closing all windows...done");
+            for (const browserWindow of browserWindows) {
+                const id = browserWindow.id;
 
-        log.info("Exiting electron...");
+                if (! browserWindow.isDestroyed()) {
 
-        app.quit();
+                    if (doCloseWindows && browserWindow.isClosable()) {
+                        log.info(`Closing window id=${id}`);
+                        browserWindow.close();
+                    }
 
-        log.info("Exiting main...");
-        process.exit();
+                    if (doDestroyWindows) {
+                        log.info(`Destroying window id=${id}`);
+                        browserWindow.destroy();
+                    }
+
+                } else {
+                    log.info(`Skipping destroy window (is destroyed) id=${id}`);
+                }
+
+            }
+
+            log.info("Closing/destroying all windows...done");
+
+        }
+
+        if (doServicesStop) {
+
+            log.info("Stopping services...");
+
+            Services.stop({
+                webserver: this.webserver,
+            });
+
+            log.info("Stopping services...done");
+
+        }
+
+        if (doAppQuit) {
+            log.info("Quitting app...");
+
+            app.quit();
+
+            log.info("Quitting app...done");
+        }
+
+        if (doProcessExit) {
+            log.info("Process exit...");
+            process.exit();
+            log.info("Process exit...done");
+        }
 
     }
 
     /**
      * The user asked to open a file from the command line or via OS event.
      */
-    public async handleLoadDoc(path: string, newWindow: boolean = true): Promise<BrowserWindow> {
+    public async handleLoadDoc(path: string,
+                               newWindow: boolean = true): Promise<BrowserWindow> {
 
         const extraTags = {'type': 'viewer'};
 
@@ -217,22 +260,23 @@ export class MainAppController {
     /**
      * Open a dialog box for a PDF file.
      */
-    private async promptDoc(): Promise<string> {
+    private async promptImportDocs(): Promise<string[] | undefined> {
 
-        return new Promise<string>((resolve) => {
+        const downloadsDir = app.getPath('downloads');
+
+        return new Promise<string[] | undefined>((resolve) => {
 
             dialog.showOpenDialog({
-                  title: "Open Document",
-                  defaultPath: this.datastore.stashDir,
+                  title: "Import Document",
+                  defaultPath: downloadsDir,
                   filters: [
-                      { name: 'Docs', extensions: ['pdf', "phz"] }
+                      { name: 'Docs', extensions: ['pdf', "phz", "PDF"] }
                   ],
-                  properties: ['openFile']
-              }, (path) => {
+                  properties: ['openFile', 'multiSelections']
+                  // properties: ['openFile']
+              }, (paths) => {
 
-                if (path) {
-                    resolve(path[0]);
-                }
+                resolve(paths);
 
             });
 
@@ -241,3 +285,4 @@ export class MainAppController {
     }
 
 }
+

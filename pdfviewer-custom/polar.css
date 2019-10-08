@@ -10,6 +10,12 @@
 @import url('./add-comment.css');
 @import url('./annotationbar.css');
 @import url('./text-highlights.css');
+@import url('./flexbar.css');
+@import url('./progress.css');
+@import url('./typography.css');
+@import url('./summernote.css');
+@import url('./pricing.css');
+@import url('./ui-mode.css');
 
 body {
     height: 100%;
@@ -48,8 +54,8 @@ body {
     margin-top: 20px;
 }
 
-.polar-htmlviewer #polar-viewer,
-.polar-htmlviewer #polar-sidebar {
+.polar-htmlviewer .polar-viewer,
+.polar-htmlviewer .polar-sidebar {
     margin-top: 65px;
     height: calc(100% - 65px);
     width: 100%;
@@ -62,14 +68,28 @@ body {
 /*}*/
 
 #polar-header-body {
-    width: calc(100% - 10px);
-    margin-left: 5px;
+    /*width: calc(100% - 10px);*/
+    /*margin-left: 5px;*/
+}
+
+
+#polar-header-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#polar-header-body #polar-progress {
+    margin: auto 5px;
+    padding-right: 10px;
 }
 
 #polar-progress {
-    margin-top: 10px;
-    margin-bottom: 10px;
     width: 100%;
+}
+
+#polar-progress progress {
+    border: none;
 }
 
 #polar-header progress {

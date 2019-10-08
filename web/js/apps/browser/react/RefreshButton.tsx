@@ -1,16 +1,24 @@
 import * as React from 'react';
 import {Button, InputGroupAddon} from 'reactstrap';
 import {ISimpleReactor} from '../../../reactor/SimpleReactor';
-import {NavigationEventType} from '../BrowserApp';
+import {NavigationEventType, NavigationEvent} from '../BrowserApp';
 
-export class RefreshButton extends React.Component<Props, State> {
+export class RefreshButton extends React.Component<IProps, State> {
 
-    constructor(props: Props, context: State) {
+    constructor(props: IProps, context: State) {
         super(props, context);
+
+        this.state = {
+            nav: 'none'
+        };
+
+    }
+
+    public componentDidMount(): void {
 
         this.props.navigationReactor.addEventListener(event => {
 
-            if (event === 'did-start-loading') {
+            if (event.type === 'did-start-loading') {
 
                 this.setState( {
                     nav: 'loading'
@@ -18,7 +26,7 @@ export class RefreshButton extends React.Component<Props, State> {
 
             }
 
-            if (event === 'did-stop-loading') {
+            if (event.type === 'did-stop-loading') {
 
                 this.setState( {
                     nav: 'loaded'
@@ -27,10 +35,6 @@ export class RefreshButton extends React.Component<Props, State> {
             }
 
         });
-
-        this.state = {
-            nav: 'none'
-        };
 
     }
 
@@ -41,18 +45,18 @@ export class RefreshButton extends React.Component<Props, State> {
 
         switch (this.state.nav) {
             case 'none':
-                navButtonClassName = 'fa fa-refresh fa-lg';
+                navButtonClassName = 'fas fa-sync fa-lg';
                 disabled = true;
                 break;
             case 'loading':
-                navButtonClassName = 'fa fa-refresh fa-lg fa-spin';
+                navButtonClassName = 'fas fa-sync fa-lg fa-spin';
                 disabled = false;
                 break;
             case 'loaded':
-                navButtonClassName = 'fa fa-refresh fa-lg';
+                navButtonClassName = 'fas fa-sync fa-lg';
                 disabled = false;
                 break;
-        }
+        };
 
         return (
 
@@ -77,9 +81,10 @@ export class RefreshButton extends React.Component<Props, State> {
 
 }
 
-interface Props {
-    navigationReactor: ISimpleReactor<NavigationEventType>;
+interface IProps {
+    navigationReactor: ISimpleReactor<NavigationEvent>;
     onReload: () => void;
+    disabled?: boolean;
 
 }
 

@@ -1,52 +1,59 @@
 /**
  * Datastore just in memory with no on disk persistence.
  */
-import {Datastore} from './Datastore';
-import {Preconditions} from '../Preconditions';
+import {AbstractDatastore, Datastore, DeleteResult, DocMetaSnapshotEventListener, ErrorListener, FileMeta, SnapshotResult, DatastoreOverview, PrefsProvider} from './Datastore';
+import {isPresent, Preconditions} from 'polar-shared/src/Preconditions';
 import {DocMetaFileRef, DocMetaRef} from './DocMetaRef';
-import {FilePaths} from '../util/FilePaths';
-import {Directories} from './Directories';
-import {Logger} from '../logger/Logger';
-import {DeleteResult} from './DiskDatastore';
-import {FileDeleted} from '../util/Files';
-import {Backend} from './Backend';
-import {DatastoreFile} from './DatastoreFile';
-import {Optional} from '../util/ts/Optional';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {FileHandle, Files} from 'polar-shared/src/util/Files';
+import {Backend} from 'polar-shared/src/datastore/Backend';
+import {DocFileMeta} from './DocFileMeta';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {DocInfo} from '../metadata/DocInfo';
+import {DatastoreMutation, DefaultDatastoreMutation} from './DatastoreMutation';
+import {Datastores} from './Datastores';
+import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
+import {DiskInitResult} from './DiskDatastore';
+import {ISODateTimeString, ISODateTimeStrings} from 'polar-shared/src/metadata/ISODateTimeStrings';
+import {DictionaryPrefs} from '../util/prefs/Prefs';
+import {Providers} from 'polar-shared/src/util/Providers';
+import {WriteFileOpts} from './Datastore';
+import {DefaultWriteFileOpts} from './Datastore';
+import {DatastoreCapabilities} from './Datastore';
+import {NetworkLayer} from './Datastore';
+import {WriteOpts} from './Datastore';
+import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
+import {FileRef} from "polar-shared/src/datastore/FileRef";
 
 const log = Logger.create();
 
-export class MemoryDatastore implements Datastore {
+export class MemoryDatastore extends AbstractDatastore implements Datastore {
 
-    public readonly stashDir: string;
+    public readonly id = 'memory';
 
-    public readonly filesDir: string;
-
-    public readonly dataDir: string;
-
-    public readonly logsDir: string;
-
-    public readonly directories: Directories;
+    private readonly created: ISODateTimeString;
 
     protected readonly docMetas: {[fingerprint: string]: string} = {};
 
+    protected readonly files: {[key: string]: FileData} = {};
+
+    private readonly prefs = new DictionaryPrefs();
+
     constructor() {
-        this.directories = new Directories();
-
-        // these dir values are used in the UI and other places so we need to
-        // actually have values for them.
-        this.dataDir = Directories.getDataDir().path;
-        this.stashDir = FilePaths.create(this.dataDir, "stash");
-        this.filesDir = FilePaths.create(this.dataDir, "files");
-
-        this.logsDir = FilePaths.create(this.dataDir, "logs");
+        super();
 
         this.docMetas = {};
+        this.created = ISODateTimeStrings.create();
 
     }
 
     // noinspection TsLint
-    public async init() {
-        await this.directories.init();
+    public async init(errorListener: ErrorListener = NULL_FUNCTION): Promise<DiskInitResult> {
+        return {};
+    }
+
+    public async stop() {
+        // noop
     }
 
     public async contains(fingerprint: string): Promise<boolean> {
@@ -61,7 +68,9 @@ export class MemoryDatastore implements Datastore {
                 deleted: false
             },
             dataFile: {
-                path: `/${docMetaFileRef.filename}`,
+                path: '/' + Optional.of(docMetaFileRef.docFile)
+                                .map(current => current.name)
+                                .getOrUndefined(),
                 deleted: false
             }
         };
@@ -75,16 +84,53 @@ export class MemoryDatastore implements Datastore {
 
     }
 
-    public addFile(backend: Backend, name: string, data: Buffer | string): Promise<DatastoreFile> {
-        throw new Error("Not implemented");
+    public async writeFile(backend: Backend,
+                           ref: FileRef,
+                           data: FileHandle | Buffer | string,
+                           opts: WriteFileOpts = new DefaultWriteFileOpts()): Promise<DocFileMeta> {
+
+        const key = MemoryDatastore.toFileRefKey(backend, ref);
+
+        let buff: Buffer | undefined;
+
+        if (typeof data === 'string') {
+            buff = Buffer.from(data);
+        } else if (data instanceof Buffer) {
+            buff = data;
+        } else {
+            buff = await Files.readFileAsync(data.path);
+        }
+
+        const meta = opts.meta || {};
+
+        this.files[key] = {buffer: buff!, meta};
+
+        return {backend, ref, url: 'NOT_IMPLEMENTED:none'};
+
     }
 
-    public getFile(backend: Backend, name: string): Promise<Optional<DatastoreFile>> {
-        throw new Error("Not implemented");
+    public getFile(backend: Backend, ref: FileRef): DocFileMeta {
+
+        const key = MemoryDatastore.toFileRefKey(backend, ref);
+
+        if (!key) {
+            throw new Error(`No file for ${backend} at ${ref.name}`);
+        }
+
+        const fileData = this.files[key];
+
+        return {backend, ref, url: 'NOT_IMPLEMENTED:none'};
+
     }
-    
-    public containsFile(backend: Backend, name: string): Promise<boolean> {
-        throw new Error("Not implemented");
+
+    public async containsFile(backend: Backend, ref: FileRef): Promise<boolean> {
+        const key = MemoryDatastore.toFileRefKey(backend, ref);
+        return isPresent(this.files[key]);
+    }
+
+    public async deleteFile(backend: Backend, ref: FileRef): Promise<void> {
+        const key = MemoryDatastore.toFileRefKey(backend, ref);
+        delete this.files[key];
     }
 
     /**
@@ -101,18 +147,69 @@ export class MemoryDatastore implements Datastore {
     /**
      * Write the datastore to disk.
      */
-    public async sync(fingerprint: string, data: string) {
+    public async write(fingerprint: string,
+                       data: string,
+                       docInfo: IDocInfo,
+                       opts: WriteOpts = {}): Promise<void> {
+
+        const datastoreMutation = opts.datastoreMutation || new DefaultDatastoreMutation();
 
         Preconditions.assertTypeOf(data, "string", "data");
 
         this.docMetas[fingerprint] = data;
+
+        datastoreMutation.written.resolve(true);
+        datastoreMutation.committed.resolve(true);
+
     }
 
-    public async getDocMetaFiles(): Promise<DocMetaRef[]> {
+    public async getDocMetaRefs(): Promise<DocMetaRef[]> {
 
         return Object.keys(this.docMetas)
             .map(fingerprint => <DocMetaRef> {fingerprint});
 
     }
 
+    public async snapshot(listener: DocMetaSnapshotEventListener): Promise<SnapshotResult> {
+
+        return Datastores.createCommittedSnapshot(this, listener);
+
+    }
+
+    public addDocMetaSnapshotEventListener(docMetaSnapshotEventListener: DocMetaSnapshotEventListener): void {
+        // noop now
+    }
+
+    public async overview(): Promise<DatastoreOverview> {
+
+        const docMetaRefs = await this.getDocMetaRefs();
+
+        return {nrDocs: docMetaRefs.length, created: this.created};
+
+    }
+
+    public capabilities(): DatastoreCapabilities {
+
+        const networkLayers = new Set<NetworkLayer>(['local']);
+
+        return {
+            networkLayers,
+            permission: {mode: 'rw'}
+        };
+
+    }
+
+    private static toFileRefKey(backend: Backend, fileRef: FileRef) {
+        return `${backend}:${fileRef.name}`;
+    }
+
+    public getPrefs(): PrefsProvider {
+        return Providers.toInterface(() => this.prefs);
+    }
+
+}
+
+interface FileData {
+    buffer: Buffer;
+    meta: FileMeta;
 }

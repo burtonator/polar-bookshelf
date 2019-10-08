@@ -4,8 +4,10 @@
 import ReactSummernote from './ReactSummernote';
 import React from 'react';
 import {TypedWidgetProps} from './TypedWidgetProps';
-import {Logger} from '../../../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {ReactSummernote4} from './ReactSummernote4';
+import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
+import {RichTextMutator} from './RichTextMutator';
 const log = Logger.create();
 
 /**
@@ -51,7 +53,7 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
 
         // console.log('onChange: newValue: ', newValue);
 
-        log.debug('onChange', newValue);
+        // log.debug('onChange', newValue);
 
         this.value = newValue;
 
@@ -62,7 +64,7 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
     }
 
     private onBlur() {
-        log.info("onBlur");
+        // log.info("onBlur");
 
         if (this.props.onBlur) {
             this.props.onBlur(this.id, this.value);
@@ -72,7 +74,7 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
     }
 
     private onFocus() {
-        log.info("onFocus");
+        // log.info("onFocus");
 
         if (this.props.onFocus) {
             this.props.onFocus(this.id, this.value);
@@ -85,7 +87,7 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
      *
      * https://github.com/summernote/react-summernote/issues/38
      */
-    onImageUpload(images: any[], insertImage: Function) {
+    public onImageUpload(images: any[], insertImage: Function) {
 
         log.debug('onImageUpload', images);
         /* FileList does not support ordinary array methods */
@@ -104,9 +106,12 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
 
     }
 
-    render() {
+    public render() {
 
         // https://github.com/summernote/react-summernote/issues/38
+
+        const onKeyDown: (event: KeyboardEvent) => void =
+            this.props.onKeyDown ? this.props.onKeyDown : NULL_FUNCTION;
 
         return (
             <ReactSummernote4
@@ -114,10 +119,13 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
                 options={{
                     id: this.typedWidgetProps.id,
                     lang: 'en-US',
-                    height: 280,
-                    // placeholder: "this is a placeholder",
+                    height: 180,
+                    disableResizeEditor: true,
+                    placeholder: this.props.placeholder || '',
                     dialogsInBody: false,
-                    airMode: true,
+                    airMode: false,
+                    // used to fix issues with tab navigation
+                    tabSize: 0,
                     // toolbar: [
                     //     ['style', []],
                     //     ['font', []],
@@ -129,27 +137,34 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
                     //     ['image', []]
                     // ]
 
+                    // FIXME: somehow images paste has broken now...
+
                     // FIXME: add blockquote, code, and pre, and cite
 
                     // missing the highlight color pulldown...
 
                     toolbar: [
                         ['style', ['style']],
-                        ['font', ['bold', 'italic', 'underline', 'clear', 'color', 'superscript', 'subscript']],
+                        // ['font', ['bold', 'italic', 'underline', 'clear', 'color', 'superscript', 'subscript']],
+                        ['font', ['bold', 'italic', 'underline']],
                         // ['fontname', ['fontname']],
-                        ['para', ['ul', 'ol', 'paragraph']],
+                        // ['para', ['ul', 'ol', 'paragraph']],
+                        ['para', ['paragraph']],
                         ['table', ['table']],
-                        ['insert', ['link', 'picture', 'video']],
+                        // ['insert', ['link', 'picture', 'video']],
+                        ['insert', ['link', 'picture']],
                         ['view', []]
                     ]
 
                 }}
                 autofocus={this.props.autofocus}
                 onChange={this.onChange}
+                onKeyDown={(event: any) => onKeyDown(event.originalEvent)}
                 onBlur={this.onBlur}
                 onFocus={this.onFocus}
                 // onSubmit={this.onSubmit}
                 onImageUpload={this.onImageUpload}
+                onRichTextMutator={this.props.onRichTextMutator}
             />
 
         );
@@ -159,13 +174,15 @@ export class RichTextEditor4 extends React.Component<IProps, IState>  {
 }
 
 interface IProps {
-    id: string;
-    autofocus?: boolean;
-    value?: string;
-    onChange?: (newValue: string) => void;
-    onBlur?: (id: string, value: string) => void;
-    onFocus?: (id: string, value: string) => void;
-
+    readonly id: string;
+    readonly autofocus?: boolean;
+    readonly value?: string;
+    readonly onKeyDown?: (event: KeyboardEvent) => void;
+    readonly onChange?: (newValue: string) => void;
+    readonly onBlur?: (id: string, value: string) => void;
+    readonly onFocus?: (id: string, value: string) => void;
+    readonly placeholder?: string;
+    readonly onRichTextMutator?: (mutator: RichTextMutator) => void;
 }
 
 interface IState {
@@ -182,3 +199,4 @@ interface OnChangeCallback {
 interface OnSelectionCallback {
     (id: string, value: string): void;
 }
+

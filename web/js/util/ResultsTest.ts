@@ -1,6 +1,6 @@
 import {assert} from 'chai';
 import {Results} from './Results';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {assertJSON} from '../test/Assertions';
 
 const log = Logger.create();

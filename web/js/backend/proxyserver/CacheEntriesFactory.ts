@@ -1,10 +1,11 @@
-import {forDict} from '../../util/Functions';
+import {forDict} from 'polar-shared/src/util/Functions';
 import {CacheEntriesHolder} from './CacheEntriesHolder';
 import {DiskCacheEntry} from './DiskCacheEntry';
 import {PHZCacheEntry} from './PHZCacheEntry';
 import {CachingPHZReader} from '../../phz/CachingPHZReader';
 
 import fs from 'fs';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
 
 /**
  * Cache entry which is just buffered in memory.
@@ -14,9 +15,8 @@ export class CacheEntriesFactory {
     /**
      *
      * @param path
-     * @return {Promise<CacheEntriesHolder>}
      */
-    public static async createEntriesFromFile(path: string) {
+    public static async createEntriesFromFile(path: string): Promise<CacheEntriesHolder> {
 
         if (path.endsWith(".chtml")) {
             return CacheEntriesFactory.createFromCHTML(path);
@@ -28,7 +28,7 @@ export class CacheEntriesFactory {
 
     }
 
-    static createFromHTML(url: string, path: string) {
+    public static createFromHTML(url: string, path: string) {
 
         // TODO: stat the file so that we can get the Content-Length
 
@@ -51,45 +51,47 @@ export class CacheEntriesFactory {
      * @param path
      * @return Promise<CacheEntriesHolder>
      */
-    static async createFromPHZ(path: string) {
+    public static async createFromPHZ(path: string) {
 
         // load the .json data so we have the URL.
 
-        let cachingPHZReader = new CachingPHZReader(path);
+        const cachingPHZReader = new CachingPHZReader(path);
 
-        let resources = await cachingPHZReader.getResources();
+        const resources = await cachingPHZReader.getResources();
 
-        let cacheEntriesHolder = new CacheEntriesHolder({});
+        const cacheEntriesHolder = new CacheEntriesHolder({});
 
         cacheEntriesHolder.metadata = await cachingPHZReader.getMetadata();
 
-        forDict(resources.entries, (key, resourceEntry) => {
+        Dictionaries.forDict(resources.entries, (key, resourceEntry) => {
 
-            let resource = resourceEntry.resource;
+            const resource = resourceEntry.resource;
 
-            let url = resourceEntry.resource.url;
+            const url = resourceEntry.resource.url;
 
-            if(!url) {
+            if (!url) {
                 throw new Error("No url");
             }
 
-            // FIXME: we need a way to keep the CacheEntry and Resource fields
-            // all in sync... Maybe have them all extend from the same base object
+            // TODO: we need a way to keep the CacheEntry and Resource fields
+            // all in sync... Maybe have them all extend from the same base
+            // object
 
-            let cacheEntry = new PHZCacheEntry({
+            const cacheEntry = new PHZCacheEntry({
                 url,
                 method: resource.method,
                 headers: resource.headers,
                 statusCode: resource.statusCode,
-                statusMessage: resource.statusMessage,
+                statusMessage: resource.statusMessage || "OK",
                 contentType: resource.contentType,
+                docTypeFormat: resource.docTypeFormat,
                 mimeType: resource.encoding,
                 encoding: resource.encoding,
                 phzReader: cachingPHZReader,
-                resourceEntry: resourceEntry
+                resourceEntry
             });
 
-            cacheEntriesHolder.cacheEntries[url]=cacheEntry;
+            cacheEntriesHolder.cacheEntries[url] = cacheEntry;
 
         });
 
@@ -104,15 +106,15 @@ export class CacheEntriesFactory {
      * @param path
      * @return Promise<CacheEntriesHolder>
      */
-    static async createFromCHTML(path: string) {
+    public static async createFromCHTML(path: string) {
 
         // load the .json data so we have the URL.
 
-        let jsonPath = path.replace(".chtml", "") + ".json";
+        const jsonPath = path.replace(".chtml", "") + ".json";
 
-        let json = fs.readFileSync(jsonPath);
+        const json = fs.readFileSync(jsonPath);
 
-        let data = JSON.parse(json.toString("UTF-8"));
+        const data = JSON.parse(json.toString("UTF-8"));
 
         let url = data.url;
 
@@ -127,7 +129,7 @@ export class CacheEntriesFactory {
             },
             cacheEntries: {
                 url: new DiskCacheEntry({
-                    url: url,
+                    url,
                     method: "GET",
                     headers: {
                         "Content-Type": "text/html"

@@ -1,12 +1,12 @@
 import {assert} from 'chai';
-import {Progress} from './Progress';
+import {ProgressCalculator} from './ProgressCalculator';
 
 
 describe('ProgressTest', function() {
 
     it("Basic Progress", async function () {
 
-        let progress = new Progress(4);
+        const progress = new ProgressCalculator(4);
 
         assert.equal(progress.percentage(), 0);
 

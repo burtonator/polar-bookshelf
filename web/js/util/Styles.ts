@@ -1,6 +1,6 @@
-import {Preconditions} from '../Preconditions';
-import {Optional} from './ts/Optional';
-import {Strings} from './Strings';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {Strings} from "polar-shared/src/util/Strings";
 
 export class Styles {
 
@@ -24,9 +24,9 @@ export class Styles {
      * Return the top, left, width, and height of the given element.
      *
      */
-    static positioning(element: HTMLElement) {
+    public static positioning(element: HTMLElement) {
 
-        let result: Positioning = {
+        const result: Positioning = {
             left: undefined,
             top: undefined,
             right: undefined,
@@ -37,7 +37,7 @@ export class Styles {
 
         Object.keys(result).forEach(key => {
 
-            if(result.hasOwnProperty(key)) {
+            if (result.hasOwnProperty(key)) {
 
                 result[key] = Optional.of(element.style.getPropertyValue(key))
                     .filter(current => current !== null && current !== undefined)

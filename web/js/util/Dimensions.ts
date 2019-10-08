@@ -1,7 +1,8 @@
 /**
  * Simple dimension of a Rect.
  */
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {IDimensions} from "./IDimensions";
 
 export class Dimensions {
 
@@ -34,22 +35,9 @@ export class Dimensions {
         return this.width * this.height;
     }
 
-    toString() {
+    public toString() {
         return `${this.width}x${this.height}`;
     }
 
 }
 
-export interface IDimensions {
-
-    /**
-     * This width of this rect.
-     */
-    readonly width: number;
-
-    /**
-     * This height of this rect.
-     */
-    readonly height: number;
-
-}

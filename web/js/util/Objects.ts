@@ -3,7 +3,7 @@ export class Objects {
     /**
      * Take the current object, and use given object as a set of defaults.
      */
-    static defaults(current: any, defaults: any) {
+    public static defaults(current: any, defaults: any) {
 
         let result = current;
 
@@ -11,8 +11,9 @@ export class Objects {
             result = {};
         }
 
-        for(let key in defaults) {
-            if(defaults.hasOwnProperty(key) && ! result.hasOwnProperty(key)) {
+        for (const key in defaults) {
+
+            if (defaults.hasOwnProperty(key) && ! result.hasOwnProperty(key)) {
                 result[key] = defaults[key];
             }
         }
@@ -27,11 +28,11 @@ export class Objects {
      *
      * @param obj
      */
-    static clear(obj: any) {
+    public static clear(obj: any) {
 
-        if(obj instanceof Array) {
+        if (obj instanceof Array) {
 
-            for(let idx = 0; idx < obj.length; ++idx) {
+            for (let idx = 0; idx < obj.length; ++idx) {
                 obj.pop();
             }
 
@@ -39,9 +40,9 @@ export class Objects {
 
         }
 
-        if(typeof obj === "object") {
+        if (typeof obj === "object") {
 
-            for(let key in obj) {
+            for (const key in obj) {
                 delete obj[key];
             }
 
@@ -53,11 +54,11 @@ export class Objects {
 
     }
 
-    static duplicate(obj: any) {
+    public static duplicate(obj: any) {
         return JSON.parse(JSON.stringify(obj));
     }
 
-    static create<T>(proto: any): T {
+    public static create<T>(proto: any): T {
         return Object.create(proto);
     }
 
@@ -65,20 +66,35 @@ export class Objects {
      * Create an instance of an object from its prototype and use some Typescript
      * generic promotion to make it work properly.
      */
-    static createInstance<T>(prototype: T, val: any) {
-        let result: T = Objects.create(prototype);
+    public static createInstance<T>(prototype: T, val: any) {
+        const result: T = Objects.create(prototype);
         Object.assign(result, val);
         return result;
     }
 
-    public static typedKeys<T>(o: T): (keyof T)[] {
+    public static typedKeys<T>(obj: T): Array<(keyof T)> {
         // type cast should be safe because that's what really Object.keys() does
-        return Object.keys(o) as (keyof T)[];
+        return Object.keys(obj) as Array<(keyof T)>;
     }
-
 
 }
 
+
+/**
+ * Create a canonical representation of an object easily so the handler can
+ * delete values or set things and just return an object.
+ */
+export function canonicalize<V>(val: V, handler: (obj: any) => void): any {
+
+    if (val === undefined || val === null) {
+        return val;
+    }
+
+    const cpy = {...val}
+    handler(cpy);
+    return cpy;
+
+}
 
 function create<T>(proto: any): T {
     return Object.create(proto);

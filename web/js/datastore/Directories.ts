@@ -2,9 +2,9 @@
  * Represents key local directories for Polar when running locally.
  */
 import {DataDir, DataDirConfig, DiskDatastore} from './DiskDatastore';
-import {CreateDirResult, Files} from '../util/Files';
-import {FilePaths} from '../util/FilePaths';
-import {isPresent} from '../Preconditions';
+import {CreateDirResult, Files} from 'polar-shared/src/util/Files';
+import {FilePaths} from 'polar-shared/src/util/FilePaths';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 export class Directories {
 
@@ -56,10 +56,14 @@ export class Directories {
 
         let dataDirs: DataDir[] = [
             {
+                // configured via static.  I think we should deprecate this in the
+                // future as the env var seems more flexible and works across
+                // processes when using spectron, renderers, and main.
                 path: GlobalDataDir.get(),
                 strategy: 'manual'
             },
             {
+                // manually configured from the environment
                 path: process.env.POLAR_DATA_DIR,
                 strategy: 'env'
             },
@@ -69,6 +73,7 @@ export class Directories {
             }
         ];
 
+        // remove any paths that are missing...
         dataDirs = dataDirs.filter(current => isPresent(current.path));
 
         const dataDir = dataDirs[0];

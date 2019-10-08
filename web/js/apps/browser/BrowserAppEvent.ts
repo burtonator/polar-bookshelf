@@ -4,6 +4,7 @@ export enum BrowserAppEvent {
 
     TRIGGER_CAPTURE = 'TRIGGER_CAPTURE',
 
+    // TODO: should be CONFIGURE_BROWSER
     CONFIGURE_WINDOW = 'CONFIGURE_WINDOW'
 
 }

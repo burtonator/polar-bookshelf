@@ -1,0 +1,117 @@
+
+/* WARN: taken directly from polar-site */
+
+@media (max-width: 767px) {
+
+    .hidden-xs {
+        display: none !important;
+    }
+
+}
+
+#pricing {
+    max-width: 1200px;
+    margin: auto;
+}
+
+#pricing .fa-check {
+    color: #39d5c5;
+}
+
+#pricing .white-box {
+    padding: 30px;
+    background: #ffffff;
+    border-color: #252525;
+    color: #252525;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    position: relative;
+}
+
+#pricing .feature-na {
+    color: #cccccc;
+}
+
+#pricing .text-tint {
+    color: #515151;
+    border-color: #515151;
+}
+
+#pricing .high-shadow {
+    -webkit-box-shadow: 0 11px 15px -7px rgba(0,0,0,0.2), 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12);
+    -moz-box-shadow: 0 11px 15px -7px rgba(0,0,0,0.2),0 24px 38px 3px rgba(0,0,0,0.14),0 9px 46px 8px rgba(0,0,0,0.12);
+    box-shadow: 0 11px 15px -7px rgba(0,0,0,0.2), 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12);
+}
+
+#pricing table th {
+    width: 20%;
+    vertical-align: top;
+}
+
+#pricing table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+#pricing .table-box {
+    padding: 0;
+}
+
+#pricing .highlight-plan {
+    background: #EcF5Ff;
+}
+
+#pricing th,
+#pricing th * {
+    font-weight: normal;
+}
+
+#pricing .text-small {
+    font-size: 14px;
+}
+
+#pricing .text-large {
+    font-size: 16px;
+}
+
+#pricing .text-xlarge {
+    font-size: 20px;
+}
+
+#pricing .text-xxlarge {
+    font-size: 35px;
+}
+
+#pricing .text-left {
+    text-align: left;
+}
+
+#pricing th div {
+    margin-top: auto;
+}
+
+#pricing .buy-links {
+    text-align: center;
+}
+
+
+.plan-free #pricing tr th:nth-child(2),
+.plan-free #pricing tr td:nth-child(2) {
+    background: #EcF5Ff;
+}
+
+.plan-bronze #pricing tr th:nth-child(3),
+.plan-bronze #pricing tr td:nth-child(3) {
+    background: #EcF5Ff;
+}
+
+.plan-silver #pricing tr th:nth-child(4),
+.plan-silver #pricing tr td:nth-child(4) {
+    background: #EcF5Ff;
+}
+
+.plan-gold #pricing tr th:nth-child(5),
+.plan-gold #pricing tr td:nth-child(5) {
+    background: #EcF5Ff;
+}

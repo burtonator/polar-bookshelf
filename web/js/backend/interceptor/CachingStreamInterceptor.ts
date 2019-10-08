@@ -1,10 +1,13 @@
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {CacheRegistry} from '../proxyserver/CacheRegistry';
 import {CorrectStreamProtocolResponse, StreamInterceptors, StreamProtocolCallback} from './StreamInterceptors';
 import InterceptStreamProtocolRequest = Electron.InterceptStreamProtocolRequest;
 import {CacheStats} from './CacheStats';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 const log = Logger.create();
+
+const HEADER_CONTENT_TYPE = "Content-Type";
 
 export class CachingStreamInterceptor {
 
@@ -43,10 +46,57 @@ export class CachingStreamInterceptor {
 
         const stream = await cacheEntry.toStream();
 
-        log.debug(`Calling callback now for: ${request.url}`);
+        log.debug("Returning intercepted cache stream: ", {headers: cacheEntry.headers, statusCode: cacheEntry.statusCode});
+
+        // if there is no HTTP content type in the raw headers add it and rebuild it if necessary...
+
+        const headers = Object.assign({}, cacheEntry.headers);
+
+        if (!isPresent(headers[HEADER_CONTENT_TYPE])) {
+
+            let newContentType: string | undefined;
+
+            if (isPresent(cacheEntry.contentType)) {
+                newContentType = cacheEntry.contentType;
+            } else if (isPresent(cacheEntry.docTypeFormat)) {
+                newContentType = 'text/' + cacheEntry.docTypeFormat;
+            }
+
+            if (isPresent(newContentType)) {
+                log.info("Using new content type (missing in headers): " + newContentType);
+                headers[HEADER_CONTENT_TYPE] = newContentType!;
+            }
+
+        }
+
+        // add the charset if none is in the content type and we're sending text/html
+
+        const hdr = (header: string): string | undefined => {
+
+            if (headers[header] !== null) {
+
+                const val = headers[header];
+                if (typeof val === 'string') {
+                    return val;
+                } else {
+                    return val[0];
+                }
+
+            }
+
+            return undefined;
+
+        };
+
+        const charset = 'utf-8';
+        const contentType = hdr(HEADER_CONTENT_TYPE);
+
+        if (contentType && ['text/html', 'text/xml'].includes(contentType)) {
+            headers[HEADER_CONTENT_TYPE] = `${contentType}; charset=${charset}`;
+        }
 
         const streamProtocolResponse: CorrectStreamProtocolResponse = {
-            headers: cacheEntry.headers,
+            headers,
             data: stream,
             statusCode: cacheEntry.statusCode
         };
@@ -55,4 +105,8 @@ export class CachingStreamInterceptor {
 
     }
 
+}
+
+export interface HeaderMap {
+    [key: string]: string | string[];
 }

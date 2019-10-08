@@ -4,11 +4,15 @@ import {Elements} from '../util/Elements';
 import {ContextMenuType, ContextMenuTypes} from './ContextMenuType';
 import {MatchingSelector} from './MatchingSelector';
 import {AnnotationDescriptors} from '../metadata/AnnotationDescriptors';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {TriggerEvent} from './TriggerEvent';
 import {DocDescriptor} from '../metadata/DocDescriptor';
 import {DocFormatFactory} from '../docformat/DocFormatFactory';
-import {forDict} from '../util/Functions';
+import {forDict} from 'polar-shared/src/util/Functions';
+import {ElectronContextMenus} from './electron/ElectronContextMenus';
+import {BrowserContextMenus} from './browser/BrowserContextMenus';
+import {BrowserContextMenu} from './browser/BrowserContextMenu';
+import {Platforms} from "../util/Platforms";
 
 const log = Logger.create();
 
@@ -26,13 +30,16 @@ export class ContextMenuController {
     constructor(model: Model) {
         this.model = model;
 
-        ipcRenderer.on('context-menu-command', (event: any, arg: any) => {
+        if (ipcRenderer) {
 
-            // I don't think we need to listen to these here but rather in the
-            // specific controllers.
+            ipcRenderer.on('context-menu-command', (event: any, arg: any) => {
 
-        });
+                // I don't think we need to listen to these here but rather in the
+                // specific controllers.
 
+            });
+
+        }
     }
 
     public start() {
@@ -42,16 +49,18 @@ export class ContextMenuController {
 
         log.info("Starting ContextMenuController");
 
-        document.querySelectorAll(".page").forEach((targetElement) => {
-            this.registerPageContextMenuListener(<HTMLElement> targetElement);
-        });
 
-        // TODO: this won't work because onContextMenuHandler is tightly bound
-        // to assuming it's working within a .page
-        //
-        // document.querySelectorAll("*").forEach((targetElement) => {
-        //     this.registerDefaultContextMenuListener(<HTMLElement> targetElement);
-        // });
+        if (Platforms.isDesktop()) {
+
+            BrowserContextMenus.create();
+
+            document.querySelectorAll(".page").forEach((targetElement) => {
+                this.registerPageContextMenuListener(<HTMLElement> targetElement);
+            });
+
+        } else {
+            log.warn("Not running context menu on mobile device");
+        }
 
     }
 
@@ -63,6 +72,7 @@ export class ContextMenuController {
                                                ".area-highlight",
                                                ".pagemark",
                                                ".page"] );
+            event.preventDefault();
 
         });
 
@@ -73,19 +83,20 @@ export class ContextMenuController {
         targetElement.addEventListener('contextmenu', (event) => {
 
             this.onContextMenuHandler(event, [ "*" ] );
+            event.preventDefault();
 
         });
 
     }
 
-    private onContextMenuHandler(event: PointerEvent, annotationSelectors: string[]) {
+    private onContextMenuHandler(event: MouseEvent, annotationSelectors: string[]) {
 
         const matchingSelectors
             = ContextMenuController.elementsFromEventMatchingSelectors(event, annotationSelectors );
 
         const contextMenuTypes: ContextMenuType[] = [];
 
-        forDict(matchingSelectors, (selector: any, current: any) => {
+        forDict(matchingSelectors, (selector: string, current: MatchingSelector) => {
             if (current.elements.length > 0) {
                 contextMenuTypes.push(ContextMenuController.toContextMenuType(current.selector));
             }
@@ -97,7 +108,7 @@ export class ContextMenuController {
 
         log.info("Creating context menu for contextMenuTypes: ", contextMenuTypes);
 
-        const pageElement = Elements.untilRoot(event.target, ".page");
+        const pageElement = Elements.untilRoot(<HTMLElement> event.target, ".page");
 
         const docFormat = DocFormatFactory.getInstance();
 
@@ -114,7 +125,7 @@ export class ContextMenuController {
 
         };
 
-        ipcRenderer.send('context-menu-trigger', TriggerEvent.create({
+        const triggerEvent = TriggerEvent.create({
             point: {
                 x: event.pageX,
                 y: event.pageY
@@ -138,18 +149,73 @@ export class ContextMenuController {
             contextMenuTypes,
             matchingSelectors,
             docDescriptor
-        }));
+        });
+
+        // ElectronContextMenus.trigger(triggerEvent);
+
+        BrowserContextMenus.trigger(triggerEvent, event);
 
     }
 
-    public static elementsFromEvent(event: any) {
+    /**
+     * Pagemarks have pointer-events: none and they don't show up when using
+     * elementsFromPoint so we have to temporarily enable them.
+     */
+    private static withActivePagemarks<T>(closure: () => T) {
 
-        // the point must be relative to the viewport
-        const point = {x: event.clientX, y: event.clientY};
+        interface ElementStyleRestore {
+            readonly element: HTMLElement;
+            readonly pointerEvents: string | null;
+        }
 
-        const doc = event.target.ownerDocument;
+        const elements =
+            <HTMLElement[]> Array.from(document.querySelectorAll(".pagemark"));
 
-        return doc.elementsFromPoint(point.x, point.y);
+        const elementStyleRestores: ElementStyleRestore[] = [];
+
+        for (const element of elements) {
+
+            elementStyleRestores.push({
+                element, pointerEvents: element.style.pointerEvents
+            });
+
+            element.style.pointerEvents = 'auto';
+
+        }
+
+        const result = closure();
+
+        for (const restore of elementStyleRestores) {
+            restore.element.style.pointerEvents = restore.pointerEvents;
+        }
+
+        return result;
+
+    }
+
+
+    public static elementsFromEvent(event: MouseEvent) {
+
+        // https://stackoverflow.com/questions/14176988/why-is-document-elementfrompoint-affected-by-pointer-events-none
+
+        if (event.target instanceof HTMLElement) {
+
+            // the point must be relative to the viewport
+            const point = {x: event.clientX, y: event.clientY};
+
+            const doc = event.target.ownerDocument;
+
+            if (doc) {
+
+                return this.withActivePagemarks(() => {
+                    return <HTMLElement[]> doc.elementsFromPoint(point.x, point.y);
+                });
+
+            }
+
+        }
+
+        return [];
 
     }
 
@@ -167,7 +233,8 @@ export class ContextMenuController {
      * @param event
      * @param selectors
      */
-     public static elementsFromEventMatchingSelectors(event: any, selectors: string[]): MatchingSelectorMap {
+     public static elementsFromEventMatchingSelectors(event: MouseEvent,
+                                                      selectors: string[]): MatchingSelectorMap {
 
         const result: MatchingSelectorMap = {};
 

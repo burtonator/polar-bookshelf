@@ -10,7 +10,7 @@
  *
  */
 import {ObjectPathEntry} from './ObjectPathEntry';
-import {Paths} from '../util/Paths';
+import {Paths} from 'polar-shared/src/util/Paths';
 
 export class ObjectPaths {
 

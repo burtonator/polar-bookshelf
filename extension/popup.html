@@ -1,0 +1,74 @@
+<html>
+<head>
+
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+
+    <style>
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            font-size: 14px;
+
+        }
+
+        .saving, .success, .failure {
+            min-width: 250px;
+            margin: 0 !important;
+        }
+
+        .success {
+        }
+
+        .success img {
+            margin-right: 10px;
+        }
+
+        .success, .failure {
+
+        }
+
+    </style>
+
+    <script src="./popup-bundle.js"></script>
+
+</head>
+
+<body>
+
+<div class="alert alert-secondary saving p-1" role="alert">
+
+    <i class="fas fa-circle-notch fa-spin text-muted"></i>
+
+    <strong>Saving to Polar</strong>
+
+</div>
+
+<div class="alert alert-secondary success p-1" role="alert" style="display: none">
+    <img src="./icon-32.png">
+
+    <strong>Page successfully saved to Polar!</strong>
+</div>
+
+<div class="alert alert-danger failure p-1" role="alert" style="display: none">
+
+    <strong>
+        Failed to save!  Please make sure the Polar desktop app is running as
+        capture is <b>not</b> currently supported in the Polar web app.
+
+        <br>
+
+        <a id="download-link"
+           href="#"
+           target="_top">Click here to download Polar</a>
+
+    </strong>
+
+</div>
+
+</body>
+</html>

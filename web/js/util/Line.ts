@@ -1,4 +1,4 @@
-import {isPresent, notNull, Preconditions} from '../Preconditions';
+import {isPresent, notNull, Preconditions} from 'polar-shared/src/Preconditions';
 
 
 /**
@@ -20,7 +20,7 @@ export class Line {
         this.start = Preconditions.assertNumber(start, "start");
         this.end = Preconditions.assertNumber(end, "end");
         this.axis = axis; // TODO validate
-        //this.length = length;
+        // this.length = length;
     }
 
     /**
@@ -94,10 +94,15 @@ export class Line {
      * start origin.
      *
      */
-    multiply(scalar: number) {
-
+    multiply(scalar: number): Line {
         return new Line(this.start * scalar, this.end * scalar, this.axis);
+    }
 
+    /**
+     * Call Math.floor on the points in this line.
+     */
+    floor(): Line {
+        return new Line(Math.floor(this.start), Math.floor(this.end), this.axis);
     }
 
     toJSON() {
@@ -107,7 +112,7 @@ export class Line {
             start: this.start,
             end: this.end,
             length: this.length
-        }
+        };
 
     }
 

@@ -1,4 +1,4 @@
-import {ILogger} from './ILogger';
+import {ILogger} from 'polar-shared/src/logger/ILogger';
 import {LogLevel} from './LogLevel';
 
 export class FilteredLogger implements ILogger {

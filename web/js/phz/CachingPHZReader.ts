@@ -1,6 +1,6 @@
 import {PHZReader} from './PHZReader';
 import {ResourceEntry} from './ResourceEntry';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {CompressedReader} from './CompressedReader';
 
 const log = Logger.create();
@@ -39,8 +39,8 @@ export class CachingPHZReader implements CompressedReader {
      */
     public async init() {
 
-        this.delegate = new PHZReader(this.path);
-        await this.delegate!.init();
+        this.delegate = new PHZReader();
+        await this.delegate!.init(this.path);
 
         setTimeout(async () => {
 
@@ -78,20 +78,6 @@ export class CachingPHZReader implements CompressedReader {
         return await this.delegate!.getResourceAsStream(resourceEntry);
     }
 
-    async openWhenNecessary() {
-
-        if(this.delegate) {
-            // we are done.  There is already a delegate we can use.
-            return;
-        }
-
-        log.info("Caching PHZReader being re-opened: " + this.path);
-        ++this.reopened;
-
-        await this.init();
-
-    }
-
     public async close() {
 
         // copy the delegate so that nothing can see this.delegate as being
@@ -101,6 +87,20 @@ export class CachingPHZReader implements CompressedReader {
         this.delegate = undefined;
 
         await delegate!.close();
+
+    }
+
+    private async openWhenNecessary() {
+
+        if (this.delegate) {
+            // we are done.  There is already a delegate we can use.
+            return;
+        }
+
+        log.info("Caching PHZReader being re-opened: " + this.path);
+        ++this.reopened;
+
+        await this.init();
 
     }
 

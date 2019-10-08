@@ -1,8 +1,10 @@
 import {TraceEvent} from '../../proxies/TraceEvent';
-import {Preconditions} from '../../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {PageMeta} from '../../metadata/PageMeta';
 import {DocMeta} from '../../metadata/DocMeta';
 import {Container} from '../../components/containers/Container';
+import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 export class AnnotationEvent extends TraceEvent {
 
@@ -18,13 +20,13 @@ export class AnnotationEvent extends TraceEvent {
      *
      * @type {DocMeta}
      */
-    public docMeta: DocMeta;
+    public docMeta: IDocMeta;
 
     /**
      *
      * @type {PageMeta}
      */
-    public pageMeta: PageMeta;
+    public pageMeta: IPageMeta;
 
     /**
      * The page we're working with.
@@ -47,7 +49,6 @@ export class AnnotationEvent extends TraceEvent {
      */
     public container: Container;
 
-
     constructor(opts: any = {}) {
 
         super(opts);
@@ -59,13 +60,13 @@ export class AnnotationEvent extends TraceEvent {
         this.traceEvent = opts.traceEvent;
         this.container = opts.container;
 
-        if(this.value) {
+        if (this.value) {
             this.id = this.value.id;
         } else {
             this.id = this.previousValue.id;
         }
 
-        Preconditions.assertNotNull(this.pageMeta, "pageMeta");
+        Preconditions.assertPresent(this.pageMeta, "pageMeta");
 
     }
 

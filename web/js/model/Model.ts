@@ -1,16 +1,19 @@
 import {DocMeta} from '../metadata/DocMeta';
 import {DocMetas} from '../metadata/DocMetas';
 import {Reactor} from '../reactor/Reactor';
-import {PagemarkType} from '../metadata/PagemarkType';
-import {Preconditions} from '../Preconditions';
+import {PagemarkType} from 'polar-shared/src/metadata/PagemarkType';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Pagemarks} from '../metadata/Pagemarks';
-import {Objects} from '../util/Objects';
 import {DocMetaDescriber} from '../metadata/DocMetaDescriber';
-import {Logger} from '../logger/Logger';
-import {IListenablePersistenceLayer} from '../datastore/IListenablePersistenceLayer';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {ListenablePersistenceLayer} from '../datastore/ListenablePersistenceLayer';
 import {ModelPersisterFactory} from './ModelPersisterFactory';
 import {DocDetail} from '../metadata/DocDetail';
-import {Optional} from '../util/ts/Optional';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {DocFormatFactory} from '../docformat/DocFormatFactory';
+import {PersistenceLayerHandler} from '../datastore/PersistenceLayerHandler';
+import {PageNumber} from "polar-shared/src/metadata/IPageMeta";
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 const log = Logger.create();
 
@@ -22,20 +25,20 @@ export class Model {
     // be loaded yet and / or might be invalidated if the document is closed.
     //
     // TODO: we create a fake document which is eventually replaced.
-    public docMeta: DocMeta = NULL_DOC_META;
+    public docMeta: IDocMeta = NULL_DOC_META;
 
-    private readonly persistenceLayer: IListenablePersistenceLayer;
+    public readonly persistenceLayerProvider: () => ListenablePersistenceLayer;
 
     private readonly modelPersisterFactory: ModelPersisterFactory;
 
     private reactor: Reactor<any>;
 
-    private docMetaPromise: Promise<DocMeta> = Promise.resolve(NULL_DOC_META);
+    private docMetaPromise: Promise<IDocMeta> = Promise.resolve(NULL_DOC_META);
 
-    constructor(persistenceLayer: IListenablePersistenceLayer) {
+    constructor(public readonly persistenceLayerHandler: PersistenceLayerHandler) {
 
-        this.persistenceLayer = persistenceLayer;
-        this.modelPersisterFactory = new ModelPersisterFactory(persistenceLayer);
+        this.persistenceLayerProvider = () => persistenceLayerHandler.get();
+        this.modelPersisterFactory = new ModelPersisterFactory(persistenceLayerHandler);
 
         this.reactor = new Reactor();
         this.reactor.registerEvent('documentLoaded');
@@ -52,11 +55,13 @@ export class Model {
                                 currentPageNumber: number,
                                 docDetail: DocDetail | undefined) {
 
-        log.notice("Document loaded with fingerprint: " + fingerprint)
+        log.notice("Document loaded with fingerprint: " + fingerprint);
 
-        let docMeta: DocMeta | undefined;
+        const persistenceLayer = this.persistenceLayerProvider();
 
-        if (! await this.persistenceLayer.contains(fingerprint)) {
+        let docMeta = await persistenceLayer.getDocMeta(fingerprint);
+
+        if (!docMeta) {
 
             console.warn("New document found. Creating initial DocMeta");
 
@@ -67,15 +72,13 @@ export class Model {
                                       Optional.of(docDetail).map(current => current.filename)
                                           .getOrUndefined());
 
-            await this.persistenceLayer.sync(fingerprint, docMeta);
+            await persistenceLayer.write(fingerprint, docMeta);
 
             // I'm not sure this is the best way to resolve this as swapping in
             // the docMetaPromise without any synchronization seems like we're
             // asking for a race condition.
 
         }
-
-        docMeta = await this.persistenceLayer.getDocMeta(fingerprint);
 
         if (docMeta === undefined) {
             throw new Error("Unable to load DocMeta: " + fingerprint);
@@ -95,6 +98,8 @@ export class Model {
         // to swap out the docMeta with the right version.
         this.docMetaPromise = Promise.resolve(docMeta);
 
+        this.handleExtendedMetadataExtraction();
+
         this.reactor.dispatchEvent('documentLoaded', {
             fingerprint,
             nrPages,
@@ -103,6 +108,44 @@ export class Model {
         });
 
         return this.docMeta;
+
+    }
+
+    /**
+     * Go through and extract additional metadata on first page load.
+     */
+    private handleExtendedMetadataExtraction() {
+
+        const docFormat = DocFormatFactory.getInstance();
+
+        const currentPageElement = docFormat.getCurrentPageElement();
+
+        if (!currentPageElement) {
+            log.warn("No current page element");
+            return;
+        }
+
+        const pageNum = docFormat.getPageNumFromPageElement(currentPageElement);
+
+        if (pageNum !== 1) {
+            log.warn("Working with wrong page number: " + pageNum);
+            return;
+        }
+
+        DocMetas.withBatchedMutations(this.docMeta, () => {
+
+            const pageMeta = DocMetas.getPageMeta(this.docMeta, pageNum);
+
+            if (!pageMeta.pageInfo.dimensions) {
+                const currentPageDetail = docFormat.getCurrentPageDetail();
+
+                if (currentPageDetail.dimensions) {
+                    pageMeta.pageInfo.dimensions = currentPageDetail.dimensions;
+                }
+
+            }
+
+        });
 
     }
 
@@ -126,7 +169,7 @@ export class Model {
 
         this.assertPageNum(pageNum);
 
-        let pagemark = Pagemarks.create({
+        const pagemark = Pagemarks.create({
 
             // just set docMeta pageMarkType = PagemarkType.SINGLE_COLUMN by
             // default for now until we add multiple column types and handle
@@ -138,7 +181,7 @@ export class Model {
 
         });
 
-        let docMeta = await this.docMetaPromise;
+        const docMeta = await this.docMetaPromise;
 
         Pagemarks.updatePagemark(docMeta, pageNum, pagemark);
 
@@ -147,11 +190,23 @@ export class Model {
 
     }
 
+    public async createPagemarksForRange(end: PageNumber, percentage: number) {
+
+        const docMeta = await this.docMetaPromise;
+
+        const pagemarkRefs = Pagemarks.updatePagemarksForRange(docMeta, end, percentage);
+
+        for (const pagemarkRef of pagemarkRefs) {
+            this.reactor.dispatchEvent('createPagemark', pagemarkRef);
+        }
+
+    }
+
     /**
-     * @refactor This code should be in its own dedicated helper class
+     * @refactor This code should move to Pagemarks.ts
      * @param pageNum
      */
-    erasePagemark(pageNum: number) {
+    public erasePagemark(pageNum: number) {
 
         Preconditions.assertNumber(pageNum, "pageNum");
 
@@ -159,27 +214,23 @@ export class Model {
 
         this.assertPageNum(pageNum);
 
-        if(this.docMeta) {
+        if (this.docMeta) {
 
-            let pageMeta = this.docMeta.getPageMeta(pageNum);
+            Pagemarks.deletePagemark(this.docMeta, pageNum);
 
-            // FIXME: this is actually wrong because I need to delete the RIGHT
-            // pagemark. NOT just delete all of them.
-            Objects.clear(pageMeta.pagemarks);
-
-            // FIXME: this can be done with a mutation listener now.
             this.reactor.dispatchEvent('erasePagemark', {pageNum});
 
         }
 
     }
 
-    assertPageNum(pageNum: number) {
+    private assertPageNum(pageNum: number) {
 
-        if(pageNum == null)
+        if (pageNum == null) {
             throw new Error("Must specify page pageNum");
+        }
 
-        if(pageNum <= 0) {
+        if (pageNum <= 0) {
             throw new Error("Page numbers begin at 1");
         }
 
@@ -191,11 +242,8 @@ export interface DocumentLoadedEvent {
     readonly fingerprint: string;
     readonly nrPages: number;
     readonly currentPageNumber: number;
-    readonly docMeta: DocMeta
+    readonly docMeta: IDocMeta;
 }
 
-
-export interface DocumentLoadedCallback {
-    (event: DocumentLoadedEvent): void;
-}
+export type DocumentLoadedCallback = (event: DocumentLoadedEvent) => void;
 

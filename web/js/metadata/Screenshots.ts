@@ -1,7 +1,7 @@
 import {Screenshot} from './Screenshot';
-import {Hashcodes} from '../Hashcodes';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
 import {ImageOpts} from './Image';
-import {ISODateTimeStrings} from './ISODateTimeStrings';
+import {ISODateTimeStrings} from 'polar-shared/src/metadata/ISODateTimeStrings';
 
 export class Screenshots {
 

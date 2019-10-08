@@ -1,8 +1,8 @@
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {Elements} from '../../util/Elements';
-import {notNull} from '../../Preconditions';
+import {notNull} from 'polar-shared/src/Preconditions';
 import {ProgressEvent} from './ProgressEvent';
-import {Strings} from '../../util/Strings';
+import {Strings} from "polar-shared/src/util/Strings";
 
 const log = Logger.create();
 

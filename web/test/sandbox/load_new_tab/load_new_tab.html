@@ -1,0 +1,33 @@
+<html>
+<body>
+
+<div id="clickme">click me</div>
+
+<script>
+
+    let element = document.getElementById('clickme');
+
+    element.addEventListener('dblclick', event => {
+
+        console.log("FIXME: is trusted: ", event.isTrusted)
+
+        const href = 'http://example.com';
+
+        // const anchor = Object.assign(document.createElement('a'), {
+        //     target: '_blank',
+        //     href
+        // });
+
+        // anchor.dispatchEvent(event);
+
+        // document.location.href = href;
+
+        window.open(href, '_blank');
+
+
+    });
+
+</script>
+
+</body>
+</html>

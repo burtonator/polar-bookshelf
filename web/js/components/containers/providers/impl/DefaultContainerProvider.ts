@@ -5,11 +5,11 @@ import {Container} from '../../Container';
 
 export class DefaultContainerProvider extends ContainerProvider {
 
-    getContainers() {
+    public getContainers() {
         return super._getContainers(".page");
     }
 
-    createContainerLifecycleListener(container: Container) {
+    public createContainerLifecycleListener(container: Container) {
         return new DefaultContainerLifecycleListener(container);
     }
 

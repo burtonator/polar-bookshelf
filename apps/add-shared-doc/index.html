@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <link rel="icon" href="/icon.ico">
+
+    <!-- TODO: these need to load locally before we enable firebase in production -->
+    <script src="/node_modules/firebase/firebase.js"></script>
+    <script src="/node_modules/firebaseui/dist/firebaseui.js"></script>
+    <link rel="stylesheet" href="/node_modules/firebaseui/dist/firebaseui.css" />
+
+    <title>Polar: Adding shared doc...</title>
+
+</head>
+<body>
+
+<noscript>
+    You need to enable JavaScript to run this app.
+    <a href="https://getpolarized.io/">Powered by Polar</a>
+</noscript>
+
+<div id="root" style="height: 100%;">
+
+    <div id="loading-v1"
+         style="display: flex; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh;">
+        <!-- a simple loading widget -->
+
+        <div style="margin: auto; ">
+            <img width="250" height="250" src="../../icon.svg"/>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+<script src="/apps/service-worker-registration.js"></script>
+<script src="/apps/init.js"></script>
+
+<script>
+
+    const fallbackLoader = () => {
+
+        // REQUIRE_ENTRY_POINT: there seems to be an Electron bug where when
+        // loading over HTTP we can't find node_modules until we require().  We can
+        // only find standard modules like 'fs' and 'electron' but not custom
+        // modules so we have to just have these four lines repeated over and over
+        // for each of our main apps.  In the future we should try to track down
+        // why this is happening but I spent 1-2 hours on trying to figure out
+        // the root cause with no resolution and this is a temporary workaround.
+        const {remote} = require('electron');
+        const path = require('path');
+        const appPath = remote.getGlobal("appPath");
+        require(path.join(appPath, "apps", "add-shared-doc", "js", "entry.js"));
+
+    };
+
+    injectApp('/web/dist/add-shared-doc-bundle.js', fallbackLoader);
+
+</script>
+
+</html>

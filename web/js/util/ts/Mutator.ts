@@ -1,4 +1,4 @@
-import {Dictionaries} from '../Dictionaries';
+import {Dictionaries} from 'polar-shared/src/util/Dictionaries';
 
 export class Mutator {
 

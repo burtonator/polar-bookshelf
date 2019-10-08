@@ -1,5 +1,6 @@
-import {Preconditions} from '../Preconditions';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {Rects} from '../Rects';
+import {Rect} from '../Rect';
 
 const $ = require('jquery');
 
@@ -16,13 +17,14 @@ export class Elements {
      * @return {Rect}
      */
 
-    // FIXME: this should be getPageOffsetRect and have a relativeToParentElement which is optional.
-    public static getRelativeOffsetRect(element: HTMLElement, parentElement?: HTMLElement): any {
+    // FIXME: this should be getPageOffsetRect and have a
+    // relativeToParentElement which is optional.
+    public static getRelativeOffsetRect(element: HTMLElement, parentElement?: HTMLElement): Rect {
 
         Preconditions.assertNotNull(element, "element");
 
         if (! parentElement) {
-            parentElement = element.ownerDocument.documentElement;
+            parentElement = element.ownerDocument!.documentElement!;
         }
 
         const offsetRect = {left: 0, top: 0, width: 0, height: 0};
@@ -81,9 +83,9 @@ export class Elements {
      *
      * @param html The HTML element to create
      */
-    public static createElementHTML(html: string): HTMLElement {
+    public static createElementHTML(html: string, tagName = 'div' ): HTMLElement {
 
-        const div = document.createElement("div");
+        const div = document.createElement(tagName);
         div.innerHTML = html;
 
         return <HTMLElement> div.firstChild!;
@@ -125,11 +127,11 @@ export class Elements {
     }
 
     /**
-     * Keep searching parent notes until we find an element matching the selector,
-     * or return null when one was not found.
+     * Keep searching parent notes until we find an element matching the
+     * selector, or return null when one was not found.
      *
      */
-    public static untilRoot(element: any, selector: string): any {
+    public static untilRoot(element: HTMLElement, selector: string): any {
 
         // TODO: refactor this for typescript
 
@@ -160,13 +162,13 @@ export class Elements {
             throw Error("Not given a div");
         }
 
-        const windowHeight = $(window).height(),
-            docScroll = $(document).scrollTop(),
-            divPosition = $(div).offset().top,
-            divHeight = $(div).height();
+        const windowHeight = $(window).height();
+        const docScroll = $(document).scrollTop();
+        const divPosition = $(div).offset().top;
+        const divHeight = $(div).height();
 
-        const hiddenBefore = docScroll - divPosition,
-            hiddenAfter = (divPosition + divHeight) - (docScroll + windowHeight);
+        const hiddenBefore = docScroll - divPosition;
+        const hiddenAfter = (divPosition + divHeight) - (docScroll + windowHeight);
 
         if ((docScroll > divPosition + divHeight) || (divPosition > docScroll + windowHeight)) {
             return 0;
@@ -182,6 +184,25 @@ export class Elements {
             }
 
             return result;
+        }
+
+    }
+
+    public static getScrollParent(element: Element | null | undefined): Element | undefined {
+
+        if (!element) {
+            return undefined;
+        }
+
+        const scrollHeight = element.scrollHeight;
+        const clientHeight = element.clientHeight;
+
+        if (scrollHeight > clientHeight) {
+            // console.log("scroll parent based on: ", {scrollHeight, clientHeight});
+            return element;
+
+        } else {
+            return this.getScrollParent(element.parentElement);
         }
 
     }

@@ -1,6 +1,19 @@
 import {Tags} from './Tags';
 import {assert} from 'chai';
 
+describe('basename', function() {
+
+    it("basename", function() {
+        assert.equal(Tags.basename('linux'), 'linux');
+        assert.equal(Tags.basename(''), '');
+        assert.equal(Tags.basename('/foo/bar'), 'bar');
+        assert.equal(Tags.basename('/foo'), 'foo');
+
+    });
+
+});
+
+
 describe('RegExp', function() {
 
     it("test unicode literal", function() {
@@ -39,6 +52,35 @@ describe('RegExp', function() {
 
         assert.throws(() => Tags.assertValid("#deck::microsoft"));
 
+        assert.throws(() => Tags.assertValid("#deck:foo:bar"));
+        assert.throws(() => Tags.assertValid("#deck::foo"));
+
+    });
+
+    it("tags with two colons", function() {
+        assert.throws(() => Tags.assertValid("#bar:cat:dog"));
+    });
+
+});
+
+describe('folders', function() {
+
+    it("test unicode literal", function() {
+
+        // Tags.assertValid("/");
+        Tags.assertValid("/tmp");
+        Tags.assertValid("/tmp/foo");
+        Tags.assertValid("/tmp/foo/CatDog");
+
+        // TODO this SHOULD pass but it does not... I think we should support
+        // spaces in tags now. even though they're not really supported in
+        // other systems.
+        // Tags.assertValid("/tmp/foo/Cat Dog");
+
+        assert.throws(() => Tags.assertValid("/tmp/foo/"));
+        assert.throws(() => Tags.assertValid("/"));
+        assert.throws(() => Tags.assertValid("/tmp//foo"));
+
     });
 
 });
@@ -47,11 +89,43 @@ describe('type tags', function() {
 
     it("basic functionality", function() {
 
-        assert.equal(Tags.stripTypedLabel("#foo:bar"), "#foobar");
-        assert.equal(Tags.stripTypedLabel("#:bar"), "#:bar");
-        assert.equal(Tags.stripTypedLabel("#bar:"), "#bar:");
+        assert.equal(Tags.stripTypedLabel("#foo:bar").get(), "#foobar");
+        assert.equal(Tags.stripTypedLabel("#:bar").get(), "#:bar");
+        assert.equal(Tags.stripTypedLabel("#bar:").get(), "#bar:");
 
+        assert.equal(Tags.stripTypedLabel("#foo/bar").get(), "#foobar");
+        assert.equal(Tags.stripTypedLabel("#foo/bar/blah").get(), "#foobarblah");
+
+        assert.equal(Tags.stripTypedLabel("#base:foo/bar").get(), "#basefoobar");
+        assert.equal(Tags.stripTypedLabel("#base:foo/bar/blah").get(), "#basefoobarblah");
+    });
+
+    it("don't allow multiple colons", function() {
+        assert.ok(! Tags.stripTypedLabel("#bar:cat:dog").isPresent());
+        });
+
+    it("don't allow multi slashes", function() {
+        assert.ok(! Tags.stripTypedLabel("#bar//dog").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#//dog").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#dog//").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#//").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#bar///dog").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#///dog").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#dog///").isPresent());
+        assert.ok(! Tags.stripTypedLabel("#///").isPresent());
     });
 
 });
 
+
+describe('folder tags', function() {
+
+    it("basic functionality", function() {
+        Tags.assertValid('foo/bar');
+        Tags.assertValid('/foo/bar');
+
+        Tags.assertValid('cat/dog/boy/girl');
+    });
+
+
+});

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css" />
+
+    <script src="https://unpkg.com/mocha@5.2.0/mocha.js"></script>
+    <link href="https://unpkg.com/mocha@5.2.0/mocha.css" rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 5px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="firebaseui-auth-container"></div>
+
+<div id="sign-in-status"></div>
+<div id="sign-in"></div>
+<pre id="account-details"></pre>
+
+<div id="mocha"></div>
+<div id="snapshot-logger"></div>
+
+
+<script>
+
+    // REQUIRE_ENTRY_POINT: there seems to be an Electron bug where when
+    // loading over HTTP we can't find node_modules until we require().  We can
+    // only find standard modules like 'fs' and 'electron' but not custom
+    // modules so we have to just have these four lines repeated over and over
+    // for each of our main apps.  In the future we should try to track down
+    // why this is happening but I spent 1-2 hours on trying to figure out
+    // the root cause with no resolution and this is a temporary workaround.
+    const {remote} = require('electron/electron');
+    const path = require('path');
+    const appPath = remote.getGlobal("appPath");
+    require(path.join(appPath, "content.js"));
+
+</script>
+
+</body>
+</html>

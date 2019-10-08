@@ -3,12 +3,11 @@
  */
 import {Dict} from '../../util/Dict';
 import {Result} from '../../util/Result';
-import {CapturedDoc} from './CaptureResults';
+import {Captured, CapturedDoc, DocTypeFormat, Overflow, ScrollBox} from './Captured';
 import {Results} from '../../util/Results';
 import {AdBlocker} from './AdBlocker';
 
 export class ContentCapture {
-
 
     public static execute(): Result<any> {
         return Results.execute(() => ContentCapture.captureHTML());
@@ -32,7 +31,9 @@ export class ContentCapture {
      * @param [result] The result we are building.
      *
      */
-    public static captureHTML(contentDoc?: Document, url?: string, result?: any): any {
+    public static captureHTML(contentDoc?: Document,
+                              url?: string,
+                              result?: Captured): Captured {
 
         const ENABLE_IFRAMES = true;
 
@@ -42,37 +43,33 @@ export class ContentCapture {
         }
 
         if (!url) {
-            url = contentDoc.location.href;
+            url = contentDoc.location!.href;
         }
 
         if (!result) {
+
+            const scrollBox = this.computeScrollBox(contentDoc);
 
             result = {
 
                 /**
                  * The captured documents indexed by URL
-                 * @type {Object<String,Object>}
                  */
                 capturedDocuments: {},
 
-                // TODO: this should be something other chan chtml now.  This
-                // actually represents the format of the captured representation
-                // not the actual storage value on disk.
                 type: "phz",
 
                 version: "4.0.0",
 
                 title: contentDoc.title,
 
-                url: contentDoc.location.href,
+                url: contentDoc.location!.href,
 
                 // keep track of the scroll height and width of the document.
                 // when the document is able to be adjusted to the size of the
                 // window then we're able to display it within the HTML viewer.
-                scroll: {
-                    height: contentDoc.body.scrollHeight,
-                    width: contentDoc.body.scrollWidth
-                }
+                scroll: scrollBox,
+                scrollBox
 
             };
 
@@ -83,16 +80,21 @@ export class ContentCapture {
             return result;
         }
 
+        // this has to be done BEFORE we clone because there is no mapping from
+        // the stylesheet to the element after we clone it.
+        this.inlineStyles(contentDoc);
+
         const cloneDoc: Document = <Document> contentDoc.cloneNode(true);
 
         result.capturedDocuments[url]
-            = ContentCapture.captureDoc(cloneDoc, contentDoc.location.href);
+            = ContentCapture.captureDoc(cloneDoc, contentDoc.location!.href);
 
         if (ENABLE_IFRAMES) {
 
             console.log("Exporting iframes...");
 
-            // now recurse into all the iframes in this doc and capture their HTML too.
+            // now recurse into all the iframes in this doc and capture their
+            // HTML too.
             const iframes = contentDoc.querySelectorAll("iframe");
 
             console.log("Found N iframes: " + iframes.length);
@@ -100,13 +102,13 @@ export class ContentCapture {
             let nrHandled = 0;
             let nrSkipped = 0;
 
-            iframes.forEach((iframe) => {
+            for (const iframe of Array.from(iframes)) {
 
                 const frameValidity = ContentCapture.computeFrameValidity(iframe);
 
                 if (frameValidity.valid && iframe.contentDocument) {
 
-                    const iframeHref = iframe.contentDocument.location.href;
+                    const iframeHref = iframe.contentDocument.location!.href;
 
                     console.log("Going to capture iframe: " + iframeHref);
                     console.log(iframe.outerHTML);
@@ -115,11 +117,11 @@ export class ContentCapture {
                     ++nrHandled;
 
                 } else {
-                    console.log(`Skipping iframe: (${frameValidity})` + iframe.outerHTML);
+                    console.log(`Skipping iframe: ` + iframe.src, frameValidity, iframe.outerHTML);
                     ++nrSkipped;
                 }
 
-            });
+            }
 
             console.log(`Handled ${nrHandled} and skipped ${nrSkipped} iframes`);
 
@@ -140,12 +142,16 @@ export class ContentCapture {
         };
 
         if (! iframe.contentDocument) {
+            console.log("iframe not valid due to no contentDocument");
+
             return {reason: "NO_CONTENT_DOCUMENT", valid: false};
         }
 
         // TODO: only work with http and https URLs or about:blank
 
         if (iframe.style.display === "none") {
+
+            console.log("iframe not valid due to display:none");
 
             // TODO: we need a more practical mechanism to determine if we
             // are display none including visibility and calculated CSS and
@@ -164,11 +170,16 @@ export class ContentCapture {
             throw new Error("No cloneDoc");
         }
 
-        // FIXME: include a fingerprint in the output JSON which should probably
+        // TODO: include a fingerprint in the output JSON which should probably
         // be based on the URL.
 
         // TODO: store many of these fields in the HTML too because the iframes
         // need to have the same data
+
+        const scrollBox = this.computeScrollBox(cloneDoc);
+
+        const docTypeFormat = this.docTypeFormat(cloneDoc);
+
         const result: CapturedDoc = {
 
             // TODO: capture HTML metadata including twitter card information
@@ -184,12 +195,9 @@ export class ContentCapture {
             // The scroll height of the document as it is currently rendered.
             // This is used as a hint for loading the static form of the
             // document.
-            scrollHeight: cloneDoc.documentElement.scrollHeight,
+            scrollHeight: scrollBox.height,
 
-            scrollBox: {
-                width: cloneDoc.documentElement.scrollWidth,
-                height: cloneDoc.documentElement.scrollHeight,
-            },
+            scrollBox,
 
             // The content as an HTML string
             content: "",
@@ -200,6 +208,10 @@ export class ContentCapture {
              */
             contentTextLength: 0,
 
+            docTypeFormat,
+
+            contentType: (<any> cloneDoc).contentType,
+
             mutations: {
                 eventAttributesRemoved: 0,
                 existingBaseRemoved: false,
@@ -209,59 +221,101 @@ export class ContentCapture {
                 cleanupHead: null,
                 cleanupBase: null,
                 showAriaHidden: 0,
-                adsBlocked: null
             }
 
         };
 
-        // TODO: make the mutations a list of functions that need to be run
-        // and the mutation names just the list of the functions. The functions
-        // can then just return a mutation and the data structures are updated.
+        console.log("Doc type format is: " + docTypeFormat);
 
-        result.mutations.cleanupRemoveScripts = ContentCapture.cleanupRemoveScripts(cloneDoc, url);
-        result.mutations.cleanupHead = ContentCapture.cleanupHead(cloneDoc, url);
-        result.mutations.cleanupBase = ContentCapture.cleanupBase(cloneDoc, url);
-        // result.mutations.adsBlocked = AdBlocker.cleanse(cloneDoc, url);
+        if (docTypeFormat === 'html') {
 
-        // ***  add metadata into the HTML for polar
+            // TODO: make the mutations a list of functions that need to be run
+            // and the mutation names just the list of the functions. The
+            // functions can then just return a mutation and the data
+            // structures are updated.
 
-        document.head.appendChild(ContentCapture.createMeta("polar-url", result.url));
+            result.mutations.cleanupRemoveScripts = ContentCapture.cleanupRemoveScripts(cloneDoc, url);
+            ContentCapture.removeNoScriptElements(cloneDoc);
+            result.mutations.cleanupHead = ContentCapture.cleanupHead(cloneDoc, url);
+            result.mutations.cleanupBase = ContentCapture.cleanupBase(cloneDoc, url);
+            result.mutations.adsBlocked = AdBlocker.cleanse(cloneDoc, url);
 
-        // *** remove javascript html onX elements.
+            // ***  add metadata into the HTML for polar
 
-        const EVENT_ATTRIBUTES = ContentCapture.createEventAttributes();
+            document.head!.appendChild(ContentCapture.createMeta("polar-url", result.url));
 
-        cloneDoc.querySelectorAll("*").forEach((element) => {
+            // *** remove javascript html onX elements.
 
-            Array.from(element.attributes).forEach((attr) => {
-                if (EVENT_ATTRIBUTES[attr.name]) {
-                    element.removeAttribute(attr.name);
-                    ++result.mutations.eventAttributesRemoved;
-                }
+            const EVENT_ATTRIBUTES = ContentCapture.createEventAttributes();
+
+            cloneDoc.querySelectorAll("*").forEach((element) => {
+
+                Array.from(element.attributes).forEach((attr) => {
+                    if (EVENT_ATTRIBUTES[attr.name]) {
+                        element.removeAttribute(attr.name);
+                        ++result.mutations.eventAttributesRemoved;
+                    }
+                });
+
             });
 
-        });
+            // *** remove javascript: anchors.
 
-        // *** remove javascript: anchors.
+            cloneDoc.querySelectorAll("a").forEach((element) => {
 
-        cloneDoc.querySelectorAll("a").forEach((element) => {
+                const href = element.getAttribute("href");
+                if (href && href.indexOf("javascript:") === 0) {
+                    element.removeAttribute("href");
+                    ++result.mutations.javascriptAnchorsRemoved;
+                }
 
-            const href = element.getAttribute("href");
-            if (href && href.indexOf("javascript:") === 0) {
-                element.removeAttribute("href");
-                ++result.mutations.javascriptAnchorsRemoved;
-            }
+            });
 
-        });
+            result.mutations.showAriaHidden = ContentCapture.cleanupShowAriaHidden(cloneDoc);
 
-        result.mutations.showAriaHidden = ContentCapture.cleanupShowAriaHidden(cloneDoc);
+        }
 
-        result.content = ContentCapture.toOuterHTML(cloneDoc);
+        result.content = ContentCapture.toOuterHTML(cloneDoc, docTypeFormat);
         result.contentTextLength = result.content.length;
 
         console.log(`Captured ${url} which has a text length of: ${result.content.length}`);
 
         return result;
+
+    }
+
+    /**
+     * Return the document format of the underlying document by determining if
+     * it's XML or HTML
+     */
+    private static docTypeFormat(doc: Document): DocTypeFormat {
+
+        if (doc.doctype === null || doc.doctype === undefined) {
+            return 'html';
+        }
+
+        if (doc.doctype.name === null || doc.doctype.name === undefined) {
+            return 'html';
+        }
+
+        return doc.doctype.name.toLowerCase() === 'html' ? 'html' : 'xml';
+
+    }
+
+    private static computeScrollBox(doc: Document): ScrollBox {
+
+        if (! doc.documentElement) {
+            throw new Error("No document element");
+        }
+
+        const computedStyle = window.getComputedStyle(doc.documentElement!);
+
+        return {
+            width: doc.documentElement!.scrollWidth,
+            widthOverflow: <Overflow> computedStyle.overflowX || 'visible' ,
+            height: doc.documentElement!.scrollHeight,
+            heightOverflow: <Overflow> computedStyle.overflowY || 'visible' ,
+        };
 
     }
 
@@ -285,11 +339,11 @@ export class ContentCapture {
         base = cloneDoc.createElement("base");
         base.setAttribute("href", url);
 
-        if (cloneDoc.head.firstChild != null) {
+        if (cloneDoc.head!.firstChild != null) {
             // base must be the first element
-            cloneDoc.head.insertBefore(base, cloneDoc.head.firstChild);
+            cloneDoc.head!.insertBefore(base, cloneDoc.head!.firstChild);
         } else {
-            cloneDoc.head.appendChild(base);
+            cloneDoc.head!.appendChild(base);
         }
 
         result.baseAdded = true;
@@ -298,16 +352,16 @@ export class ContentCapture {
 
     }
 
-    static cleanupHead(cloneDoc: Document, url: string): Object {
+    private static cleanupHead(cloneDoc: Document, url: string): any {
 
         // make sure the document has a head.
 
-        let result = {
+        const result = {
             headAdded: false
         };
 
         if (! cloneDoc.head) {
-            cloneDoc.insertBefore(cloneDoc.createElement("head"), cloneDoc.firstChild);
+            cloneDoc.insertBefore(cloneDoc.createElement("head"), cloneDoc.firstElementChild);
             result.headAdded = true;
         }
 
@@ -315,17 +369,77 @@ export class ContentCapture {
 
     }
 
-    static cleanupRemoveScripts(cloneDoc: Document, url: string): Object {
+    private static inlineStyles(doc: Document): any {
 
-        let result = {
+        const result = {
+            inlined: 0
+        };
+
+        function toSerializedStylesheet(styleSheet: CSSStyleSheet): string {
+
+            let buff = "";
+
+            const imports: CSSStyleSheet[] = [];
+
+            for (const rule of Array.from(styleSheet.rules)) {
+
+                // buff += rule.cssText + '\n';
+
+                buff += rule.cssText;
+
+            }
+
+            return buff;
+
+        }
+
+        for (const styleSheet of Array.from(doc.styleSheets)) {
+
+            if (styleSheet.ownerNode instanceof HTMLElement) {
+
+                if (styleSheet.ownerNode.tagName === 'STYLE') {
+
+                    // the ownerNode is just going to be flat out wrong here...
+                    // shoot
+
+                    styleSheet.ownerNode.innerText = toSerializedStylesheet( <CSSStyleSheet> styleSheet);
+                    ++result.inlined;
+                }
+
+            }
+
+        }
+
+        return result;
+
+    }
+
+
+    /**
+     * noscript elements must be removed because they weren't actually used
+     * as part of the original rendered page.
+     */
+    private static removeNoScriptElements(cloneDoc: Document) {
+
+        const elements = Array.from(cloneDoc.documentElement.querySelectorAll('noscript'));
+        for (const element of elements) {
+            element.parentElement!.removeChild(element);
+        }
+
+    }
+
+
+    private static cleanupRemoveScripts(cloneDoc: Document, url: string): any {
+
+        const result = {
             scriptsRemoved: 0
         };
 
         // remove the script elements as these are active and we do not want
         // them loaded in the future.
-        cloneDoc.querySelectorAll("script").forEach(function (scriptElement) {
+        cloneDoc.querySelectorAll("script").forEach((scriptElement) => {
 
-            if(scriptElement.parentElement) {
+            if (scriptElement.parentElement) {
                 scriptElement.parentElement.removeChild(scriptElement);
                 ++result.scriptsRemoved;
             }
@@ -333,7 +447,7 @@ export class ContentCapture {
         });
 
         // make sure the script removal worked
-        if(cloneDoc.querySelectorAll("script").length !== 0) {
+        if (cloneDoc.querySelectorAll("script").length !== 0) {
             throw new Error("Unable to remove scripts");
         }
 
@@ -341,29 +455,12 @@ export class ContentCapture {
 
     }
 
-    static cleanupShowAriaHidden(cloneDoc: Document): number {
-
-        let mutations : number = 0;
-
-        cloneDoc.querySelectorAll("*").forEach(function (element) {
-            if(element.getAttribute("aria-hidden") === "true") {
-                element.setAttribute("aria-hidden", "false");
-                ++mutations;
-            }
-        });
-
-        return mutations;
-
-    }
-
-    static cleanupFullStylesheetURLs(cloneDoc: Document): number {
+    private static cleanupShowAriaHidden(cloneDoc: Document): number {
 
         let mutations: number = 0;
 
-        cloneDoc.querySelectorAll("a").forEach(function (element) {
-
-            let href = element.getAttribute("href");
-            if(href) {
+        cloneDoc.querySelectorAll("*").forEach((element) => {
+            if (element.getAttribute("aria-hidden") === "true") {
                 element.setAttribute("aria-hidden", "false");
                 ++mutations;
             }
@@ -373,7 +470,24 @@ export class ContentCapture {
 
     }
 
-    static doctypeToOuterHTML(doctype: DocumentType) {
+    private static cleanupFullStylesheetURLs(cloneDoc: Document): number {
+
+        let mutations: number = 0;
+
+        cloneDoc.querySelectorAll("a").forEach((element) => {
+
+            const href = element.getAttribute("href");
+            if (href) {
+                element.setAttribute("aria-hidden", "false");
+                ++mutations;
+            }
+        });
+
+        return mutations;
+
+    }
+
+    private static doctypeToOuterHTML(doctype: DocumentType) {
 
         return "<!DOCTYPE "
                + doctype.name
@@ -384,8 +498,12 @@ export class ContentCapture {
 
     }
 
-    static createMeta(name: string, content: string) {
-        let meta = document.createElement("meta");
+    private static processingInstructionToOuterHTML(processingInstruction: ProcessingInstruction) {
+        return `<?${processingInstruction.target} ${processingInstruction.data} ?>`;
+    }
+
+    private static createMeta(name: string, content: string) {
+        const meta = document.createElement("meta");
         meta.setAttribute("name", name);
         meta.setAttribute("content", content);
         return meta;
@@ -403,26 +521,58 @@ export class ContentCapture {
      *
      * @param doc
      */
-    static toOuterHTML(doc: Document) {
+    private static toOuterHTML(doc: Document, docTypeFormat: DocTypeFormat) {
 
         // https://stackoverflow.com/questions/817218/how-to-get-the-entire-document-html-as-a-string
 
         // https://stackoverflow.com/questions/6088972/get-doctype-of-an-html-as-string-with-javascript
 
-        if(doc.doctype) {
+        if (docTypeFormat === 'xml') {
 
-            return ContentCapture.doctypeToOuterHTML(doc.doctype) +
-                   "\n" +
-                   doc.documentElement.outerHTML;
+            let result = '';
+
+            for (const node of Array.from(doc.childNodes)) {
+
+                switch (node.nodeType) {
+
+                    case Node.DOCUMENT_TYPE_NODE:
+                        result += this.doctypeToOuterHTML(<DocumentType> node);
+                        result += '\n';
+                        break;
+
+                    case Node.PROCESSING_INSTRUCTION_NODE:
+                        result += this.processingInstructionToOuterHTML(<ProcessingInstruction> node);
+                        result += '\n';
+                        break;
+
+                    case Node.ELEMENT_NODE:
+                        result += (<Element> node).outerHTML;
+                        result += '\n';
+                        break;
+
+                }
+
+            }
+
+            return result;
 
         } else {
-            return doc.documentElement.outerHTML;
-        }
 
+            if (doc.doctype) {
+
+                return ContentCapture.doctypeToOuterHTML(doc.doctype) +
+                    "\n" +
+                    doc.documentElement!.outerHTML;
+
+            } else {
+                return doc.documentElement!.outerHTML;
+            }
+
+        }
 
     }
 
-    static createEventAttributes(): Dict<number> {
+    private static createEventAttributes(): Dict<number> {
 
         return Object.freeze({
             "onafterprint": 1,
@@ -501,14 +651,32 @@ export class ContentCapture {
 
 }
 
-console.log("Content capture script loaded!");
+/**
+ * Generate IDs used for different internal content capture purposes
+ */
+export class IDGenerator {
+
+    private static id: number = 0;
+
+    public static generate() {
+        return this.id++;
+    }
+
+}
+
+// console.log("Content capture script loaded within: " + window.location.href);
 
 declare var global: any;
 
 process.once('loaded', () => {
+
+    // TODO: importing and then defining configureBrowser did not work here.
+    // It might be nice to work with postMessage here.
+
     // This is a workaround to make this available to the new process while
     // nodeIntegration is false.  We're going to need some way to handle this
     // in the future
     console.log("Re-defining ContentCapture");
     global.ContentCapture = ContentCapture;
 });
+

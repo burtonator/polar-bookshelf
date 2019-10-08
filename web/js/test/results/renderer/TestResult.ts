@@ -7,12 +7,12 @@ export class TestResult {
      * need to store a null result wrap it in an object with a 'value'.  We make this
      * a global value so that spectron can easily read it.
      */
-    static set(value: any) {
+    public static set(value: any) {
         window.SPECTRON_TEST_RESULT = value;
     }
 
 
-    static get(): any {
+    public static get(): any {
         return window.SPECTRON_TEST_RESULT;
     }
 

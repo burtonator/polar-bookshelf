@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import {Rects} from './Rects';
 import {assertJSON} from './test/Assertions';
 import {Rect} from './Rect';
-import {IRect} from './util/rects/IRect';
+import {IRect} from 'polar-shared/src/util/rects/IRect';
 import {RectArt} from './util/RectArt';
 import {MOCK_RECTS} from './MockRects';
 
@@ -12,23 +12,23 @@ describe('Rects', function() {
 
         it("basic perc", function () {
 
-            let a = Rects.createFromBasicRect({
+            const a = Rects.createFromBasicRect({
                 top: 0,
                 left: 0,
                 width: 50,
                 height: 50
             });
 
-            let b = Rects.createFromBasicRect({
+            const b = Rects.createFromBasicRect({
                 top: 0,
                 left: 0,
                 width: 100,
                 height: 100
             });
 
-            let actual = Rects.perc(a, b);
+            const actual = Rects.perc(a, b);
 
-            let expected = {
+            const expected = {
                 "left": 0,
                 "top": 0,
                 "right": 50,

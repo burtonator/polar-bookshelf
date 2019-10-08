@@ -1,0 +1,12 @@
+
+.flexbar {
+    width: 100%;
+}
+
+.flexbar, .flexbar > div {
+    display: flex;
+}
+
+.flexbar-right {
+    margin-left: auto;
+}

@@ -1,4 +1,4 @@
-import {FilePaths} from "../../util/FilePaths";
+import {FilePaths} from "polar-shared/src/util/FilePaths";
 import {DiskCacheEntry} from './DiskCacheEntry';
 import {assert} from 'chai';
 import * as fs from 'fs';

@@ -1,48 +1,27 @@
 import {SerializedObject} from './SerializedObject';
-import {Preconditions} from '../Preconditions';
-import {ImageType} from './ImageType';
+import {Preconditions} from 'polar-shared/src/Preconditions';
+import {IImage, ImageType} from "polar-shared/src/metadata/IImage";
+import {BackendFileRef} from "polar-shared/src/datastore/BackendFileRef";
 
-export class Image extends SerializedObject {
+export class Image extends SerializedObject implements IImage {
 
-    /**
-     * The type of this image.  This is optional because for a remote URL
-     * we might not know the type.
-     */
-    public readonly type?: ImageType;
+    public readonly id: string;
 
-    /**
-     * The src of this image.  Either an HTTP/HTTPS URL or a data: URL.
-     */
-    public readonly src: string;
+    public readonly type: ImageType;
 
-    /**
-     * The width of this image.
-     */
+    public readonly src: BackendFileRef;
+
     public readonly width?: number;
 
-    /**
-     * The height of this image.
-     *
-     * @type {number}
-     */
     public readonly height?: number;
 
-    /**
-     * A per image 'relation' similar to the HTML rel attribute with links.
-     * This allow us to attach an image to an annotation and give it a relation.
-     *
-     * For example.  We could have 'screenshot', 'thumbnail', 'highlight', etc.
-     *
-     * These relations are free form so any relation type can be designed by
-     * the developer and still compatible with the schema.  Standard relations
-     * are and will be defined and future relations can be added at any point.
-     */
     public readonly rel?: string;
 
-    constructor(opts: any) {
+    constructor(opts: IImage) {
 
-        super(opts);
+        super(<any> opts);
 
+        this.id = opts.id;
         this.type = opts.type;
         this.src = opts.src;
         this.width = opts.width;
@@ -58,8 +37,8 @@ export class Image extends SerializedObject {
 
         super.validate();
 
-        // Preconditions.assertNotNull(this.type, "type");
-        Preconditions.assertNotNull(this.src, "src");
+        Preconditions.assertPresent(this.type, "type");
+        Preconditions.assertPresent(this.src, "src");
 
     }
 
@@ -71,3 +50,12 @@ export interface ImageOpts {
     readonly rel?: string;
     readonly type?: ImageType;
 }
+
+export enum ImageTypes {
+    GIF = 'image/gif',
+    PNG = 'image/png',
+    JPEG = 'image/jpeg',
+    WEBP = 'image/webp',
+    SVG = 'image/svg+xml'
+}
+

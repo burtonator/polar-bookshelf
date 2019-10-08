@@ -1,5 +1,5 @@
 import {DocDescriptor} from '../../metadata/DocDescriptor';
-import {AnnotationType} from '../../metadata/AnnotationType';
+import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
 
 export class CreateAnnotationRequest {
 

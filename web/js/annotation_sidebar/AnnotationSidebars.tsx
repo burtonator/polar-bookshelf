@@ -3,21 +3,31 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {AnnotationSidebar} from './AnnotationSidebar';
 import {DocMeta} from '../metadata/DocMeta';
-import {Logger} from '../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {PersistenceLayer} from '../datastore/PersistenceLayer';
+import {Docs} from '../metadata/Docs';
+import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 const log = Logger.create();
 
 export class AnnotationSidebars {
 
-    public static create(docMeta: DocMeta): Splitter {
+    public static create(docMeta: IDocMeta,
+                         persistenceLayerProvider: () => PersistenceLayer): Splitter {
 
-        const splitter = new Splitter('#polar-viewer', '#polar-sidebar');
+        const splitter = new Splitter('.polar-viewer', '.polar-sidebar');
+
+        const polarSidebar = document.querySelector(".polar-sidebar")! as HTMLElement;
+        polarSidebar.style.display = 'block';
 
         splitter.collapse();
 
+        const doc = Docs.create(docMeta, persistenceLayerProvider().capabilities().permission);
+
         ReactDOM.render(
-            <AnnotationSidebar docMeta={docMeta} />,
-            document.querySelector('#polar-sidebar') as HTMLElement
+            <AnnotationSidebar doc={doc}
+                               persistenceLayerProvider={persistenceLayerProvider} />,
+            document.querySelector('.polar-sidebar') as HTMLElement
         );
 
         return splitter;
@@ -38,9 +48,13 @@ export class AnnotationSidebars {
 
         this.scrollToElement(pageElement);
 
-        const annotationElement = document.querySelector(selector)! as HTMLElement;
+        const annotationElement = document.querySelector(selector);
 
-        this.scrollToElement(annotationElement);
+        if (annotationElement) {
+            this.scrollToElement(annotationElement as HTMLElement);
+        } else {
+            log.warn("Could not find annotation element: " + selector);
+        }
 
         // TODO: disable this for now because with the pagemark the flash does
         // not actually work. Migrate to using some type of pointer showing the
@@ -57,12 +71,15 @@ export class AnnotationSidebars {
 
     private static scrollToElement(element: HTMLElement) {
 
-        // NOTE: behavior: smooth won't actually work
-        element.scrollIntoView({
+        const options = {
             behavior: 'instant',
             block: 'center',
             inline: 'center'
-       });
+        };
+
+        // NOTE that 'instant' is apparently unsupported in the typescript type
+        // but it's supported in Javascript.
+        element.scrollIntoView(options as ScrollIntoViewOptions);
 
     }
 

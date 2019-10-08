@@ -1,0 +1,11 @@
+#!/bin/bash
+
+package_version=$(jq -r .devDependencies.electron package.json | grep -Eo "[0-9.]+$")
+builder_version=$(grep electronVersion electron-builder.yml | grep -Eo "[0-9.]+$")
+
+if [[ "${package_version}" != "${builder_version}" ]]; then
+    echo "Electron build versions are incorrect ${package_version} vs ${builder_version}" > /dev/stderr
+    exit 1
+fi
+
+exit 0

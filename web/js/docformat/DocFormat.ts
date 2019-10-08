@@ -1,41 +1,42 @@
-import {notNull, Preconditions} from '../Preconditions';
+import {notNull, Preconditions} from 'polar-shared/src/Preconditions';
 import {Elements} from '../util/Elements';
 import {DocDetail} from '../metadata/DocDetail';
+import {IDimensions} from "../util/IDimensions";
 
 /**
  * Get the proper docFormat to work with.
  */
 export abstract class DocFormat {
 
-    public abstract readonly name: string;
+    public abstract readonly name: DocFormatName;
 
-    currentScale(): number {
+    public currentScale(): number {
         return 1.0;
     }
 
-    getPageNumFromPageElement(pageElement: HTMLElement): number {
+    public getPageNumFromPageElement(pageElement: HTMLElement): number {
         Preconditions.assertNotNull(pageElement, "pageElement");
-        let dataPageNum = notNull(pageElement.getAttribute("data-page-number"));
+        const dataPageNum = notNull(pageElement.getAttribute("data-page-number"));
         return parseInt(dataPageNum);
     }
 
-    getPageElementFromPageNum(pageNum: number) {
+    public getPageElementFromPageNum(pageNum: number): HTMLElement {
 
-        if(!pageNum) {
+        if (!pageNum) {
             throw new Error("Page number not specified");
         }
 
-        let pageElements = document.querySelectorAll(".page");
+        const pageElements = document.querySelectorAll(".page");
 
         // note that elements are 0 based indexes but our pages are 1 based
         // indexes.
-        let pageElement = pageElements[pageNum - 1];
+        const pageElement = pageElements[pageNum - 1];
 
-        if(! pageElement) {
+        if (! pageElement) {
             throw new Error("Unable to find page element for page num: " + pageNum);
         }
 
-        return pageElement;
+        return <HTMLElement> pageElement;
 
     }
 
@@ -43,11 +44,11 @@ export abstract class DocFormat {
      * Get the current page number based on which page is occupying the largest
      * percentage of the viewport.
      */
-    getCurrentPageElement(): HTMLElement | null {
+    public getCurrentPageElement(): HTMLElement | null {
 
-        let pageElements = document.querySelectorAll(".page");
+        const pageElements = document.querySelectorAll(".page");
 
-        if(pageElements.length === 1) {
+        if (pageElements.length === 1) {
 
             // if we only have one page, just go with that as there are no other
             // options.  This was added to avoid a bug in calculate visibility
@@ -56,16 +57,16 @@ export abstract class DocFormat {
 
         }
 
-        let result = <CurrentPageElement> {
+        const result = <CurrentPageElement> {
             element: null,
             visibility: 0
         };
 
         pageElements.forEach(pageElement => {
 
-            let element = <HTMLElement>pageElement;
+            const element = <HTMLElement> pageElement;
 
-            let visibility = Elements.calculateVisibilityForDiv(element);
+            const visibility = Elements.calculateVisibilityForDiv(element);
 
             if ( visibility > result.visibility) {
                 result.element = element;
@@ -82,42 +83,42 @@ export abstract class DocFormat {
     /**
      * Get all the metadata about the current page.
      */
-    getCurrentPageMeta() {
+    public getCurrentPageDetail(): PageDetail {
 
-        let pageElement = notNull(this.getCurrentPageElement());
-        let pageNum = this.getPageNumFromPageElement(pageElement);
+        const pageElement = notNull(this.getCurrentPageElement());
+        const pageNum = this.getPageNumFromPageElement(pageElement);
 
-        return { pageElement, pageNum }
+        return { pageElement, pageNum };
 
     }
 
     /**
      * Get the current doc fingerprint or null if it hasn't been loaded yet.
      */
-    abstract currentDocFingerprint(): string | undefined;
+    public abstract currentDocFingerprint(): string | undefined;
 
     /**
      * Get the current state of the doc.
      */
-    abstract currentState(event: any): CurrentState;
+    public abstract currentState(): CurrentDocState;
 
-    supportThumbnails() {
+    public supportThumbnails() {
         return false;
     }
 
-    textHighlightOptions() {
+    public textHighlightOptions() {
         return {};
     }
 
-    targetDocument(): HTMLDocument | null {
+    public targetDocument(): HTMLDocument | null {
         throw new Error("Not implemented");
     }
 
-    docDetail(): DocDetail {
+    public docDetail(): DocDetail {
 
-        let fingerprint = this.currentDocFingerprint();
+        const fingerprint = this.currentDocFingerprint();
 
-        if( ! fingerprint) {
+        if (! fingerprint) {
             throw new Error("No document loaded");
         }
 
@@ -125,6 +126,20 @@ export abstract class DocFormat {
 
     }
 
+    public async getCanvas(pageNum: number): Promise<HTMLCanvasElement> {
+
+        const pageElement = this.getPageElementFromPageNum(pageNum);
+
+        return <HTMLCanvasElement> pageElement.querySelector("canvas");
+
+    }
+
+}
+
+export interface PageDetail {
+    readonly pageElement: HTMLElement;
+    readonly pageNum: number;
+    readonly dimensions?: IDimensions;
 }
 
 export interface CurrentPageElement {
@@ -132,12 +147,12 @@ export interface CurrentPageElement {
     visibility: number;
 }
 
-export interface CurrentState {
+export interface CurrentDocState {
 
     readonly nrPages: number;
 
     readonly currentPageNumber: number;
 
-    readonly pageElement: HTMLElement;
-
 }
+
+export type DocFormatName = 'html' | 'pdf';

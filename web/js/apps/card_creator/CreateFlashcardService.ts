@@ -4,7 +4,7 @@ import {IPCEngine} from '../../ipc/handler/IPCEngine';
 import {CreateFlashcardForm} from './elements/schemaform/CreateFlashcardForm';
 import {CreateFlashcardHandler} from './handlers/CreateFlashcardHandler';
 import {ElectronRendererPipe} from '../../ipc/pipes/ElectronRendererPipe';
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 
 const log = Logger.create();
 

@@ -14,7 +14,7 @@ export class SpectronSpec {
         this.app = app;
     }
 
-    public async waitFor(val: any) {
+    public async waitFor(val: any): Promise<this> {
 
         // wait for at least one window (which is the main one that will hold our value)
         await Concurrently.waitForPredicate(() => this.app.client.getWindowCount(),
@@ -23,10 +23,16 @@ export class SpectronSpec {
         const testResultReader = new WebDriverTestResultReader(this.app);
         assert.equal(await testResultReader.read(), val);
 
+        return this;
+
     }
 
     public static create(app: TApplication) {
         return new SpectronSpec(app);
+    }
+
+    public stop() {
+        this.app.stop();
     }
 
 }

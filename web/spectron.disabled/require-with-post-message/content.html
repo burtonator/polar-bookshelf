@@ -1,0 +1,20 @@
+<html>
+<body>
+
+<h1>hello world</h1>
+
+<script>
+
+    window.addEventListener("message", event => {
+
+        if (event.data.type === 'require') {
+            console.log("Going to require: " + event.data.src);
+            require(event.data.src);
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

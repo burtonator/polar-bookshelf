@@ -1,57 +1,33 @@
 import {Annotation} from './Annotation';
 import {Note} from './Note';
-import {PagemarkType} from './PagemarkType';
+import {PagemarkType} from 'polar-shared/src/metadata/PagemarkType';
 import {PagemarkRect} from './PagemarkRect';
 import {MetadataSerializer} from './MetadataSerializer';
-import {PagemarkMode} from './PagemarkMode';
+import {PagemarkMode} from 'polar-shared/src/metadata/PagemarkMode';
+import {IPagemark} from "polar-shared/src/metadata/IPagemark";
 
-export class Pagemark extends Annotation {
+export class Pagemark extends Annotation implements IPagemark {
 
     // TODO: should pagemarks support the full nesting model where we can
     // have comments, notes, flashcards, etc?  Probably not but notes might
     // make sense.
 
-    /**
-     * The note for this annotation.
-     *
-     */
     public notes: {[id: string]: Note};
 
-    /**
-     * The type of pagemark.
-     *
-     */
     public type: PagemarkType;
 
-    /**
-     * The total percentage of the page that is covered with the page mark.
-     * From 0 to 100.  This factors in the total rows and columns on the
-     * page and is the raw percentage value of the page.
-     *
-     */
     public percentage: number;
 
-    /**
-     * The column number on which this pagemark is rendered.  This is mostly
-     * metadata and we should be migrating to PagemarkRect and PagemarkRange
-     * which supports raw rendering of the pagemarks.
-     */
     public column: number;
 
-    /**
-     * The PagemarkRect for this pagemark. When not specified we use a box of
-     *
-     * { top: 0, left: 0, width: 100, height: 100 }
-     *
-     * or the whole page.
-     *
-     */
     public rect: PagemarkRect;
 
-    /**
-     * The mode of this pagemark (read, ignored, etc).
-     */
     public mode: PagemarkMode;
+
+    public batch?: string;
+
+    // TODO: add an 'inactive' field so that the user can toggle the pagemarks
+    // active and inactive easily.
 
     constructor(val: any) {
 
@@ -75,38 +51,55 @@ export class Pagemark extends Annotation {
 
     }
 
-    setup() {
+    public setup() {
 
         super.setup();
 
-        if(!this.notes) {
-            this.notes = {}
+        if (!this.notes) {
+            this.notes = {};
         }
 
-        if(!this.type) {
+        if (!this.type) {
             this.type = PagemarkType.SINGLE_COLUMN;
         }
 
-        if(!this.mode) {
+        if (!this.mode) {
             this.mode = PagemarkMode.READ;
         }
 
-        if(!this.percentage) {
+        if (!this.percentage) {
             this.percentage = 100;
         }
 
-        if(!this.column) {
+        if (!this.column) {
             this.column = 0;
         }
 
     }
 
-    validate() {
+    public validate() {
         super.validate();
     }
 
-    toString() {
+    public toString() {
         return MetadataSerializer.serialize(this);
     }
 
 }
+
+export interface PagemarkRef {
+
+    readonly pageNum: number;
+
+    readonly pagemark: IPagemark;
+
+}
+
+export interface PagemarkIDRef {
+
+    readonly pageNum: number;
+
+    readonly id: string;
+
+}
+

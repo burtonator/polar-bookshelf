@@ -1,6 +1,6 @@
 import {IMutableReactor, IReactor, Reactor} from './Reactor';
-import {Listener} from './Listener';
-import {isPresent} from '../Preconditions';
+import {EventListener, RegisteredEventListener} from './EventListener';
+import {isPresent} from 'polar-shared/src/Preconditions';
 
 /**
  * A reactor that allows dispatchEvents to be queue'd up until the first
@@ -17,9 +17,9 @@ export class QueuedReactor<V> implements IReactor<V>, IMutableReactor<V> {
         this.delegate = delegate;
     }
 
-    public addEventListener(eventName: string, listener: Listener<V>): void {
+    public addEventListener(eventName: string, eventListener: EventListener<V>): RegisteredEventListener<V> {
 
-        this.delegate.addEventListener(eventName, listener);
+        this.delegate.addEventListener(eventName, eventListener);
 
         // now call all the events on the delegate directly.
 
@@ -30,6 +30,12 @@ export class QueuedReactor<V> implements IReactor<V>, IMutableReactor<V> {
             }
 
         }
+
+        const release = () => {
+            this.removeEventListener(eventName, eventListener);
+        };
+
+        return {eventListener, release};
 
     }
 
@@ -86,8 +92,12 @@ export class QueuedReactor<V> implements IReactor<V>, IMutableReactor<V> {
         this.delegate.clearEvent(eventName);
     }
 
-    public removeEventListener(eventName: string, listener: Listener<V>): boolean {
+    public removeEventListener(eventName: string, listener: EventListener<V>): boolean {
         return this.delegate.removeEventListener(eventName, listener);
+    }
+
+    public size(eventName: string): number {
+        return this.delegate.size(eventName);
     }
 
     private enqueue(eventName: string, value: V): this {

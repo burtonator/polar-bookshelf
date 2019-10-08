@@ -13,4 +13,8 @@ export class Buffers {
 
     }
 
+    public static toArrayBuffer(buffer: Buffer) {
+        return buffer.buffer;
+    }
+
 }

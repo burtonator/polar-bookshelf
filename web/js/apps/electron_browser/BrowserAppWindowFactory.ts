@@ -17,7 +17,7 @@ export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = 
     icon: APP_ICON,
     webPreferences: {
 
-        // NOTE: these must be disabled becuase they break pdf.js.  It must be
+        // NOTE: these must be disabled because they break pdf.js.  It must be
         // some change to require() from their workers.  So maybe I just can't
         // use workers for now.
         // nodeIntegrationInWorker: true,
@@ -26,21 +26,19 @@ export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = 
 
         defaultEncoding: 'UTF-8',
 
-        webaudio: false,
+        webaudio: true,
 
         nodeIntegration: false,
 
         // zoomFactor: 1.0
 
         /**
-         *
-         *
          * Use a persistent cookie session between restarts.  This is used so
          * that we keep user cookies including Google Analytics cookies.
          */
-        // partition: "persist:polar"
-
+        partition: 'persist:polar-app'
     }
+
 };
 
 /**

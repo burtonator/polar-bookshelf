@@ -1,13 +1,14 @@
 import {DocDetail, UpdatableDocDetails} from './DocDetail';
-import {isPresent} from '../Preconditions';
-import {Logger} from '../logger/Logger';
+import {isPresent} from 'polar-shared/src/Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {DocInfo} from './DocInfo';
+import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
 
 const log = Logger.create();
 
 export class DocDetails {
 
-    public static merge(docInfo: DocInfo, docDetail?: DocDetail): UpdatableDocDetails | undefined {
+    public static merge(docInfo: IDocInfo, docDetail?: DocDetail): UpdatableDocDetails | undefined {
 
         // we basically now need to 'gift' additional fields to the doc model
         // here including title, filename, etc.

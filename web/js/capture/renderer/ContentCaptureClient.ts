@@ -1,5 +1,5 @@
 import {ipcMain} from "electron";
-import {Logger} from '../../logger/Logger';
+import {Logger} from 'polar-shared/src/logger/Logger';
 import {BrowserWindow} from "electron";
 
 const log = Logger.create();

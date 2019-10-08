@@ -1,19 +1,23 @@
-import {CaptureOpts} from './CaptureOpts';
+import {CaptureOpts, DefaultCaptureOpts} from './CaptureOpts';
 import {WebContents, WebRequest} from 'electron';
 import {CaptureResult} from './CaptureResult';
-import {Logger} from '../logger/Logger';
-import {Preconditions} from '../Preconditions';
+import {Logger} from 'polar-shared/src/logger/Logger';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 import {PendingWebRequestsListener} from '../webrequests/PendingWebRequestsListener';
 import {DebugWebRequestsListener} from '../webrequests/DebugWebRequestsListener';
 import {WebRequestReactor} from '../webrequests/WebRequestReactor';
 import {WebContentsDriver, WebContentsDriverFactory} from './drivers/WebContentsDriver';
 import {BrowserProfile} from './BrowserProfile';
-import {Strings} from '../util/Strings';
-import {Optional} from '../util/ts/Optional';
-import {Functions} from '../util/Functions';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {Functions} from 'polar-shared/src/util/Functions';
 import {Promises} from '../util/Promises';
 import {ContentCaptureExecutor} from './ContentCaptureExecutor';
 import {ResolvablePromise} from '../util/ResolvablePromise';
+import BrowserRegistry from './BrowserRegistry';
+import {BrowserProfiles} from './BrowserProfiles';
+import {Objects} from '../util/Objects';
+import {Strings} from "polar-shared/src/util/Strings";
+import {Latch} from "polar-shared/src/util/Latch";
 
 const log = Logger.create();
 
@@ -39,17 +43,16 @@ export class Capture {
 
     public readonly webRequestReactors: WebRequestReactor[] = [];
 
-    private result = new ResolvablePromise<CaptureResult>();
+    private result = new Latch<CaptureResult>();
 
     private webContents?: WebContents;
 
     private driver?: WebContentsDriver;
 
-    constructor(browserProfile: BrowserProfile,
-                captureOpts: CaptureOpts = {amp: true}) {
+    constructor(browserProfile: BrowserProfile, captureOpts: Partial<CaptureOpts> = {}) {
 
         this.browserProfile = Preconditions.assertNotNull(browserProfile, "browser");
-        this.captureOpts = captureOpts;
+        this.captureOpts = Objects.defaults(captureOpts, new DefaultCaptureOpts());
 
         this.pendingWebRequestsListener = new PendingWebRequestsListener();
         this.debugWebRequestsListener = new DebugWebRequestsListener();
@@ -89,20 +92,37 @@ export class Capture {
 
         });
 
-        return this.result;
+        if (this.captureOpts.link) {
+
+            this.browserProfile.navigation.navigated.dispatchEvent({
+                link: this.captureOpts.link
+            });
+        }
+
+        return this.result.get();
 
     }
 
     private async loadURL(url: string) {
 
         // wait until the main URL loads.
-        const loadURLPromise = this.driver!.loadURL(url);
+
+        const latch = new Latch();
+
+        this.driver!.loadURL(url)
+            .then(() => {
+                latch.resolve(true);
+            })
+            .catch(err => {
+                log.error("Loading URL failed: ", err);
+                latch.resolve(true);
+            });
 
         // wait a minimum amount of time for the page to load so that we can
         // make sure that all static content has executed.
-        const minDelayPromise = Promises.waitFor(EXECUTE_CAPTURE_DELAY);
+        // const minDelayPromise = Promises.waitFor(EXECUTE_CAPTURE_DELAY);
 
-        await Promise.all([ loadURLPromise, minDelayPromise ]);
+        await Promise.all([ latch.get() ]);
 
         // the page loaded now... capture the content.
         await this.handleLoad(url);
@@ -187,13 +207,14 @@ export class Capture {
 
     public async executeContentCapture() {
 
-        const result = await ContentCaptureExecutor.execute(this.webContents!, this.driver!.browserProfile);
+        const captureResult
+            = await ContentCaptureExecutor.execute(this.webContents!, this.driver!.browserProfile);
 
         if (this.browserProfile.destroy) {
             Optional.of(this.driver).when(driver => driver.destroy());
         }
 
-        this.result.resolve(result);
+        this.result.resolve(captureResult);
 
     }
 
@@ -215,6 +236,15 @@ export class Capture {
             this.pendingWebRequestsListener.register(webRequestReactor);
 
         }
+
+    }
+
+    public static async trigger(captureOpts: Partial<CaptureOpts> = {}): Promise<CaptureResult> {
+
+        const browser = BrowserRegistry.DEFAULT;
+        const browserProfile = BrowserProfiles.toBrowserProfile(browser, 'DEFAULT');
+        const capture = new Capture(browserProfile, captureOpts);
+        return capture.start();
 
     }
 

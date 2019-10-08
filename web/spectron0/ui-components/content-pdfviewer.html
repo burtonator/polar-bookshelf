@@ -1,0 +1,198 @@
+<html>
+
+<head>
+
+
+    <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="../../../node_modules/bootstrap/dist/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="../../../node_modules/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../../../node_modules/summernote/dist/summernote-bs4.css">
+    <link rel="stylesheet" href="../../../pdfviewer-custom/polar.css">
+    <link rel="stylesheet" href="../../../pdfviewer-custom/progress.css">
+    <link rel="stylesheet" href="../../../pdfviewer-custom/twitter-bootstrap.css">
+    <link rel="stylesheet" href="../../../node_modules/react-table/react-table.css">
+
+    <link rel="stylesheet" href="./style.css"/>
+
+    <link rel="stylesheet" href="../../../node_modules/toastr/build/toastr.min.css">
+    <link rel="stylesheet" href="../../../pdfviewer-custom/toaster.css">
+
+    <link rel="stylesheet" href="../../../node_modules/@burtonator/react-dropdown/dist/react-dropdown.css">
+
+    <script src="../../../node_modules/firebase/firebase.js"></script>
+    <script src="../../../node_modules/firebaseui/dist/firebaseui.js"></script>
+
+    <style>
+
+        .hover-bg-primary:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        body, html {
+            margin: 0;
+            height: 100%;
+        }
+
+        h1.component {
+            font-weight: 18px;
+            padding-bottom: 5px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            color: rgba(0,0,0,0.8);
+            border-bottom: 1px solid rgba(0,0,0,0.4);
+        }
+
+        .components {
+            margin: 5px;
+        }
+
+        .bg-tertiary {
+            background-color: #dddddd;
+        }
+
+        .link-navbar {
+            background-color: #EEEEEE;
+            border-bottom: 1px solid darkgrey;
+        }
+
+        .form-group input[type="checkbox"] {
+            display: none;
+        }
+
+        .form-group input[type="checkbox"] + .btn-group > label span {
+            width: 20px;
+        }
+
+        .form-group input[type="checkbox"] + .btn-group > label span:first-child {
+            display: none;
+        }
+        .form-group input[type="checkbox"] + .btn-group > label span:last-child {
+            display: inline-block;
+        }
+
+        .form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+            display: inline-block;
+        }
+        .form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+            display: none;
+        }
+
+        tag-input-popover {
+            width: 500px !important;
+            max-width: 9999px !important;
+        }
+
+        .tag-input-popover label {
+            font-weight: bold;
+        }
+
+        .rich-text-area-input .note-editor.note-frame {
+            border: none;
+        }
+
+        .rich-text-area-input .note-statusbar {
+            display: none;
+        }
+
+        .hover-highlight :hover {
+            background-color: #F0F0F0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<div id="viewerContainer" tabindex="0">
+
+<div>
+    <div id="viewer" class="pdfViewer"></div>
+</div>
+
+</div>
+
+<script>
+    // require("./content");
+
+    async function doTest() {
+
+        // const { PDFJSStatic, PDFPageViewport, PDFViewer, PDFFindController, PDFLinkService } from 'pdfjs-dist';
+        // import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+        // import * as pdfjsViewer from 'pdfjs-dist/lib/web/pdf_viewer';
+        // import * as pdfjsLinkService from 'pdfjs-dist/lib/web/pdf_link_service';
+        // import * as pdfjsFindController from 'pdfjs-dist/lib/web/pdf_find_controller';
+
+        const pdfjsLib = require('pdfjs-dist/build/pdf');
+        const pdfjsViewer = require('pdfjs-dist/lib/web/pdf_viewer');
+        const pdfjsLinkService = require('pdfjs-dist/lib/web/pdf_link_service');
+        const pdfjsFindController  = require('pdfjs-dist/lib/web/pdf_find_controller');
+
+        const container = document.getElementById('viewerContainer');
+
+        if (! container) {
+            throw new Error("No container");
+        }
+
+        const pdfLinkService = new pdfjsLinkService.PDFLinkService();
+        const pdfFindController = new pdfjsFindController.PDFFindController({
+            linkService: pdfLinkService,
+        });
+        //
+
+        // FIXME: I think I ahve to specify a custom RenderingQueue here because right now it renders ALL the pages...
+        // and I need to limit this to say += 10 pages..
+
+        // FIXME: how do we change the zoom
+
+        // FIXME: how do we render the thumbnails
+
+        // FIXME: the textarea overlay isn't setup to work
+
+        const pdfElement = new pdfjsViewer.PDFViewer({
+            container: container,
+            linkService: this.pdfLinkService,
+            findController: this.pdfFindController,
+            enhanceTextSelection: true,
+            textLayerMode: 2
+        });
+
+        // FIXME: the scale is important here too...
+
+        //
+        pdfLinkService.setViewer(pdfElement);
+        //
+        // // Loading document.
+
+        // const url = '../../../docs/examples/pdf/bigtable.pdf';
+        const url = '../../../test.pdf';
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../node_modules/pdfjs-dist/build/pdf.worker.js';
+
+        const loadingTask = pdfjsLib.getDocument({
+            url,
+            cMapUrl: '../../../node_modules/pdfjs-dist/cmaps/',
+            cMapPacked: true,
+            pdfFindController: this.pdfFindController,
+        });
+        //
+        const pdfDocument = await loadingTask.promise;
+
+        pdfElement.setDocument(pdfDocument);
+        pdfLinkService.setDocument(pdfDocument, null);
+        pdfFindController.setDocument(pdfDocument);
+
+    }
+
+    doTest().catch(err => console.error(err));
+
+</script>
+
+</body>
+</html>
+
+
+

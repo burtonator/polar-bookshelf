@@ -10,26 +10,26 @@ describe('WindowMessagePipe', function() {
     // must be disabled for now as JSDOM uses 100% cpu during tests.
     it("Basic post message", async function () {
 
-        let dom = new JSDOM("<html></html>");
+        const dom = new JSDOM("<html></html>");
 
         global.window = dom.window;
 
         assert.notEqual(global.window, null);
 
-        let windowMessagePipe = new WindowMessagePipe();
+        const windowMessagePipe = new WindowMessagePipe();
 
-        let messagePromise = windowMessagePipe.when('/hello');
+        const messagePromise = windowMessagePipe.when('/hello');
 
-        let message = {
+        const message = {
             channel: '/hello',
             message: 'hello world'
         };
 
         window.postMessage(message, '*');
 
-        let pipeNotification = await messagePromise;
-        assertJSON(pipeNotification.channel, '/hello');
-        assertJSON(pipeNotification.message, 'hello world');
+        const pipeNotification = await messagePromise;
+        assert.equal(pipeNotification.channel, '/hello');
+        assert.equal(pipeNotification.message, 'hello world');
 
     });
 

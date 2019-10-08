@@ -3,7 +3,7 @@ import {Spectron} from '../../../js/test/Spectron';
 import {assertJSON} from '../../../js/test/Assertions';
 
 const assert = require('assert');
-const {Functions} = require("../../../js/util/Functions");
+const {Functions} = require("polar-shared/src/util/Functions");
 
 describe('jquery-ui', function() {
 

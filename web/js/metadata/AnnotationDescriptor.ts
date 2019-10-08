@@ -1,5 +1,5 @@
-import {AnnotationType} from './AnnotationType';
-import {Preconditions} from '../Preconditions';
+import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
+import {Preconditions} from 'polar-shared/src/Preconditions';
 
 /**
  * High level descriptor for an annotation.  Used so that we can references

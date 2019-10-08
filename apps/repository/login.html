@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="chrome-webstore-item"
+          href="https://chrome.google.com/webstore/detail/jkfdkjomocoaljglgddnmhcbolldcafd">
+
+    <link rel="manifest" href="/manifest.json">
+
+    <link rel="icon" href="/icon.ico">
+
+    <!-- TODO: these need to load locally before we enable firebase in production -->
+    <script src="/node_modules/firebase/firebase.js"></script>
+    <script src="/node_modules/firebaseui/dist/firebaseui.js"></script>
+    <link rel="stylesheet" href="/node_modules/firebaseui/dist/firebaseui.css" />
+
+    <link rel="stylesheet" href="/node_modules/react-table/react-table.css">
+    <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap-reboot.min.css">
+
+    <link rel="stylesheet" href="/node_modules/toastr/build/toastr.min.css">
+
+    <link rel="stylesheet" href="/pdfviewer-custom/flexbar.css">
+    <link rel="stylesheet" href="/pdfviewer-custom/progress.css">
+    <link rel="stylesheet" href="/pdfviewer-custom/typography.css">
+
+    <link rel="stylesheet" href="/apps/repository/css/index.css">
+
+    <title>Polar: Document Repository</title>
+
+    <style>
+
+      html, body {
+        padding: 0;
+        margin: 0;
+      }
+
+      body {
+        height: 100%;
+        width: 100%;
+      }
+
+      /*body {*/
+        /*!* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#7abcff+0,60abf8+44,4096ee+100;Blue+3D+%2314 *!*/
+        /*background: #7abcff; !* Old browsers *!*/
+        /*background: -moz-linear-gradient(top, #7abcff 0%, #60abf8 44%, #4096ee 100%); !* FF3.6-15 *!*/
+        /*background: -webkit-linear-gradient(top, #7abcff 0%,#60abf8 44%,#4096ee 100%); !* Chrome10-25,Safari5.1-6 *!*/
+        /*background: linear-gradient(to bottom, #7abcff 0%,#60abf8 44%,#4096ee 100%); !* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ *!*/
+        /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7abcff', endColorstr='#4096ee',GradientType=0 ); !* IE6-9 *!*/
+      /*}*/
+
+      #root {
+        display: flex;
+        height:  100%;
+      }
+
+      #auth-box {
+        margin: auto;
+        max-height: 500px;
+        max-width: 450px;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+      }
+
+      h1 {
+        color: #303030;
+        font-size: 35px;
+      }
+
+      #auth-box .btn {
+        font-size: 14px;
+      }
+
+    </style>
+
+  </head>
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+
+      <a href="https://getpolarized.io/">Powered by Polar</a>
+
+    </noscript>
+
+    <div id="root" class="p-2">
+
+      <div id="auth-box" class="">
+
+        <div class="rounded border p-1">
+
+          <div class="text-center login-banner mb-1">
+
+            <img class="logo" src="/icon.svg" width="175" height="175">
+
+            <h1>
+              Login to Polar
+            </h1>
+
+          </div>
+
+          <div id="firebaseui-auth-container" class="p-1"></div>
+
+        </div>
+
+        <div class="text-right mt-1" id="auth-footer">
+
+          <button id="cancel-button"
+                  type="button"
+                  onclick="doCancel()"
+                  style="display: none;"
+                  class="btn btn-small btn-light p-1 text-muted">
+            Cancel
+          </button>
+
+          <button id="download-button"
+                  type="button"
+                  onclick="doDownloadDesktop()"
+                  style="display: none;"
+                  title="We also have a desktop version of Polar that runs on Windows, MacOS, or Linux."
+                  class="btn btn-small btn-light p-1 text-primary ml-1 border">
+
+            <i class="fas fa-download"></i>
+
+            Download Desktop
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script>
+
+      function runtime() {
+          if (document.location.href.indexOf(".getpolarized.io") !== -1) {
+              return 'browser';
+          } else {
+              return 'electron';
+          }
+      }
+
+      function doCancel() {
+
+        if (document.location.href.startsWith('https://app.getpolarized.io')) {
+          document.location.href = 'https://app.getpolarized.io';
+        } else {
+          document.location.href = '/';
+        }
+
+      }
+
+      function doDownloadDesktop() {
+        document.location.href = 'https://getpolarized.io/download.html?utm_source=getpolarized.io&utm_content=login-download-button&utm_medium=site';
+      }
+
+      function doInit() {
+
+        if (runtime() === 'browser') {
+            document.getElementById("download-button").style.display = 'inline-block';
+        } else {
+          document.getElementById("cancel-button").style.display = 'inline-block';
+        }
+
+      }
+
+      doInit();
+
+    </script>
+
+  </body>
+
+  <script src="/apps/init.js"></script>
+
+  <script>
+
+      const fallbackLoader = () => {
+
+          // REQUIRE_ENTRY_POINT: there seems to be an Electron bug where when
+          // loading over HTTP we can't find node_modules until we require().  We can
+          // only find standard modules like 'fs' and 'electron' but not custom
+          // modules so we have to just have these four lines repeated over and over
+          // for each of our main apps.  In the future we should try to track down
+          // why this is happening but I spent 1-2 hours on trying to figure out
+          // the root cause with no resolution and this is a temporary workaround.
+          const {remote} = require('electron');
+          const path = require('path');
+          const appPath = remote.getGlobal("appPath");
+          require(path.join(appPath, "apps", "repository", "js", "login.js"));
+
+      }
+
+      injectApp('/web/dist/login-bundle.js', fallbackLoader);
+
+  </script>
+
+</html>

@@ -1,15 +1,28 @@
+/**
+ * @Deprecated Try to move to using Latch instead of ResolvablePromise.
+ * This has a bug where reject fails and I think it's because it's a promise
+ * around a promise and node gets confused.
+ */
 export class ResolvablePromise<T> implements Promise<T> {
 
-    private promise: Promise<T>;
+    public readonly [Symbol.toStringTag]: "Promise";
 
-    public resolve: (value?: T) => void = () => {};
+    public promise: Promise<T>;
 
-    readonly [Symbol.toStringTag]: "Promise";
+    // noinspection TsLint
+    public resolve: (value?: T) => void = () => { };
+
+    // noinspection TsLint
+    // public reject: (reason?: any) => void = () => { };
 
     constructor() {
-        this.promise = new Promise<T>(resolve => {
+
+        this.promise = new Promise<T>((resolve, reject) => {
             this.resolve = resolve;
+            // this.reject = reject;
         });
+
+
     }
 
     public async get(): Promise<T> {
@@ -20,12 +33,20 @@ export class ResolvablePromise<T> implements Promise<T> {
         this.resolve(value);
     }
 
-    public catch<TResult = never>(onrejected?: ((reason: any) => (PromiseLike<TResult> | TResult)) | null | undefined): Promise<T | TResult> {
-        return this.promise.then(onrejected);
+    public catch<TResult = never>(onrejected?: OnRejectedCallback<TResult>): Promise<T | TResult> {
+        return this.promise.catch(onrejected);
     }
 
-    public then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | null | undefined, onrejected?: ((reason: any) => (PromiseLike<TResult2> | TResult2)) | null | undefined): Promise<TResult1 | TResult2> {
-        return this.promise.then(onfulfilled);
+    public then<TResult1 = T, TResult2 = never>(onresolved?: ((value: T) => (PromiseLike<TResult1> | TResult1)) | null | undefined,
+                                                onrejected?: OnRejectedCallback<TResult2>): Promise<TResult1 | TResult2> {
+
+        return this.promise.then(onresolved, onrejected);
+
     }
 
 }
+
+type OnResolvedCallback<T> = ((reason: any) => (PromiseLike<T> | T)) | null | undefined;
+
+type OnRejectedCallback<T> = ((reason: any) => (PromiseLike<T> | T)) | null | undefined;
+
