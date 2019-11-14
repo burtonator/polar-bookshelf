@@ -9,7 +9,7 @@ export class Decks {
      * @param tagValue
      */
     public static toSubDeck(tagValue: string): string {
-        return tagValue.replace(/\//g, "::");
+        return tagValue.replace(/\//g, "::").replace(/_/g, " ");
     }
 
 }
