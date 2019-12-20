@@ -137,10 +137,14 @@ export class MainApp {
         this.registerHandlers(mainAppController);
 
         const fileArg = Cmdline.getDocArg(process.argv);
+        const urlArg = Cmdline.getURLArg(process.argv);
 
         if (fileArg) {
             log.info("Opening file given on the command line: " + fileArg);
             await mainAppController.handleLoadDoc(fileArg);
+        } else if (urlArg) {
+            log.info("Opening URL given on the command line: " + urlArg);
+            await mainAppController.cmdCaptureWebPageWithBrowser({link: urlArg});
         }
 
         return {mainWindow, mainAppController};
@@ -161,10 +165,14 @@ export class MainApp {
             log.info("Someone opened a second instance.");
 
             const fileArg = Cmdline.getDocArg(commandLine);
+            const urlArg = Cmdline.getURLArg(commandLine);
 
             if (fileArg) {
                 log.info("Opening file given on second instance command line: " + fileArg);
                 FileImportClient.send(FileImportRequests.fromPath(fileArg));
+            } else if (urlArg) {
+                log.info("Opening URL given on second instance command line: " + urlArg);
+                await mainAppController.cmdCaptureWebPageWithBrowser({link: urlArg});
 
             } else {
                 mainAppController.activateMainWindow();
