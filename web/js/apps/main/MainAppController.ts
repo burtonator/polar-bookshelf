@@ -36,20 +36,6 @@ export class MainAppController {
         this.directories = new Directories();
     }
 
-    public async cmdCaptureWebPage() {
-
-        const browserWindowOptions = Object.assign({}, BROWSER_WINDOW_OPTIONS);
-
-        browserWindowOptions.width = browserWindowOptions.width! * .9;
-        browserWindowOptions.height = browserWindowOptions.height! * .9;
-        browserWindowOptions.center = true;
-
-        const url = ResourcePaths.resourceURLFromRelativeURL('./apps/capture/start-capture/index.html');
-
-        await MainAppBrowserWindowFactory.createWindow(browserWindowOptions, url);
-
-    }
-
     public async cmdCaptureWebPageWithBrowser(captureOpts: Partial<CaptureOpts> = {}) {
 
         const captureResult = await Capture.trigger(captureOpts);

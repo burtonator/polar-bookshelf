@@ -1,6 +1,5 @@
 import {SpectronMain, WindowFactory} from '../../web/js/test/SpectronMain';
 import {Logging} from '../../web/js/logger/Logging';
-import {CaptureController} from '../../web/js/capture/controller/CaptureController';
 import {CacheRegistry} from '../../web/js/backend/proxyserver/CacheRegistry';
 import {BrowserWindow} from "electron";
 import BrowserRegistry from '../../web/js/capture/BrowserRegistry';
@@ -16,10 +15,6 @@ import {Capture} from '../../web/js/capture/Capture';
 //
 //     const cacheRegistry = new CacheRegistry();
 //     const fileRegistry = new FileRegistry(webserverConfig);
-//
-//     const captureController = new CaptureController(cacheRegistry, fileRegistry);
-//
-//     captureController.start();
 //
 //     const browser = BrowserRegistry.DEFAULT;
 //
