@@ -131,11 +131,23 @@ export class MainApp {
         const mainAppService = new DocLoaderService(mainAppController);
         mainAppService.start();
 
-        // TODO: handle the command line here.. IE if someone opens up a file
-        // via argument.
-
         const mainAppMenu = new MainAppMenu(mainAppController);
         mainAppMenu.setup();
+
+        this.registerHandlers(mainAppController);
+
+        const fileArg = Cmdline.getDocArg(process.argv);
+
+        if (fileArg) {
+            log.info("Opening file given on the command line: " + fileArg);
+            await mainAppController.handleLoadDoc(fileArg);
+        }
+
+        return {mainWindow, mainAppController};
+
+    }
+
+    private registerHandlers(mainAppController: MainAppController) {
 
         app.on('open-file', async (event, path) => {
 
@@ -151,7 +163,7 @@ export class MainApp {
             const fileArg = Cmdline.getDocArg(commandLine);
 
             if (fileArg) {
-
+                log.info("Opening file given on second instance command line: " + fileArg);
                 FileImportClient.send(FileImportRequests.fromPath(fileArg));
 
             } else {
@@ -218,8 +230,6 @@ export class MainApp {
             }
 
         });
-
-        return {mainWindow, mainAppController};
 
     }
 
