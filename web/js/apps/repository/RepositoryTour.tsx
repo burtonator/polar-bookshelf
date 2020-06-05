@@ -243,7 +243,7 @@ export class RepositoryTour extends React.Component<IProps, IState> {
                     <p>
                         Polar supports <Term>cloud sync</Term> which keeps all your
                         documents securely backed up in the cloud.
-                        Enabling <Term>cloud sync</Term> also allow you to keep all your
+                        Enabling <Term>cloud sync</Term> also allows you to keep all your
                         computers that run Polar fully synchronized.
                     </p>
 
