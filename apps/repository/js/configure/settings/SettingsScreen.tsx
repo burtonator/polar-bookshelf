@@ -114,6 +114,12 @@ export const SettingsScreen = () => {
                                    prefs={prefs}
                                    preview={true}/>
 
+                    <SettingToggle title="Tabbed Browsing"
+                                   description="Enables tabbed browsing"
+                                   name="tabbed"
+                                   prefs={prefs}
+                                   preview={true}/>
+
                     <Divider/>
 
                     <p>
