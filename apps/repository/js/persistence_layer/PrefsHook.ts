@@ -6,14 +6,20 @@ import {
 import {PersistentPrefs} from "../../../../web/js/util/prefs/Prefs";
 import {usePersistenceLayerContext} from "./PersistenceLayerApp";
 import {SnapshotSubscriber} from 'polar-shared/src/util/Snapshots';
+import {ListenablePersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
 
-export function usePrefs(): SubscriptionValue<PersistentPrefs> {
 
-    const persistenceLayerContext = usePersistenceLayerContext();
+export function usePrefs(persistenceLayerProvider: ListenablePersistenceLayerProvider | undefined = undefined): SubscriptionValue<PersistentPrefs> {
+
+  if (persistenceLayerProvider !== undefined) {
+    console.warn("not undefined");
+  console.warn(persistenceLayerProvider());
+  }
+    const provider = persistenceLayerProvider || usePersistenceLayerContext().persistenceLayerProvider;
 
     const createSubscription = (): SnapshotSubscriber<PersistentPrefs> => {
 
-        const persistenceLayer = persistenceLayerContext.persistenceLayerProvider();
+        const persistenceLayer = provider()
 
         if (!persistenceLayer) {
             console.warn("No persistence layer");

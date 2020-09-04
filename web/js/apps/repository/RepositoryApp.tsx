@@ -75,7 +75,6 @@ interface RepositoryDocViewerScreenProps {
 
 export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerScreenProps) => {
 
-/*
     const prefs = usePrefs();
 
     if (! prefs.value) {
@@ -84,7 +83,6 @@ export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerS
 
     const mode = prefs.value!.get('tabbed');
     (window as any).tabbed = mode;
-*/
 
     return (
       <AuthRequired>
@@ -112,6 +110,14 @@ export const RepositoryApp = (props: IProps) => {
     const {app, repoDocMetaManager, repoDocMetaLoader, persistenceLayerManager} = props;
 
     Preconditions.assertPresent(app, 'app');
+
+
+    const prefs = usePrefs(app.persistenceLayerProvider);
+
+    if (prefs.value) {
+      const mode = prefs.value.get('tabbed');
+      (window as any).tabbed = mode;
+    }
 
     const RepositoryDocViewers = () => {
       // Get tabStore
@@ -348,7 +354,7 @@ export const RepositoryApp = (props: IProps) => {
                                     <MUIDialogController>
 
                                         <Switch>
-                                            <RepositoryDocViewers />
+                                            {/*<RepositoryDocViewers />*/}
                                             {/*<></>*/}
 
                                             <Route exact path={["/login", "/login.html"]}>
