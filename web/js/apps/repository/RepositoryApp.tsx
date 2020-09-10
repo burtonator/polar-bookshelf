@@ -58,6 +58,8 @@ import {useBrowserTabsCallbacks, useBrowserTabsStore} from "../../chrome_tabs/Br
 import {DocViewerAppURLs} from "../../../../apps/doc/src/DocViewerAppURLs";
 import {useLocation} from "react-router-dom";
 import {usePrefs} from "../../../../apps/repository/js/persistence_layer/PrefsHook";
+import {PersistentPrefs} from "../../util/prefs/Prefs";
+import {SubscriptionValue} from "../../ui/data_loader/UseSnapshotSubscriber";
 
 interface IProps {
     readonly app: App;
@@ -111,13 +113,28 @@ export const RepositoryApp = (props: IProps) => {
 
     Preconditions.assertPresent(app, 'app');
 
-
-    const prefs = usePrefs(app.persistenceLayerProvider);
-
-    if (prefs.value) {
-      const mode = prefs.value.get('tabbed');
-      (window as any).tabbed = mode;
+    interface GetTabbedProps {
+      onGet: (tabbed: string) => void;
     }
+
+    const GetTabbed = (props: GetTabbedProps) => {
+      const prefs = usePrefs();
+
+      if (!prefs.value) {
+        return null;
+      }
+
+      const tabbed = prefs.value.get('tabbed');
+      if (!tabbed.isPresent()) {
+        return null;
+      }
+
+      (window as any).tabbed = tabbed.get();
+      props.onGet(tabbed.get());
+
+      return null;
+    }
+
 
     const RepositoryDocViewers = () => {
       // Get tabStore
@@ -126,6 +143,7 @@ export const RepositoryApp = (props: IProps) => {
         "tabs",
         "tabContents"
       ]);
+
 
       // Map tabContents to array of DocViewers in Persistent Routes
       // Note: Deletion of a tab may cause rerender
@@ -438,7 +456,9 @@ export const RepositoryApp = (props: IProps) => {
                             </BrowserRouter>
                         </UseLocationChangeStoreProvider>
                     </>
-
+                    <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
+                      <GetTabbed onGet={(prefs) => {}} />
+                    </PersistenceLayerContext.Provider>
                 </div>
             </RepositoryRoot>
         </MUIRepositoryRoot>

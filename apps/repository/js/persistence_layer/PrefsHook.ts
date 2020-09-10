@@ -9,13 +9,9 @@ import {SnapshotSubscriber} from 'polar-shared/src/util/Snapshots';
 import {ListenablePersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
 
 
-export function usePrefs(persistenceLayerProvider: ListenablePersistenceLayerProvider | undefined = undefined): SubscriptionValue<PersistentPrefs> {
+export function usePrefs(): SubscriptionValue<PersistentPrefs> {
 
-  if (persistenceLayerProvider !== undefined) {
-    console.warn("not undefined");
-  console.warn(persistenceLayerProvider());
-  }
-    const provider = persistenceLayerProvider || usePersistenceLayerContext().persistenceLayerProvider;
+    const provider = usePersistenceLayerContext().persistenceLayerProvider;
 
     const createSubscription = (): SnapshotSubscriber<PersistentPrefs> => {
 
