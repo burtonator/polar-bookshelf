@@ -9,6 +9,8 @@ import {ViewerURLs} from "./doc_loaders/ViewerURLs";
 import {PersistentRoute} from "../repository/PersistentRoute";
 import {useBrowserDocLoader} from './doc_loaders/browser/BrowserDocLoader';
 import {RepositoryDocViewerScreen} from '../repository/RepositoryApp';
+import {usePrefs} from "../../../../apps/repository/js/persistence_layer/PrefsHook";
+
 
 function useDocLoaderElectron2() {
 
@@ -67,7 +69,7 @@ function useDocLoaderDefault() {
     const {persistenceLayerProvider} = usePersistenceLayerContext();
     const {addTab} = useBrowserTabsCallbacks();
 
-    return React.useCallback((loadDocRequest: LoadDocRequest) => {
+    const tabbedDocLoader = React.useCallback((loadDocRequest: LoadDocRequest) => {
 
         const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
         const parsedURL = new URL(viewerURL);
@@ -81,7 +83,21 @@ function useDocLoaderDefault() {
         addTab(tabDescriptor);
 
     }, []);
-    //return useBrowserDocLoader();
+
+    const prefs = usePrefs();
+
+    const browserDocLoader = useBrowserDocLoader();
+
+    if (!prefs.value) {
+      return browserDocLoader;
+    }
+
+    const tabbed = prefs.value.get('tabbed');
+    if (!tabbed.isPresent() || tabbed.get() === "false") {
+      return browserDocLoader;
+    }
+
+    return tabbedDocLoader;
 }
 
 function useDocLoaderNull() {

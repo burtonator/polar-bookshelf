@@ -76,16 +76,6 @@ interface RepositoryDocViewerScreenProps {
 }
 
 export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerScreenProps) => {
-
-    const prefs = usePrefs();
-
-    if (! prefs.value) {
-        return null;
-    }
-
-    const mode = prefs.value!.get('tabbed');
-    (window as any).tabbed = mode;
-
     return (
       <AuthRequired>
           <PersistenceLayerContext.Provider value={{persistenceLayerProvider: props.persistenceLayerProvider}}>
@@ -113,11 +103,23 @@ export const RepositoryApp = (props: IProps) => {
 
     Preconditions.assertPresent(app, 'app');
 
+    const [tabbed, setTabbed] = React.useState(undefined as undefined | boolean);
+
+    // Get tabStore
+    const { activeTab, tabs, tabContents } = useBrowserTabsStore([
+      "activeTab",
+      "tabs",
+      "tabContents"
+    ]);
+
     interface GetTabbedProps {
       onGet: (tabbed: string) => void;
     }
 
     const GetTabbed = (props: GetTabbedProps) => {
+      const tabbedRef = React.useRef("");
+      React.useEffect(() => props.onGet(tabbedRef.current), []);
+
       const prefs = usePrefs();
 
       if (!prefs.value) {
@@ -129,21 +131,23 @@ export const RepositoryApp = (props: IProps) => {
         return null;
       }
 
-      (window as any).tabbed = tabbed.get();
-      props.onGet(tabbed.get());
+      tabbedRef.current = tabbed.get();
 
       return null;
     }
 
+    const handleOnGet = (tabbed: string) => {
+      setTabbed(tabbed === "true");
+    }
 
-    const RepositoryDocViewers = () => {
-      // Get tabStore
-      const { activeTab, tabs, tabContents } = useBrowserTabsStore([
-        "activeTab",
-        "tabs",
-        "tabContents"
-      ]);
-
+    const getDocViewers = React.useCallback(() => {
+      if (tabbed === false) {
+        return [(
+          <Route exact path={["/doc", "/doc/:id"]}>
+             <RepositoryDocViewerScreen persistenceLayerProvider={app.persistenceLayerProvider} url={document.location.href} />
+          </Route>
+        )];
+      }
 
       // Map tabContents to array of DocViewers in Persistent Routes
       // Note: Deletion of a tab may cause rerender
@@ -161,19 +165,10 @@ export const RepositoryApp = (props: IProps) => {
         }
       ).filter(value => value !== null);
 
-      (window as any).docViewers = docViewers;
-      if (docViewers.length === 0) {
-        return null;
-      }
+      return docViewers;
+    }, [tabbed]);
 
-
-      return (
-        <>
-          {docViewers}
-        </>
-      );
-
-    }
+    const docViewers = getDocViewers();
 
     const RenderDocRepoScreen = React.memo(() => (
         <AuthRequired>
@@ -367,17 +362,23 @@ export const RepositoryApp = (props: IProps) => {
                     <>
                         <UseLocationChangeStoreProvider>
                             <BrowserRouter>
-                              <BrowserTabs />
+                              <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
+                                <GetTabbed onGet={handleOnGet} />
+                                <BrowserTabs />
+                              </PersistenceLayerContext.Provider>
                                 <UseLocationChangeRoot>
                                     <MUIDialogController>
 
                                         <Switch>
+                                            {(tabbed === undefined || docViewers.length === 0) ? [] : docViewers}
+
                                             {/*<RepositoryDocViewers />*/}
                                             {/*<></>*/}
 
                                             <Route exact path={["/login", "/login.html"]}>
                                                 <LoginScreen/>
                                             </Route>
+
 
                                             {/*<Route exact path={["/doc", "/doc/:id"]}>*/}
                                             {/*    <RenderDocViewerScreen/>*/}
@@ -456,9 +457,6 @@ export const RepositoryApp = (props: IProps) => {
                             </BrowserRouter>
                         </UseLocationChangeStoreProvider>
                     </>
-                    <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
-                      <GetTabbed onGet={(prefs) => {}} />
-                    </PersistenceLayerContext.Provider>
                 </div>
             </RepositoryRoot>
         </MUIRepositoryRoot>

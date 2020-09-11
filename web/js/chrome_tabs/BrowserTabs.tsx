@@ -1,6 +1,7 @@
 import React from "react";
 import { AppBar, Tabs, makeStyles, Theme } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
+import { usePrefs } from "../../../apps/repository/js/persistence_layer/PrefsHook";
 import { ChromeTab } from "./ChromeTab";
 import { BrowserTabContent } from "./BrowserTabContent";
 import {
@@ -25,6 +26,8 @@ export const BrowserTabs = () => {
   const classes = useStyles();
 
   const history = useHistory();
+
+  const prefs = usePrefs();
 
   // Array of tab positions
   // Indexed by positionIndex
@@ -57,6 +60,16 @@ export const BrowserTabs = () => {
       history.push(tabs[activeTab].url);
     } 
   }, [activeTab]);
+
+  // Do not render if tabbed is disabled
+  if (!prefs.value) {
+    return null;
+  }
+
+  const tabbed = prefs.value.get('tabbed');
+  if (!tabbed.isPresent() || tabbed.get() === "false") {
+    return null;
+  }
 
   // Change tabs
   const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
