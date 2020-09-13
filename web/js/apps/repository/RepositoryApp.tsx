@@ -52,7 +52,6 @@ import {RepoFooter} from "../../../../apps/repository/js/repo_footer/RepoFooter"
 import {MUIDialogController} from "../../mui/dialogs/MUIDialogController";
 import {UseLocationChangeStoreProvider} from '../../../../apps/doc/src/annotations/UseLocationChangeStore';
 import {UseLocationChangeRoot} from "../../../../apps/doc/src/annotations/UseLocationChangeRoot";
-<<<<<<< HEAD
 import {BrowserTabs} from "../../chrome_tabs/BrowserTabs";
 import {useBrowserTabsCallbacks, useBrowserTabsStore} from "../../chrome_tabs/BrowserTabsStore";
 import {DocViewerAppURLs} from "../../../../apps/doc/src/DocViewerAppURLs";
