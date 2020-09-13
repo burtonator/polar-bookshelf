@@ -1,40 +1,49 @@
 import React from 'react';
 import {deepMemo} from "../../react/ReactUtils";
 import {ILTRect} from "polar-shared/src/util/rects/ILTRect";
-import { VerticalLine } from './VerticalLine';
+import {VerticalLine} from './VerticalLine';
 import {HorizontalLine} from "./HorizontalLine";
 import {IPoint} from "../../Point";
+import {Rects} from "../../Rects";
+import {ILTBRRects} from "polar-shared/src/util/rects/ILTBRRects";
+
+export type ResizableBounds = 'parent';
 
 interface IProps {
-    readonly color: string;
 
+    readonly id?: string;
+    readonly color: string;
     readonly document?: Document;
     readonly window?: Window;
-
     readonly style?: React.CSSProperties;
     readonly className?: string;
-
     readonly resizeAxis?: 'y';
-
     readonly computeInitialPosition: () => ILTRect;
-
-    readonly onResized?: (resizeRect: ILTRect) => void;
-
+    readonly onResized?: (resizeRect: ILTRect, direction: Direction) => void;
     readonly onContextMenu?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+    readonly bounds?: ResizableBounds;
+
+    /**
+     * CSS properties for the resize handles.
+     */
+    readonly resizeHandleStyle?: React.CSSProperties;
 
 }
 
-type Direction = 'top' | 'bottom' | 'left' | 'right';
+export type Direction = 'top' | 'bottom' | 'left' | 'right';
 
 type MouseEventHandler = (event: MouseEvent) => void;
 
+// FIXME: I need to add support for positioning based on the positioned ancestor
+// a box might have default positioning so position 'absolute' won't work to
+// position it ... this is going to require some more work
 export const Resizable = deepMemo((props: IProps) => {
 
-    // TODO: bounds isn't implemented at all (which is needed) use a ref callback
-    // and then compute bounds when we're resizing.
-
     const [position, setPosition] = React.useState<ILTRect>(props.computeInitialPosition())
-    const positionRef = React.useRef(position);
+
+    // the position while we're resizing then truncated to compute the position
+    const resizingPositionRef = React.useRef(position);
+
     const mouseDown = React.useRef(false);
     const mouseEventOrigin = React.useRef<IPoint | undefined>(undefined);
     const mouseMoveHandler = React.useRef<MouseEventHandler | undefined>(undefined);
@@ -42,6 +51,24 @@ export const Resizable = deepMemo((props: IProps) => {
 
     const win = props.window || window;
     const doc = props.document || document;
+
+    const computeBoundsParentElement = React.useCallback(() => {
+
+        return elementRef.current?.parentElement;
+
+    }, [elementRef.current]);
+
+    const computeBoundsParentElementRect = React.useCallback((): ILTRect => {
+
+        const boundsParentElement = computeBoundsParentElement();
+
+        if (boundsParentElement) {
+            return Rects.createFromOffset(boundsParentElement);
+        }
+
+        return Rects.createFromOffset(doc.body);
+
+    }, [elementRef.current]);
 
     const toggleUserSelect = (resizing: boolean) => {
         // this is a hack to disable user select of the document to prevent
@@ -55,14 +82,45 @@ export const Resizable = deepMemo((props: IProps) => {
 
     };
 
-    function updatePosition(position: ILTRect) {
+    const toggleCursor = (direction: Direction | undefined) => {
+
+        if (! direction) {
+            doc.body.style.cursor = 'auto';
+            return;
+        }
+
+        function computeCursor(direction: Direction) {
+
+            switch(direction) {
+                case "top":
+                    return 'row-resize';
+                case "bottom":
+                    return 'row-resize';
+                case "left":
+                    return 'col-resize';
+                case "right":
+                    return 'col-resize';
+            }
+
+        }
+
+        doc.body.style.cursor = computeCursor(direction);
+
+    }
+
+    function updatePosition(position: ILTRect, direction: Direction) {
         setPosition(position);
-        positionRef.current = position;
+
+        if (props.onResized) {
+            props.onResized(position, direction);
+        }
+
     }
 
     const handleMouseUp = React.useCallback(() => {
         mouseDown.current = false;
         toggleUserSelect(false);
+        toggleCursor(undefined);
         win.removeEventListener('mousemove', mouseMoveHandler.current!);
     }, []);
 
@@ -74,50 +132,77 @@ export const Resizable = deepMemo((props: IProps) => {
         }
 
         const origin = mouseEventOrigin.current!;
+
         const delta = {
             x: event.clientX - origin.x,
             y: event.clientY - origin.y
         };
 
-        function computeNewPosition(): ILTRect {
+        /**
+         * Compute the position raw/directly from the current delta.
+         */
+        function computeResizingPosition(): ILTRect {
 
             switch (direction) {
 
                 case "top":
                     return {
-                        ...positionRef.current,
-                        top: Math.min(positionRef.current.top + delta.y,
-                                       positionRef.current.top + positionRef.current.height),
-                        height: Math.max(positionRef.current.height - delta.y, 0)
+                        ...resizingPositionRef.current,
+                        top: Math.min(resizingPositionRef.current.top + delta.y,
+                                      resizingPositionRef.current.top + resizingPositionRef.current.height),
+                        height: Math.max(resizingPositionRef.current.height - delta.y, 0)
                     };
                 case "bottom":
                     return {
-                        ...positionRef.current,
-                        // TODO: also don't allow this to be dragged too far to the top.
-                        height: positionRef.current.height + delta.y
+                        ...resizingPositionRef.current,
+                        height: resizingPositionRef.current.height + delta.y
                     };
                 case "left":
                     return {
-                        ...positionRef.current,
-                        left: Math.min(positionRef.current.left + delta.x,
-                                       positionRef.current.left + positionRef.current.width),
-                        width: Math.max(positionRef.current.width - delta.x, 0)
+                        ...resizingPositionRef.current,
+                        left: Math.min(resizingPositionRef.current.left + delta.x,
+                                       resizingPositionRef.current.left + resizingPositionRef.current.width),
+                        width: Math.max(resizingPositionRef.current.width - delta.x, 0)
                     };
                 case "right":
                     return {
-                        ...positionRef.current,
-                        width: positionRef.current.width + delta.x,
+                        ...resizingPositionRef.current,
+                        width: resizingPositionRef.current.width + delta.x,
                     };
 
             }
         }
 
-        updatePosition(computeNewPosition());
-        mouseEventOrigin.current = event;
+        /**
+         * Compute the new position but factor in bounds too.
+         */
+        function computePosition(): ILTRect {
 
-        if (props.onResized) {
-            props.onResized(positionRef.current);
+            const resizingPosition = computeResizingPosition();
+
+            if (props.bounds) {
+
+                const boundsParentElementRect = computeBoundsParentElementRect();
+
+                const boundedLTRB = {
+                    left: Math.max(resizingPosition.left, 0),
+                    top: Math.max(resizingPosition.top, 0),
+                    right: Math.min(resizingPosition.left + resizingPosition.width, boundsParentElementRect.width),
+                    bottom: Math.min(resizingPosition.top + resizingPosition.height, boundsParentElementRect.height)
+                }
+
+                return ILTBRRects.toLTRect(boundedLTRB)
+
+            }
+
+            return resizingPosition;
+
         }
+
+        resizingPositionRef.current = computeResizingPosition();
+
+        updatePosition(computePosition(), direction);
+        mouseEventOrigin.current = event;
 
     }, []);
 
@@ -126,6 +211,7 @@ export const Resizable = deepMemo((props: IProps) => {
         mouseEventOrigin.current = {x: event.clientX, y: event.clientY};
 
         toggleUserSelect(true);
+        toggleCursor(direction);
 
         mouseMoveHandler.current = (event: MouseEvent) => handleMouseMove(event, direction);
 
@@ -150,7 +236,8 @@ export const Resizable = deepMemo((props: IProps) => {
 
     return (
 
-        <div style={{...style, ...props.style}}
+        <div id={props.id}
+             style={{...style, ...props.style}}
              ref={ref => elementRef.current = ref}
              draggable={false}
              className={props.className}
@@ -185,3 +272,37 @@ export const Resizable = deepMemo((props: IProps) => {
     );
 
 })
+
+export namespace HTMLElements {
+
+    /**
+     * Search backwards in the DOM to find the most positioned ancestor or
+     * the current element if it's positioned.
+     */
+    export function findPositionedAncestor(element: HTMLElement): HTMLElement | undefined {
+
+        if (element.style.position !== null && element.style.position !== 'static') {
+            return element;
+        }
+
+        if (element.parentElement) {
+            return findPositionedAncestor(element.parentElement);
+        }
+
+        return undefined;
+
+    }
+
+    export function computeOffset(parent: HTMLElement, child: HTMLElement): IPoint {
+
+        const parentBCR = parent.getBoundingClientRect();
+        const childBCR = child.getBoundingClientRect();
+
+        const x = childBCR.x - parentBCR.x;
+        const y = childBCR.y - parentBCR.y
+
+        return {x, y};
+
+    }
+
+}

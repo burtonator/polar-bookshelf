@@ -1,65 +1,109 @@
 import * as React from 'react';
+import {deepMemo} from "../../../web/js/react/ReactUtils";
 import {Analytics} from "../../../web/js/analytics/Analytics";
-import {Nav} from "../../../web/js/ui/util/Nav";
+import {useNav} from "../../../web/js/ui/util/NavHook";
+import {AppRuntime} from 'polar-shared/src/util/AppRuntime';
+import {Platforms} from 'polar-shared/src/util/Platforms';
+import {Browsers} from "polar-browsers/src/Browsers";
+import Button from '@material-ui/core/Button';
+import {FAChromeIcon} from "../../../web/js/mui/MUIFontAwesome";
+import {useSnapshotSubscriber} from "../../../web/js/ui/data_loader/UseSnapshotSubscriber";
+import {WebExtensionPresenceClient} from "polar-web-extension-api/src/WebExtensionPresenceClient";
+import {useComponentDidMount} from "../../../web/js/hooks/ReactLifecycleHooks";
+import {isPresent} from "polar-shared/src/Preconditions";
 
-export class ChromeExtensionInstallButton extends React.Component<any, any> {
+export function useWebExtensionInstalled() {
 
-    private open: boolean = false;
+    const [installed, setInstalled] = React.useState<boolean | undefined>(undefined);
 
+    useComponentDidMount(() => {
 
+        async function doAsync() {
+            const response = await WebExtensionPresenceClient.exec();
+            setInstalled(isPresent(response));
+        }
 
-    // constructor() {
-    //
-    //     this.onClick = this.onClick.bind(this);
-    //
-    //     this.state = {
-    //         open: this.open,
-    //     };
-    //
-    // }
+        doAsync()
+        .catch(err => console.error(err));
 
-    public render() {
+    });
 
-        return null;
-
-        // const isChrome = ['chrome', 'chromium'].includes(Browsers.get()?.id || '');
-        // const hidden = AppRuntime.isElectron() || ! Platforms.isDesktop() || ! isChrome;
-        //
-        // return (
-        //
-        //     // <div className="d-none-mobile">
-        //     //
-        //     //     <Button hidden={hidden}
-        //     //             onClick={() => this.onClick()}
-        //     //             variant="contained">
-        //     //
-        //     //         <div style={{display: 'flex'}}>
-        //     //
-        //     //
-        //     //             Install Chrome Extension
-        //     //
-        //     //     </Button>
-        //     //
-        //     // </div>
-        //
-        // );
-
-    }
-
-    private onClick(): void {
-
-        Analytics.event({category: 'chrome-extension', action: 'manual-installation-triggered'});
-
-        Nav.openLinkWithNewTab("https://chrome.google.com/webstore/detail/polar-pdf-web-and-documen/jkfdkjomocoaljglgddnmhcbolldcafd");
-
-    }
-
-    private onSuccess() {
-        // Toaster.success("Chrome extension installed successfully!");
-    }
-
-    private onFailure(error: string) {
-        // Toaster.error("Failed to install chrome extension: " + error);
-    }
+    return installed;
 
 }
+
+
+export function useWebExtensionInstalledSnapshots() {
+
+    const [installed, setInstalled] = React.useState<boolean | undefined>(undefined);
+    const subscriber = React.useMemo(() => ({
+        id: 'web-extension-presence',
+        subscribe: WebExtensionPresenceClient.subscribe
+    }), []);
+
+    const {value, error} = useSnapshotSubscriber(subscriber);
+
+    if (error) {
+        setInstalled(false);
+        return;
+    }
+
+    if (value) {
+        setInstalled(true);
+    } else {
+        setInstalled(false);
+    }
+
+    return installed;
+
+}
+
+export const ChromeExtensionInstallButton = deepMemo(() => {
+
+    const isChrome = ['chrome', 'chromium'].includes(Browsers.get()?.id || '');
+    const hidden = AppRuntime.isElectron() || ! Platforms.isDesktop() || ! isChrome;
+    const linkLoader = useNav();
+    const webExtensionInstalled = useWebExtensionInstalled();
+
+    function onClick(): void {
+        Analytics.event({category: 'chrome-extension', action: 'manual-installation-triggered'});
+
+        function computeURL() {
+
+            if (document.location.href!.startsWith('https://beta.getpolarized.io')) {
+                return 'https://chrome.google.com/webstore/detail/save-to-polar-beta/mklidoahhflhlpcpigokeckcipaibopd?hl=en';
+            }
+
+            return "https://chrome.google.com/webstore/detail/polar-pdf-web-and-documen/jkfdkjomocoaljglgddnmhcbolldcafd";
+
+        }
+
+        linkLoader(computeURL(), {newWindow: true, focus: true});
+    }
+
+    if (webExtensionInstalled) {
+        // it's installed so we're good to go
+        return null;
+    }
+
+    if (webExtensionInstalled === undefined) {
+        // we dont' know if it's installed yet.
+        return null;
+    }
+
+    return (
+
+        <Button hidden={hidden}
+                onClick={() => onClick()}
+                variant="contained"
+                startIcon={<FAChromeIcon/>}
+                size="medium"
+                color="default">
+
+            Install Chrome Extension
+
+        </Button>
+
+    );
+
+});

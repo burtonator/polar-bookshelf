@@ -280,7 +280,7 @@ export class App<P> extends React.Component<{}, IAppState> {
                          maxWidth: 400
                      }}
                      className="border p-1 shadow">
-                    <AccountControl userInfo={userInfo} onLogout={NULL_FUNCTION}/>
+                    <AccountControl userInfo={userInfo}/>
                 </div>
             );
         };

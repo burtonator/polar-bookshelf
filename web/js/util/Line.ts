@@ -103,7 +103,7 @@ export class Line {
 
     }
 
-    static interval(start: number, pt: number, end: number): boolean {
+    public static interval(start: number, pt: number, end: number): boolean {
         return start <= pt && pt <= end;
     }
 

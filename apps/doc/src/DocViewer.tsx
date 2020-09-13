@@ -1,4 +1,4 @@
-import {DocViewerToolbar} from "./DocViewerToolbar";
+import {DocViewerToolbar} from "./toolbar/DocViewerToolbar";
 import {DockLayout} from "../../../web/js/ui/doc_layout/DockLayout";
 import * as React from "react";
 import {DocViewerAppURLs} from "./DocViewerAppURLs";
@@ -31,6 +31,8 @@ import {DocRenderer, DocViewerContext} from "./renderers/DocRenderer";
 import {useLogger} from "../../../web/js/mui/MUILogger";
 import {ViewerContainerProvider} from "./ViewerContainerStore";
 import {FileTypes} from "../../../web/js/apps/main/file_loaders/FileTypes";
+import {deepMemo} from "../../../web/js/react/ReactUtils";
+import {useLogWhenChanged} from "../../../web/js/hooks/ReactHooks";
 
 const Main = React.memo(() => {
 
@@ -229,7 +231,7 @@ namespace Device {
                                         {docMeta &&
                                             <AnnotationSidebar2 />}
                                     </>,
-                                width: 390,
+                                width: 410,
                             }
                         ]}/>
                 </div>
@@ -241,7 +243,7 @@ namespace Device {
 
 }
 
-const DocViewerMain = React.memo(() => {
+const DocViewerMain = deepMemo(() => {
 
     return (
         <DeviceRouter handheld={<Device.Handheld/>}
@@ -255,18 +257,31 @@ interface DocViewerProps {
   readonly url: string;
 }
 
-export const DocViewer = React.memo((props: DocViewerProps) => {
+interface DocViewerParentProps {
+    readonly docID: string;
+    readonly children: React.ReactNode;
+}
+
+const DocViewerParent = deepMemo((props: DocViewerParentProps) => (
+    <div data-doc-viewer-id={props.docID}
+         style={{
+             display: 'flex',
+             minHeight: 0,
+             overflow: 'auto',
+             flexGrow: 1,
+         }}>
+        {props.children}
+    </div>
+));
+
+export const DocViewer = deepMemo((props: DocViewerProps) => {
 
     const {docURL} = useDocViewerStore(['docURL']);
     const {setDocMeta} = useDocViewerCallbacks();
     const log = useLogger();
-    const persistenceLayerContext = usePersistenceLayerContext()
 
-    const parsedURL = DocViewerAppURLs.parse(props.url);
-
-    // TODO: I think I can have hard wired types for state transition functions
-    // like an uninitialized store, with missing values, then an initialized one
-    // with a different 'type' value.
+    const persistenceLayerContext = usePersistenceLayerContext();
+    const parsedURL = React.useMemo(() => DocViewerAppURLs.parse(props.url), []);
 
     useComponentDidMount(() => {
 
@@ -311,19 +326,13 @@ export const DocViewer = React.memo((props: DocViewerProps) => {
     const docID = parsedURL.id;
 
     return (
-        <div data-doc-viewer-id={docID}
-             style={{
-                 display: 'flex',
-                 minHeight: 0,
-                 overflow: 'auto',
-                 flexGrow: 1,
-             }}>
+        <DocViewerParent docID={docID}>
             <DocViewerContext.Provider value={{fileType, docID}}>
                 <ViewerContainerProvider>
                     <DocViewerMain/>
                 </ViewerContainerProvider>
             </DocViewerContext.Provider>
-        </div>
+        </DocViewerParent>
     );
 
 });

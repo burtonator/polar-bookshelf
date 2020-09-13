@@ -35,6 +35,9 @@ export class Accounts {
 
     }
 
+    /**
+     * @Deprecated use a snapshot / hook version of this
+     */
     public static async get(): Promise<Account | undefined> {
 
         const ref = await this.ref();

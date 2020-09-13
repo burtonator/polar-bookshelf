@@ -25,7 +25,6 @@ import {
     IDocScale,
     useDocViewerCallbacks
 } from "../../DocViewerStore";
-import isEqual from 'react-fast-compare';
 import {useDocFindCallbacks} from "../../DocFindStore";
 import {PageNavigator} from "../../PageNavigator";
 import {PDFDocs} from "polar-pdf/src/pdf/PDFDocs";
@@ -45,6 +44,7 @@ import {KnownPrefs} from "../../../../../web/js/util/prefs/KnownPrefs";
 import {useAnnotationBar} from "../../AnnotationBarHooks";
 import {DocumentInit} from "../DocumentInitHook";
 import {useDocViewerPageJumpListener} from '../../DocViewerAnnotationHook';
+import {deepMemo} from "../../../../../web/js/react/ReactUtils";
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -130,7 +130,7 @@ interface IProps {
 
 }
 
-export const PDFDocument = React.memo((props: IProps) => {
+export const PDFDocument = deepMemo((props: IProps) => {
 
     const {docURL} = props;
     const [active, setActive] = React.useState(false);
@@ -138,9 +138,13 @@ export const PDFDocument = React.memo((props: IProps) => {
     const docViewerRef = React.useRef<DocViewer | undefined>(undefined);
     const scaleRef = React.useRef<ScaleLevelTuple>(ScaleLevelTuples[1]);
     const docRef = React.useRef<PDFDocumentProxy | undefined>(undefined);
+    const pageNavigatorRef = React.useRef<PageNavigator | undefined>(undefined);
+
     const log = useLogger();
 
-    const {setDocDescriptor, setPageNavigator, setResizer, setScaleLeveler, setDocScale} = useDocViewerCallbacks();
+    const {setDocDescriptor, setPageNavigator, setResizer, setScaleLeveler, setDocScale, setPage}
+        = useDocViewerCallbacks();
+
     const {setFinder} = useDocFindCallbacks();
     const {persistenceLayerProvider} = usePersistenceLayerContext();
     const prefs = usePrefsContext();
@@ -234,18 +238,18 @@ export const PDFDocument = React.memo((props: IProps) => {
 
         }
 
-        const pageNavigator = createPageNavigator(docRef.current);
+        pageNavigatorRef.current = createPageNavigator(docRef.current);
 
         dispatchPDFDocMeta();
 
-        setPageNavigator(pageNavigator);
+        setPageNavigator(pageNavigatorRef.current);
 
-        const scrollDebouncer = Debouncers.create(() => {
+        const handleScroll = Debouncers.create(() => {
             dispatchPDFDocMeta();
         });
 
         docViewer.containerElement.addEventListener('scroll', () => {
-            scrollDebouncer();
+            handleScroll();
         });
 
         const scaleLeveler = (scale: ScaleLevelTuple) => {
@@ -358,6 +362,7 @@ export const PDFDocument = React.memo((props: IProps) => {
                 fingerprint: docRef.current.fingerprint
             };
 
+            setPage(pageNavigatorRef.current!.get());
             setDocDescriptor(docDescriptor);
 
         }
@@ -371,5 +376,5 @@ export const PDFDocument = React.memo((props: IProps) => {
         </>
     ) || null;
 
-}, isEqual);
+});
 

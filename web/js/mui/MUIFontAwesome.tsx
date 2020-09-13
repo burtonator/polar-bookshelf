@@ -1,27 +1,40 @@
 import React from "react";
 import {SvgIcon, SvgIconProps} from "@material-ui/core";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {
-    faCheckSquare,
-    faCoffee,
-    faTag
-} from "@fortawesome/free-solid-svg-icons";
-import isEqual from "react-fast-compare";
-import {faSquare} from "@fortawesome/free-regular-svg-icons";
-import {library} from "@fortawesome/fontawesome-svg-core";
+import {faCheckSquare} from "@fortawesome/free-solid-svg-icons/faCheckSquare";
+import {faCoffee} from "@fortawesome/free-solid-svg-icons/faCoffee";
+import {faTag} from "@fortawesome/free-solid-svg-icons/faTag";
+import {faSquare} from "@fortawesome/free-regular-svg-icons/faSquare";
+import {faChrome} from "@fortawesome/free-brands-svg-icons/faChrome";
+import {faDiscord} from "@fortawesome/free-brands-svg-icons/faDiscord";
 
-library.add(faCheckSquare, faCoffee, faTag, faCheckSquare, faSquare);
+import {IconProp, library} from "@fortawesome/fontawesome-svg-core";
+import {deepMemo} from "../react/ReactUtils";
 
-export const FACheckSquare = React.memo((props: SvgIconProps) => (
-    <SvgIcon {...props}>
-        <FontAwesomeIcon icon={faCheckSquare} />
-    </SvgIcon>
+library.add(faCheckSquare, faCoffee, faTag, faCheckSquare, faSquare, faChrome, faDiscord);
 
-), isEqual);
+// to minimize size we have to:
+// https://github.com/FortAwesome/react-fontawesome/issues/70
 
-export const FASquare = React.memo((props: SvgIconProps) => (
-    <SvgIcon {...props}>
-        <FontAwesomeIcon icon={faSquare} />
-    </SvgIcon>
+interface FASvgIconProps extends SvgIconProps {
+    readonly icon: IconProp;
+}
 
-), isEqual);
+const FASvgIcon = deepMemo((props: FASvgIconProps) => {
+    return (
+        <SvgIcon {...props}>
+            <FontAwesomeIcon icon={props.icon} />
+        </SvgIcon>
+    );
+});
+
+function createIcon(icon: IconProp) {
+    return deepMemo((props: SvgIconProps) => (
+        <FASvgIcon icon={icon} {...props}/>
+    ))
+}
+
+export const FACheckSquareIcon = createIcon(faCheckSquare);
+export const FASquareIcon = createIcon(faSquare);
+export const FAChromeIcon = createIcon(faChrome);
+export const FADiscordIcon = createIcon(faDiscord);

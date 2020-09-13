@@ -42,14 +42,12 @@ export const AnnotationRepoTableRow = React.memo(React.forwardRef((props: IProps
                   selected={rowSelected}>
 
             <TableCell padding="checkbox">
-                <Box p={1}>
-                    <AnnotationPreview id={annotation.id}
-                                       text={annotation.text}
-                                       img={annotation.img}
-                                       color={annotation.color}
-                                       lastUpdated={annotation.lastUpdated}
-                                       created={annotation.created}/>
-                </Box>
+                <AnnotationPreview id={annotation.id}
+                                   text={annotation.text}
+                                   img={annotation.img}
+                                   color={annotation.color}
+                                   lastUpdated={annotation.lastUpdated}
+                                   created={annotation.created}/>
             </TableCell>
         </TableRow>
     );

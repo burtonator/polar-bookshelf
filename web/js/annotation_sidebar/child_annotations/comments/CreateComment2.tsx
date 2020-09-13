@@ -8,12 +8,13 @@ import {useAnnotationActiveInputContext} from "../../AnnotationActiveInputContex
 import {EditComment2} from './EditComment2';
 import {IDocAnnotationRef} from "../../DocAnnotation";
 import {Refs} from 'polar-shared/src/metadata/Refs';
+import {deepMemo} from "../../../react/ReactUtils";
 
 interface IProps {
     readonly parent: IDocAnnotationRef;
 }
 
-export const CreateComment2 = React.memo((props: IProps) => {
+export const CreateComment2 = deepMemo((props: IProps) => {
 
     const {parent} = props;
 

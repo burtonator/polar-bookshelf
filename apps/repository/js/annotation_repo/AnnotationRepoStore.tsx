@@ -255,10 +255,6 @@ const createCallbacks = (storeProvider: Provider<IAnnotationRepoStore>,
 
     const docLoader = useDocLoader();
 
-    type AnnotationMutator<T extends IAnnotationMutationSelected> = (docMeta: IDocMeta,
-                                                                     pageMeta: IPageMeta,
-                                                                     mutation: T) => void;
-
     const annotationMutations = AnnotationMutationCallbacks.create(updateStore, refresher);
 
     function updateStore(docMetas: ReadonlyArray<IDocMeta>): ReadonlyArray<IDocMeta> {
@@ -381,9 +377,10 @@ const createCallbacks = (storeProvider: Provider<IAnnotationRepoStore>,
 
         const {docMeta, original} = annotation;
 
-        AnnotationMutations.update(annotation, original);
 
         async function doAsync() {
+
+            AnnotationMutations.update(annotation, original);
 
             await repoDocMetaLoader.update(docMeta, 'updated');
 

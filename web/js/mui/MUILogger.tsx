@@ -1,27 +1,20 @@
+import React from 'react';
 import {ConsoleLogger} from "polar-shared/src/logger/ConsoleLogger";
 import {useDialogManager} from "./dialogs/MUIDialogControllers";
 import {DialogManager} from "./dialogs/MUIDialogController";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {ILogger} from "polar-shared/src/logger/ILogger";
-import {MultiLogger} from "../logger/MultiLogger";
 
 /**
  * Used so that we can use our MUI error dialog if an error was raised.
  * @NotStale
  */
 export function useLogger(): ILogger {
-
     const dialogManager = useDialogManager();
-
-    const loggers = [
-        new MUILogger(dialogManager),
-        // new SentryBrowserLogger()
-    ];
-
-    return new MultiLogger(...loggers);
-
+    // it's important to useMemo here or the value will change and can trigger
+    // too many renders of root components and nuke performance.
+    return React.useMemo(() => new MUILogger(dialogManager), [dialogManager]);
 }
-
 
 /**
  * Logger that just uses the DialogManager to display errors in a snackbar.

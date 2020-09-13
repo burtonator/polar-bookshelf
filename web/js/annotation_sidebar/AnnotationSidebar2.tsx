@@ -127,7 +127,7 @@ const Annotations = React.memo(() => {
     return (
         <Paper square
                elevation={0}
-               className="pb-1 pl-1 pr-1"
+               className="pb-1 pt-1"
                style={{
                    flexGrow: 1,
                    display: 'flex',

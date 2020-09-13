@@ -1,11 +1,9 @@
-
-
 import React from 'react';
 import {Content} from "./Content";
 import {SearchBar} from "./SearchBar";
 import { DOMHighlights } from '../../web/js/dom_highlighter/DOMHighlights';
 import { DOMTextHit } from 'polar-dom-text-search/src/DOMTextHit';
-import {DOMTextSearch} from "polar-dom-text-search/src/DOMTextSearch";
+import {DOMTextIndexes} from "polar-dom-text-search/src/DOMTextIndexes";
 
 export const DOMHits = () => {
 
@@ -20,7 +18,7 @@ export const DOMHits = () => {
 
         // use the new search frame work to see if we can find the text on
         // the page...
-        const index = DOMTextSearch.createIndex(document, document.getElementById('content')!);
+        const index = DOMTextIndexes.create(document, document.getElementById('content')!);
 
         const hits = index.search(text, 0, {caseInsensitive: true});
         setHits(hits);

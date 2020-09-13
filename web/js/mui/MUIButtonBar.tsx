@@ -17,6 +17,7 @@ export const MUIButtonBar = deepMemo((props: IProps) => {
         <div style={{
                  display: 'flex',
                  alignItems: 'center',
+                 flexWrap: 'nowrap',
                  ...(props.style || {})
              }}
              className={className}>

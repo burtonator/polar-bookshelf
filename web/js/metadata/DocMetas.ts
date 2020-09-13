@@ -275,7 +275,6 @@ export class DocMetas {
     public static forceWrite(docMeta: IDocMeta) {
         docMeta.docInfo.lastUpdated = ISODateTimeStrings.create();
     }
-
     /**
      * Create a copy of the DocMeta and with updated lastUpdate fields and
      * a new UUID.

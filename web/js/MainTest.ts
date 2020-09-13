@@ -1,15 +1,7 @@
-// all our unit tests...
-
 import {assert} from 'chai';
 import {assertJSON} from './test/Assertions';
-import {createSiblingTuples} from 'polar-shared/src/util/Functions';
 import {Delegator, getBoundingClientRectFromBCRs} from './utils';
-
-
-//import * as utils from "./utils.js";
-
-//chai.config.truncateThreshold = 0;
-//chai.use(chaiDiff);
+import { Tuples } from 'polar-shared/src/util/Tuples';
 
 // stable reference date for all tests.
 var date = new Date(Date.parse("2018-05-30T02:47:44.411Z"));
@@ -33,45 +25,47 @@ describe('Testing createSiblingTuples.', function() {
 
     it('Test with no entries', function() {
 
-        assert.deepEqual( createSiblingTuples([]), []);
+        assert.deepEqual( Tuples.createSiblings([]), []);
 
     });
 
     it('Test with 1 entry', function() {
 
-        assert.deepEqual( createSiblingTuples([1]), [ { curr: 1, prev: undefined, next: undefined } ]);
+        assert.deepEqual( Tuples.createSiblings([1]), [
+            { idx: 0, curr: 1, prev: undefined, next: undefined }
+        ]);
 
     });
 
     it('Test with 2 entries', function() {
 
-        assert.deepEqual( createSiblingTuples([1,2]),
+        assert.deepEqual( Tuples.createSiblings([1,2]),
                           [
-                              { curr: 1, prev: undefined, next: 2 },
-                              { curr: 2, prev: 1, next: undefined }
+                              { idx: 0, curr: 1, prev: undefined, next: 2 },
+                              { idx: 1, curr: 2, prev: 1, next: undefined }
                           ]);
 
     });
 
     it('Test with 3 entries', function() {
 
-        assert.deepEqual( createSiblingTuples([1,2,3]),
+        assert.deepEqual( Tuples.createSiblings([1,2,3]),
             [
-                { curr: 1, prev: undefined, next: 2 },
-                { curr: 2, prev: 1, next: 3 },
-                { curr: 3, prev: 2, next: undefined }
+                { idx: 0, curr: 1, prev: undefined, next: 2 },
+                { idx: 1, curr: 2, prev: 1, next: 3 },
+                { idx: 2, curr: 3, prev: 2, next: undefined }
             ]);
 
     });
 
     it('Test with 4 entries', function() {
 
-        assert.deepEqual( createSiblingTuples([1,2,3,4]),
+        assert.deepEqual( Tuples.createSiblings([1,2,3,4]),
             [
-                { curr: 1, prev: undefined, next: 2 },
-                { curr: 2, prev: 1, next: 3 },
-                { curr: 3, prev: 2, next: 4 },
-                { curr: 4, prev: 3, next: undefined }
+                { idx: 0, curr: 1, prev: undefined, next: 2 },
+                { idx: 1, curr: 2, prev: 1, next: 3 },
+                { idx: 2, curr: 3, prev: 2, next: 4 },
+                { idx: 3, curr: 4, prev: 3, next: undefined }
             ]);
 
     });

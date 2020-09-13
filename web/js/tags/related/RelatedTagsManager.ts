@@ -5,10 +5,26 @@ import {
     ValueAutocompleteOption
 } from "../../mui/autocomplete/MUICreatableAutocomplete";
 import {Tag, Tags} from "polar-shared/src/tags/Tags";
+import {LocalRelatedTagsStore} from "./LocalRelatedTagsStore";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {Debouncers} from "polar-shared/src/util/Debouncers";
+import {TagFilters} from "polar-shared/src/tags/TagFilters";
 
 export type TagDocsIndex = {[tag: string]: TagDocs};
 
 export type DocTagsIndex = {[docID: string]: DocTags};
+
+export type TagsIndex = {[tag: string]: Tag};
+
+export interface IRelatedTagsData {
+
+    readonly tagDocsIndex: TagDocsIndex;
+
+    readonly docTagsIndex: DocTagsIndex;
+
+    readonly tagsIndex: TagsIndex;
+
+}
 
 /**
  * Related tag index for in memory related tags computation.  This does not
@@ -29,33 +45,73 @@ export class RelatedTagsManager {
      */
     private docTagsIndex: DocTagsIndex = {};
 
-    public update(docID: DocID, mutationType: MutationType, ...tags: TagLiteral[]) {
+    private tagsIndex: TagsIndex = {};
 
-        for (const tag of tags) {
+    private persister: () => void = NULL_FUNCTION;
 
-            const tagMeta = Dictionaries.computeIfAbsent(this.tagDocsIndex, tag, () => {
-                return {tag, docs: new Set<DocID>()};
+    constructor(data?: IRelatedTagsData) {
+
+        if (data) {
+
+            // manually created to represent an externalized related tags index
+            this.tagDocsIndex = data.tagDocsIndex;
+            this.docTagsIndex = data.docTagsIndex;
+            this.tagsIndex = data.tagsIndex;
+
+        } else {
+            this.persister = Debouncers.create(() => this.persist(), {interval: 5000});
+        }
+
+    }
+
+    public tags(): ReadonlyArray<Tag> {
+        return Object.values(this.tagsIndex);
+    }
+
+    public update(docID: DocID, mutationType: MutationType, tags: ReadonlyArray<Tag>) {
+
+        const updateTagsIndex = () => {
+            // FIXME: we're not doing any type of pruning here... so if a
+            // tag is deleted it's not removed ...
+            for (const tag of tags) {
+                this.tagsIndex[tag.id] = tag;
+            }
+        }
+
+        updateTagsIndex();
+
+        // TODO: the following mutates each of the indexes together and should
+        // probably be broken out
+
+        const tagLabels = tags.map(current => current.label)
+
+        for (const tagLabel of tagLabels) {
+
+            const tagDocs = Dictionaries.computeIfAbsent(this.tagDocsIndex, tagLabel, (): TagDocs => {
+                return {tag: tagLabel, docs: {}};
             });
 
             switch (mutationType) {
 
                 case 'set':
-                    tagMeta.docs.add(docID);
+                    tagDocs.docs[docID] = true;
                     break;
 
                 case 'delete':
-                    tagMeta.docs.delete(docID);
+                    delete tagDocs.docs[docID];
                     break;
 
             }
 
-            const docMeta = Dictionaries.computeIfAbsent(this.docTagsIndex, docID, () => {
-                return {doc: docID, tags: []};
+            const docMeta = Dictionaries.computeIfAbsent(this.docTagsIndex, docID, (): DocTags => {
+                return {tags: []};
             });
 
-            docMeta.tags.push(tag);
+            docMeta.tags.push(tagLabel);
 
         }
+
+        this.persister();
 
     }
 
@@ -78,11 +134,11 @@ export class RelatedTagsManager {
                 return;
             }
 
-            const relatedDocs = indexedTagMeta.docs;
+            const relatedDocIDs = indexedTagMeta.docs;
 
-            for (const relatedDoc of relatedDocs) {
+            for (const relatedDocID of Object.keys(relatedDocIDs)) {
 
-                const indexedDocMeta = this.docTagsIndex[relatedDoc];
+                const indexedDocMeta = this.docTagsIndex[relatedDocID];
 
                 const relatedTags = indexedDocMeta.tags;
 
@@ -138,16 +194,35 @@ export class RelatedTagsManager {
             return this.compute(tags)
                        .map(current => current.tag)
                        .map(Tags.create)
+                       .filter(TagFilters.onlyRegular)
                        .map(toAutocompleteOption)
         };
 
     }
 
+    public toExternal(): IRelatedTagsData {
+
+        return {
+            tagDocsIndex: this.tagDocsIndex,
+            docTagsIndex: this.docTagsIndex,
+            tagsIndex: this.tagsIndex
+        };
+
+    }
+
+    public persist() {
+        LocalRelatedTagsStore.write(this.toExternal());
+    }
+
+}
+
+export interface DocIDSetMap {
+    [id: string]: boolean;
 }
 
 export interface TagDocs {
     readonly tag: TagLiteral;
-    readonly docs: Set<DocID>;
+    readonly docs: DocIDSetMap;
 }
 
 export interface DocTags {

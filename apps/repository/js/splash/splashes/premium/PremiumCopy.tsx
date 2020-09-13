@@ -12,7 +12,7 @@ import {
 import {PremiumButton} from "./PremiumButton";
 import React from "react";
 import {NullCollapse} from "../../../../../../web/js/ui/null_collapse/NullCollapse";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from "polar-accounts/src/Billing";
 import Paper from "@material-ui/core/Paper";
 
 export const MobileContent = (props: IProps) => {
@@ -377,7 +377,7 @@ export const DesktopContent =  (props: IProps) => {
 
 
 export interface IProps {
-    readonly plan: accounts.Plan;
+    readonly plan: Billing.Plan;
     readonly userInfo?: UserInfo;
     readonly interval: PlanInterval;
     readonly togglePlanInterval: () => void;

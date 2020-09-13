@@ -53,7 +53,7 @@ const AnnotationSelected = React.memo((props : AnnotationSelectedProps) => {
                         <>
                             <AnnotationInlineControlBar annotation={annotation}/>
 
-                            <div className="p-1">
+                            <div className="mt-1">
                                 <AnnotationView2 annotation={annotation}/>
                             </div>
                         </>

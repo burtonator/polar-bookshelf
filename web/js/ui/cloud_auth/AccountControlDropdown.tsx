@@ -8,11 +8,7 @@ import {deepMemo} from "../../react/ReactUtils";
 
 
 interface IProps {
-
     readonly userInfo: UserInfo;
-
-    readonly onLogout: () => void;
-
 }
 
 export const AccountControlDropdown = deepMemo((props: IProps) => (
@@ -22,8 +18,7 @@ export const AccountControlDropdown = deepMemo((props: IProps) => (
                placement="bottom-end"
                caret>
 
-        <AccountControl userInfo={props.userInfo}
-                        onLogout={props.onLogout}/>
+        <AccountControl userInfo={props.userInfo}/>
 
     </MUIPopper>
 

@@ -3,7 +3,6 @@ import {RightSidebar} from "../../../web/js/ui/motion/RightSidebar";
 import {AccountControl} from "../../../web/js/ui/cloud_auth/AccountControl";
 import {DeviceRouter} from "../../../web/js/ui/DeviceRouter";
 import {PersistenceLayerController} from "../../../web/js/datastore/PersistenceLayerManager";
-import {AccountActions} from "../../../web/js/accounts/AccountActions";
 import {useUserInfoContext} from "../../../web/js/apps/repository/auth_handler/UserInfoProvider";
 import {deepMemo} from "../../../web/js/react/ReactUtils";
 
@@ -15,12 +14,9 @@ const AccountInfo = (props: AccountInfoProps) => {
 
     const userInfoContext = useUserInfoContext();
 
-    const onLogout = () => AccountActions.logout(props.persistenceLayerController);
-
     if (userInfoContext?.userInfo) {
         return <AccountControl {...props}
-                               userInfo={userInfoContext?.userInfo}
-                               onLogout={() => onLogout()}/>;
+                               userInfo={userInfoContext?.userInfo}/>;
     } else {
         return <h2>Please Login</h2>;
     }

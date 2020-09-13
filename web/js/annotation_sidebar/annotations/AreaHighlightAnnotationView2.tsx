@@ -2,8 +2,10 @@ import * as React from 'react';
 import {IDocAnnotationRef} from '../DocAnnotation';
 import {ResponsiveImg} from '../ResponsiveImg';
 import {HighlightColors} from 'polar-shared/src/metadata/HighlightColor';
-import isEqual from "react-fast-compare";
 import {AnnotationViewControlBar2} from "../AnnotationViewControlBar2";
+import {AnnotationTagsBar} from "../AnnotationTagsBar";
+import {deepMemo} from "../../react/ReactUtils";
+import {AnnotationDivider} from "./AnnotationDivider";
 
 const Image = (props: IProps) => {
 
@@ -27,7 +29,7 @@ const Image = (props: IProps) => {
 interface IProps {
     readonly annotation: IDocAnnotationRef;
 }
-export const AreaHighlightAnnotationView2 = React.memo((props: IProps) => {
+export const AreaHighlightAnnotationView2 = deepMemo((props: IProps) => {
 
     const {annotation} = props;
 
@@ -40,24 +42,37 @@ export const AreaHighlightAnnotationView2 = React.memo((props: IProps) => {
         // annotation that is created but I need a functional way to do
         // this because how do I determine when it loses focus?
 
-        <div key={key}
-             className="p-1">
+        <>
+            <div key={key}
+                 className=""
+                 style={{
+                     paddingLeft: '8px',
+                     paddingRight: '5px',
+                     borderLeft: `4px solid ${borderColor}`
+                 }}>
 
-            <div className="muted-color-root">
+                <div>
 
-                <div style={{
-                         borderLeft: `5px solid ${borderColor}`
-                     }}>
+                    <div style={{marginTop: '5px'}}>
+                        <AnnotationTagsBar tags={annotation.original.tags}/>
+                    </div>
 
-                    <Image {...props}/>
+                    <div>
+
+                        <Image {...props}/>
+
+                        <AnnotationViewControlBar2 annotation={annotation}/>
+
+                    </div>
 
                 </div>
 
-                <AnnotationViewControlBar2 annotation={annotation}/>
 
             </div>
 
-        </div>
+            <AnnotationDivider/>
+
+        </>
     );
 
-}, isEqual);
+});

@@ -9,6 +9,7 @@ import Chip from '@material-ui/core/Chip';
 import {MUIRelatedOptions} from "./MUIRelatedOptions";
 import {PremiumFeature} from "../../ui/premium_feature/PremiumFeature";
 import isEqual from "react-fast-compare";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -81,6 +82,12 @@ export interface MUICreatableAutocompleteProps<T> {
 
     readonly relatedOptionsCalculator?: RelatedOptionsCalculator<T>;
 
+    /**
+     * Called when the autocomplete options are open with true and then false
+     * when we close it.
+     */
+    readonly onOpen?: (open: boolean) => void;
+
 }
 
 interface IState<T> {
@@ -99,9 +106,14 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
 
     const [open, setOpen] = useState<boolean>(false);
 
+    const openRef = React.useRef(false);
     const inputValue = React.useRef("");
 
     const highlighted = useRef<ValueAutocompleteOption<T> | undefined>(undefined);
+
+    // creates an index of the options by ID so that we can lookup quickly if
+    // we have an existing entry to avoid double creating a 'create' option
+    const optionsIndex = React.useMemo(() => arrayStream(props.options).toMap(current => current.id), [props.options])
 
     /**
      * Centrally set the values so we can also reset other states, fire events,
@@ -221,13 +233,34 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
 
             event.preventDefault();
             event.stopPropagation();
+
         }
 
     };
 
+    function fireOnOpen() {
+        const onOpen = props.onOpen || NULL_FUNCTION;
+        onOpen(openRef.current);
+        setOpen(openRef.current);
+    }
+
     function handleClose() {
         highlighted.current = undefined;
-        setOpen(false);
+        openRef.current = false;
+        fireOnOpen();
+    }
+
+    function handleOpen() {
+        openRef.current = true;
+        fireOnOpen();
+    }
+
+    /**
+     * Return true if the given selected values contains the potentially NEW
+     * item so we can not show duplicates.
+     */
+    function hasExistingOption(newValue: string) {
+        return isPresent(optionsIndex[newValue]);
     }
 
     // TODO: one of our users suggested that 'tab' select the item since this
@@ -245,8 +278,9 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
                 value={[...state.values]}
                 // renderInput={props => renderInput(props)}
                 options={[...state.options]}
-                // open={open}
+                open={open}
                 onClose={handleClose}
+                onOpen={handleOpen}
                 // NOTE that when we revert to manually managing this then the
                 // input is reset each time we enter a first character of a
                 // tag and then that character isn't shown - it swallows it.  A
@@ -262,7 +296,7 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
 
                     const filtered = filter(options, params);
 
-                    if (inputValue.current !== '') {
+                    if (inputValue.current !== '' && ! hasExistingOption(inputValue.current)) {
 
                         const createOption = {
                             ...props.createOption(inputValue.current),

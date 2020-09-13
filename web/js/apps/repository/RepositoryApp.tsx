@@ -47,12 +47,12 @@ import {AddFileDropzoneScreen} from './upload/AddFileDropzoneScreen';
 import {AnkiSyncController} from "../../controller/AnkiSyncController";
 import {ErrorScreen} from "../../../../apps/repository/js/ErrorScreen";
 import {ListenablePersistenceLayerProvider} from "../../datastore/PersistenceLayer";
-import isEqual from 'react-fast-compare';
 import {RepoHeader3} from "../../../../apps/repository/js/repo_header/RepoHeader3";
 import {RepoFooter} from "../../../../apps/repository/js/repo_footer/RepoFooter";
 import {MUIDialogController} from "../../mui/dialogs/MUIDialogController";
 import {UseLocationChangeStoreProvider} from '../../../../apps/doc/src/annotations/UseLocationChangeStore';
 import {UseLocationChangeRoot} from "../../../../apps/doc/src/annotations/UseLocationChangeRoot";
+<<<<<<< HEAD
 import {BrowserTabs} from "../../chrome_tabs/BrowserTabs";
 import {useBrowserTabsCallbacks, useBrowserTabsStore} from "../../chrome_tabs/BrowserTabsStore";
 import {DocViewerAppURLs} from "../../../../apps/doc/src/DocViewerAppURLs";
@@ -60,6 +60,7 @@ import {useLocation} from "react-router-dom";
 import {usePrefs} from "../../../../apps/repository/js/persistence_layer/PrefsHook";
 import {PersistentPrefs} from "../../util/prefs/Prefs";
 import {SubscriptionValue} from "../../ui/data_loader/UseSnapshotSubscriber";
+import {deepMemo} from "../../react/ReactUtils";
 
 interface IProps {
     readonly app: App;
@@ -75,27 +76,29 @@ interface RepositoryDocViewerScreenProps {
     readonly url: string
 }
 
-export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerScreenProps) => {
+export const RepositoryDocViewerScreen = deepMemo((props: RepositoryDocViewerScreenProps) => {
+
     return (
-      <AuthRequired>
-          <PersistenceLayerContext.Provider value={{persistenceLayerProvider: props.persistenceLayerProvider}}>
-              <UserTagsProvider>
-                  <DocMetaContextProvider>
-                      <DocViewerDocMetaLookupContextProvider>
-                          <DocViewerStore>
-                              <DocFindStore>
-                                  <AnnotationSidebarStoreProvider>
-                                      <DocViewer url={props.url}/>
-                                  </AnnotationSidebarStoreProvider>
-                              </DocFindStore>
-                          </DocViewerStore>
-                      </DocViewerDocMetaLookupContextProvider>
-                  </DocMetaContextProvider>
-              </UserTagsProvider>
-          </PersistenceLayerContext.Provider>
-      </AuthRequired>
-  );
-}, isEqual);
+        <AuthRequired>
+            <PersistenceLayerContext.Provider
+                value={{persistenceLayerProvider: props.persistenceLayerProvider}}>
+                <UserTagsProvider>
+                    <DocMetaContextProvider>
+                        <DocViewerDocMetaLookupContextProvider>
+                            <DocViewerStore>
+                                <DocFindStore>
+                                    <AnnotationSidebarStoreProvider>
+                                        <DocViewer url={props.url} />
+                                    </AnnotationSidebarStoreProvider>
+                                </DocFindStore>
+                            </DocViewerStore>
+                        </DocViewerDocMetaLookupContextProvider>
+                    </DocMetaContextProvider>
+                </UserTagsProvider>
+            </PersistenceLayerContext.Provider>
+        </AuthRequired>
+    );
+});
 
 export const RepositoryApp = (props: IProps) => {
 
@@ -205,20 +208,6 @@ export const RepositoryApp = (props: IProps) => {
                                                  </>
                                              </AnnotationRepoSidebarTagStore>
                                          </AnnotationRepoStore2>
-                                     }/>
-            </AuthRequired>
-        );
-    });
-
-    const LogoutScreen = React.memo(() => {
-        return (
-            <AuthRequired>
-                <PersistenceLayerApp tagsType="annotations"
-                                     repoDocMetaManager={repoDocMetaManager}
-                                     repoDocMetaLoader={repoDocMetaLoader}
-                                     persistenceLayerManager={persistenceLayerManager}
-                                     render={(props) =>
-                                         <LogoutDialog/>
                                      }/>
             </AuthRequired>
         );
@@ -386,10 +375,6 @@ export const RepositoryApp = (props: IProps) => {
 
                                             <Route exact path="/error">
                                                 <ErrorScreen/>
-                                            </Route>
-
-                                            <Route exact path='/logout'>
-                                                <LogoutScreen/>
                                             </Route>
 
                                             <Route>

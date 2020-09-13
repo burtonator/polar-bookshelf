@@ -23,7 +23,7 @@ import {
 import {PageNumber} from "polar-shared/src/metadata/IPageMeta";
 import {AnnotationType} from "polar-shared/src/metadata/AnnotationType";
 import {useAnnotationMutationsContext} from "../../../web/js/annotation_sidebar/AnnotationMutationsContext";
-import {DocMetas} from "polar-shared/src/metadata/DocMetas";
+import {IDocMetas} from "polar-shared/src/metadata/IDocMetas";
 import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
 import {IAreaHighlight} from "polar-shared/src/metadata/IAreaHighlight";
 import {IPagemark} from "polar-shared/src/metadata/IPagemark";
@@ -38,6 +38,7 @@ import {MUIMenuSubheader} from "../../../web/js/mui/menu/MUIMenuSubheader";
 import {ISelectOption} from "../../../web/js/ui/dialogs/SelectDialog";
 import {PagemarkMode} from "polar-shared/src/metadata/PagemarkMode";
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
+import {MUIMenuSection} from "../../../web/js/mui/menu/MUIMenuSection";
 
 type AnnotationMetaResolver = (annotationMeta: IAnnotationMeta) => IAnnotationRef;
 
@@ -53,7 +54,7 @@ function useAnnotationMetaToRefResolver(): AnnotationMetaResolver {
             throw new Error("No docMeta");
         }
 
-        const pageMeta = DocMetas.getPageMeta(docMeta, pageNum);
+        const pageMeta = IDocMetas.getPageMeta(docMeta, pageNum);
 
         function getOriginal(): IPagemark | ITextHighlight | IAreaHighlight {
 
@@ -462,11 +463,28 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
     const onPagemarkSetMode = (annotation: IAnnotationMeta) => {
 
         function convertPagemarkModeToOption(mode: PagemarkMode): ISelectOption<PagemarkMode> {
-            return {
-                id: mode,
-                label: mode.replace(/_/g, " "),
-                value: mode
-            };
+
+            function createOption(mode: PagemarkMode, label?: string) {
+
+                label = label || mode.replace(/_/g, " ");
+
+                return {
+                    id: mode,
+                    label,
+                    value: mode
+                };
+
+            }
+
+            switch (mode) {
+
+                case PagemarkMode.PRE_READ:
+                    return createOption(mode, 'PREVIOUSLY READ')
+                default:
+                    return createOption(mode);
+
+            }
+
         }
 
         const options: ReadonlyArray<ISelectOption<PagemarkMode>> =
@@ -510,43 +528,59 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
 
             <MUIMenuSubheader>Pagemarks</MUIMenuSubheader>
 
-            <MUIMenuItem text="Create Pagemark to Point"
+            <MUIMenuItem key="create-pagemark-to-current-location"
+                         text="Pagemark to Current Location"
                          icon={<BookmarkIcon/>}
                          onClick={onCreatePagemarkToPoint}/>
 
             {origin.pageNum > 1 && (
-                <MUIMenuItem text="Create Pagemark from Page To Point"
+                <MUIMenuItem key="create-pagemark-from-page-to-current-location"
+                             text="Pagemark from Page To to Current Location"
                              icon={<BookmarksIcon/>}
                              onClick={onCreatePagemarkFromPage}/>)}
 
-            <MUIMenuItem text="Mark Entire Document as Read"
+            <MUIMenuItem key="mark-entire-document-read"
+                         text="Mark Entire Document as Read"
                          icon={<BookmarksIcon/>}
                          onClick={onPagemarkForEntireDocument}/>
 
             {(props.origin?.pagemarks?.length || 0) > 0 &&
-                <MUIMenuItem text="Set Pagemark Mode"
+                <MUIMenuItem key="set-pagemark-mode"
+                             text="Label Pagemark"
                              icon={<BookmarkBorderIcon/>}
                              onClick={() => onPagemarkSetMode(origin.pagemarks[0])}/>}
 
             {(props.origin?.pagemarks?.length || 0) > 0 &&
-                <MUIMenuItem text="Delete Pagemark"
+                <MUIMenuItem key="delete-pagemark"
+                             text="Delete Pagemark"
                              icon={<DeleteForeverIcon/>}
                              onClick={() => onDeletePagemark(origin.pagemarks)}/>}
 
-            {isPDF &&
-                <MUIMenuItem text="Create Area Highlight"
-                             icon={<PhotoSizeSelectLargeIcon/>}
-                             onClick={onCreateAreaHighlight}/>}
+            <MUIMenuSection title="Area Highlights">
 
-            {isPDF && (props.origin?.areaHighlights?.length || 0) > 0 &&
-                <MUIMenuItem text="Delete Area Highlight"
-                             icon={<DeleteForeverIcon/>}
-                             onClick={() => onDelete(origin.areaHighlights)}/>}
+                {isPDF &&
+                    <MUIMenuItem key="create-area-highlight"
+                                 text="Create Area Highlight"
+                                 icon={<PhotoSizeSelectLargeIcon/>}
+                                 onClick={onCreateAreaHighlight}/>}
 
-            {(props.origin?.textHighlights?.length || 0) > 0 &&
-                <MUIMenuItem text="Delete Text Highlight"
-                             icon={<DeleteForeverIcon/>}
-                             onClick={() => onDelete(origin.textHighlights)}/>}
+                {isPDF && (props.origin?.areaHighlights?.length || 0) > 0 &&
+                    <MUIMenuItem key="delete-area-highlight"
+                                 text="Delete Area Highlight"
+                                 icon={<DeleteForeverIcon/>}
+                                 onClick={() => onDelete(origin.areaHighlights)}/>}
+
+            </MUIMenuSection>
+
+            <MUIMenuSection title="Text Highlights">
+                {(props.origin?.textHighlights?.length || 0) > 0 &&
+                    <MUIMenuItem key="delete-text-highlight"
+                                 text="Delete Text Highlight"
+                                 icon={<DeleteForeverIcon/>}
+                                 onClick={() => onDelete(origin.textHighlights)}/>}
+
+            </MUIMenuSection>
+
 
         </>
     );

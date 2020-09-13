@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {IDocAnnotationRef} from '../../DocAnnotation';
-import isEqual from "react-fast-compare";
 import Card from "@material-ui/core/Card";
 import CardContent from '@material-ui/core/CardContent';
 import Divider from "@material-ui/core/Divider";
 import {FlashcardAnnotationControlBar2} from "./FlashcardAnnotationControlBar2";
+import {deepMemo} from "../../../react/ReactUtils";
 
-const RenderFrontAndBackFields = (props: IProps) => {
+const RenderFrontAndBackFields = deepMemo((props: IProps) => {
 
     const { flashcard } = props;
 
@@ -38,10 +38,10 @@ const RenderFrontAndBackFields = (props: IProps) => {
         </Card>
     );
 
-};
+});
 
 
-const RenderClozeFields = (props: IProps) => {
+const RenderClozeFields = deepMemo((props: IProps) => {
 
     const { flashcard } = props;
 
@@ -54,9 +54,9 @@ const RenderClozeFields = (props: IProps) => {
         </Card>
     );
 
-};
+});
 
-const RenderFields = (props: IProps) => {
+const RenderFields = deepMemo((props: IProps) => {
 
     const { flashcard } = props;
 
@@ -66,8 +66,7 @@ const RenderFields = (props: IProps) => {
         return (<RenderFrontAndBackFields {...props}/>);
     }
 
-};
-
+});
 
 interface IProps {
     readonly flashcard: IDocAnnotationRef;
@@ -78,7 +77,7 @@ interface IProps {
 /**
  * A generic wrapper that determines which sub-component to render.
  */
-export const FlashcardAnnotationView2 = React.memo(React.forwardRef((props: IProps, ref) => {
+export const FlashcardAnnotationView2 = deepMemo(React.forwardRef((props: IProps, ref) => {
 
     const { flashcard } = props;
 
@@ -86,7 +85,7 @@ export const FlashcardAnnotationView2 = React.memo(React.forwardRef((props: IPro
 
     return (
 
-        <div key={key}>
+        <div key={key} className='p-1'>
 
             <div className="">
 
@@ -104,6 +103,6 @@ export const FlashcardAnnotationView2 = React.memo(React.forwardRef((props: IPro
 
         </div>
     );
-}), isEqual);
+}));
 
 

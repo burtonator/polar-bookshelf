@@ -34,18 +34,18 @@ import {
 import {SelectionEvents2, SelectRowType} from "./SelectionEvents2";
 import {IDStr} from "polar-shared/src/util/Strings";
 import {TaggedCallbacks} from "../annotation_repo/TaggedCallbacks";
-import {BatchMutators} from "../BatchMutators";
+import {BatchMutators, PromiseFactory} from "../BatchMutators";
 import {ILogger} from "polar-shared/src/logger/ILogger";
 import {useLogger} from "../../../../web/js/mui/MUILogger";
 import {AddFileDropzone} from "../../../../web/js/apps/repository/upload/AddFileDropzone";
 import {useDocLoader} from "../../../../web/js/apps/main/DocLoaderHooks";
+import {arrayStream} from "polar-shared/src/util/ArrayStreams";
 import ComputeNewTagsStrategy = Tags.ComputeNewTagsStrategy;
 import TaggedCallbacksOpts = TaggedCallbacks.TaggedCallbacksOpts;
 import BatchMutatorOpts = BatchMutators.BatchMutatorOpts;
-import {
-    RelatedOptionsCalculator,
-    ValueAutocompleteOption
-} from "../../../../web/js/mui/autocomplete/MUICreatableAutocomplete";
+import {IAsyncTransaction} from "polar-shared/src/util/IAsyncTransaction";
+import {useRefWithUpdates} from "../../../../web/js/hooks/ReactHooks";
+import { TagFilters } from "polar-shared/src/tags/TagFilters";
 
 interface IDocRepoStore {
 
@@ -266,10 +266,12 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
 
     }
 
-    async function withBatch<T>(promises: ReadonlyArray<Promise<T>>,
+    async function withBatch<T>(transactions: ReadonlyArray<IAsyncTransaction<T>>,
                                 opts: Partial<BatchMutatorOpts> = {}) {
 
-        await BatchMutators.exec(promises, {
+        mutator.refresh();
+
+        await BatchMutators.exec(transactions, {
             ...opts,
             refresh: mutator.refresh,
             dialogs
@@ -393,29 +395,34 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
                       tags: ReadonlyArray<Tag>,
                       strategy: ComputeNewTagsStrategy = 'set'): void {
 
-        function toPromise(repoDocInfo: RepoDocInfo) {
+        function toAsyncTransaction(repoDocInfo: RepoDocInfo) {
             const newTags = Tags.computeNewTags(repoDocInfo.tags, tags, strategy);
             return repoDocMetaManager!.writeDocInfoTags(repoDocInfo, newTags);
         }
 
-        withBatch(repoDocInfos.map(toPromise))
+        withBatch(repoDocInfos.map(toAsyncTransaction))
             .catch(err => log.error(err));
 
     }
 
     function doArchived(repoDocInfos: ReadonlyArray<RepoDocInfo>, archived: boolean): void {
 
-        const toPromise = (repoDocInfo: RepoDocInfo) => {
-            repoDocInfo.archived = archived;
-            repoDocInfo.docInfo.archived = archived;
-            return repoDocMetaManager.writeDocInfo(repoDocInfo.docInfo)
+        const toAsyncTransaction = (repoDocInfo: RepoDocInfo): IAsyncTransaction<void> => {
+
+            function prepare() {
+                repoDocInfo.archived = archived;
+                repoDocInfo.docInfo.archived = archived;
+            }
+
+            function commit() {
+                return repoDocMetaManager.writeDocInfo(repoDocInfo.docInfo, repoDocInfo.docMeta);
+            }
+
+            return {prepare, commit};
         }
 
-        const success = "Documents successfully archived";
-        const error = "Failed to some documents: ";
-
         async function doHandle() {
-            await withBatch(repoDocInfos.map(toPromise), {success, error});
+            await withBatch(repoDocInfos.map(toAsyncTransaction));
         }
 
         doHandle()
@@ -425,17 +432,23 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
 
     function doFlagged(repoDocInfos: ReadonlyArray<RepoDocInfo>, flagged: boolean): void {
 
-        const toPromise = (repoDocInfo: RepoDocInfo) => {
-            repoDocInfo.flagged = flagged;
-            repoDocInfo.docInfo.flagged = flagged;
-            return repoDocMetaManager.writeDocInfo(repoDocInfo.docInfo)
+        const toAsyncTransaction = (repoDocInfo: RepoDocInfo): IAsyncTransaction<void> => {
+
+            function prepare() {
+                repoDocInfo.flagged = flagged;
+                repoDocInfo.docInfo.flagged = flagged;
+            }
+
+            function commit() {
+                return repoDocMetaManager.writeDocInfo(repoDocInfo.docInfo, repoDocInfo.docMeta);
+            }
+
+            return {prepare, commit};
+
         }
 
-        const success = "Documents successfully flagged";
-        const error = "Failed to flag some documents: ";
-
         async function doHandle() {
-            await withBatch(repoDocInfos.map(toPromise), {success, error});
+            await withBatch(repoDocInfos.map(toAsyncTransaction));
         }
 
         doHandle()
@@ -464,15 +477,28 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
 
         function doDeleteBatch() {
 
-            const toPromise = (repoDocInfo: RepoDocInfo) => {
-                return repoDocMetaManager.deleteDocInfo(repoDocInfo);
+            const toAsyncTransaction = (repoDocInfo: RepoDocInfo): IAsyncTransaction<void> => {
+
+                function prepare() {
+
+                    // TODO: write a tombstone here so the delete is updated in
+                    // the UI immediately?
+
+                }
+
+                function commit() {
+                    return repoDocMetaManager.deleteDocInfo(repoDocInfo);
+                }
+
+                return {prepare, commit};
+
             }
 
-            const success = `${repoDocInfos.length} documents successfully deleted.`;
+            const success = `${repoDocInfos.length} documents deleted.`;
             const error = `Failed to delete document: `;
 
             async function doHandle() {
-                await withBatch(repoDocInfos.map(toPromise), {success, error});
+                await withBatch(repoDocInfos.map(toAsyncTransaction), {success, error});
             }
 
             doHandle()
@@ -514,8 +540,8 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
     function doRename(repoDocInfo: RepoDocInfo, title: string): void {
 
         async function doHandle() {
-            await repoDocMetaManager.writeDocInfoTitle(repoDocInfo, title);
             mutator.refresh();
+            await repoDocMetaManager.writeDocInfoTitle(repoDocInfo, title);
         }
 
         doHandle()
@@ -539,13 +565,41 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
         //     return;
         // }
 
-        dialogs.confirm({
-            title: "Are you sure you want to archive these document(s)?",
-            subtitle: "They won't be deleted but will be hidden by default.",
-            onCancel: NULL_FUNCTION,
-            type: 'warning',
-            onAccept: () => doArchived(repoDocInfos, true),
-        });
+        function computeNewArchived() {
+
+            if (repoDocInfos.length === 1) {
+                return ! repoDocInfos[0].archived;
+            }
+
+            const nrArchived = arrayStream(repoDocInfos)
+                .filter(current => current.archived)
+                .collect()
+                .length;
+
+            if (nrArchived === repoDocInfos.length) {
+                return false;
+            } else {
+                return true;
+            }
+
+        }
+
+        const newArchived = computeNewArchived();
+
+        if (newArchived) {
+
+            // only trigger the dialog when we're archiving , not removing from the archive.
+
+            dialogs.confirm({
+                title: "Are you sure you want to archive these document(s)?",
+                subtitle: "They won't be deleted but will be hidden by default.",
+                onCancel: NULL_FUNCTION,
+                type: 'warning',
+                onAccept: () => doArchived(repoDocInfos, newArchived),
+            });
+        } else {
+            doArchived(repoDocInfos, newArchived);
+        }
 
     }
 
@@ -618,6 +672,7 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
 
     function onDropped(tag: Tag) {
 
+        // FIXME: this is what's broken...
         const selected = selectedProvider();
         doDropped(selected, tag);
 
@@ -666,7 +721,7 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
 
         const opts: TaggedCallbacksOpts<RepoDocInfo> = {
             targets: selectedProvider,
-            tagsProvider,
+            tagsProvider: () => tagsProvider().filter(TagFilters.onlyRegular),
             dialogs,
             doTagged,
             relatedOptionsCalculator
@@ -733,14 +788,30 @@ const callbacksFactory = (storeProvider: Provider<IDocRepoStore>,
     const persistence = usePersistenceContext();
     const log = useLogger();
 
+    // TODO: we should probably useMemo below but then we get a ton of React
+    // hooks errors for some reason.
+
+    const tagsProviderRef = useRefWithUpdates(tagsProvider);
+
     return createCallbacks(storeProvider,
                            setStore,
                            mutator,
                            repoDocMetaManager,
-                           tagsProvider,
+                           () => tagsProviderRef.current(),
                            dialogs,
                            persistence,
                            log);
+
+    // return React.useMemo(() => {
+    //     return createCallbacks(storeProvider,
+    //                            setStore,
+    //                            mutator,
+    //                            repoDocMetaManager,
+    //                            tagsProvider,
+    //                            dialogs,
+    //                            persistence,
+    //                            log);
+    // }, [dialogs, repoDocMetaManager, tagsProvider, persistence, log]);
 
 }
 

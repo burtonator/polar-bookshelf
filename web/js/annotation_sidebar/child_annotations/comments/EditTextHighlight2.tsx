@@ -9,6 +9,7 @@ import {
     useAnnotationMutationsContext
 } from '../../AnnotationMutationsContext';
 import {useAnnotationActiveInputContext} from "../../AnnotationActiveInputContext";
+import {InputCompleteListener} from "../../../mui/complete_listeners/InputCompleteListener";
 
 interface IProps {
     readonly id: string;
@@ -68,12 +69,13 @@ export const EditTextHighlight2 = (props: IProps) => {
 
     }
 
+    function onComplete() {
+        handleChange(htmlRef.current);
+    }
 
     return (
-        <div>
-            {/*<RichTextFeatureIntro/>*/}
-
-            <div className="mt-1">
+        <InputCompleteListener onComplete={onComplete}>
+            <div className="m-1">
 
                 <div className="">
 
@@ -100,7 +102,7 @@ export const EditTextHighlight2 = (props: IProps) => {
 
                     <Button color="primary"
                             variant="contained"
-                            onClick={() => handleChange(htmlRef.current)}>
+                            onClick={onComplete}>
 
                         Change
 
@@ -109,7 +111,6 @@ export const EditTextHighlight2 = (props: IProps) => {
                 </div>
 
             </div>
-
-        </div>
+        </InputCompleteListener>
     );
 };

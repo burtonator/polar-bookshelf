@@ -47,7 +47,7 @@ export interface PersistenceLayer {
      */
     contains(fingerprint: string): Promise<boolean>;
 
-    getDocMeta(fingerprint: string): Promise<IDocMeta| undefined>;
+    getDocMeta(fingerprint: string): Promise<IDocMeta | undefined>;
 
     getDocMetaSnapshot(opts: DocMetaSnapshotOpts<IDocMeta>): Promise<DocMetaSnapshotResult>;
 

@@ -64,7 +64,7 @@ export const ViewOrEditComment2 = React.memo((props: IProps) => {
     }, []);
 
     return (
-        <>
+        <div className="p-1">
 
             {mode === 'view' &&
                 <CommentAnnotationView2 comment={props.comment}
@@ -82,7 +82,7 @@ export const ViewOrEditComment2 = React.memo((props: IProps) => {
                                           onEdit={onEdit}
                                           editButton={editButton}/>
 
-        </>
+        </div>
     );
 
 

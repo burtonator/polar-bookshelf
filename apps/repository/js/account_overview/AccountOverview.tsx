@@ -1,6 +1,8 @@
-import {accounts} from 'polar-accounts/src/accounts';
+import {Billing} from "polar-accounts/src/Billing";
 import * as React from "react";
-import { PlanIcon } from './PlanIcon';
+import {PlanIcon} from './PlanIcon';
+import {deepMemo} from "../../../../web/js/react/ReactUtils";
+import {Plans} from "polar-accounts/src/Plans";
 
 const Joiner = () => (
     <div className="ml-2 mr-2"
@@ -21,40 +23,39 @@ const Joiner = () => (
     </div>
 );
 
-export class AccountOverview extends React.Component<IProps> {
-
-    public render() {
-        return <div style={{display: 'flex'}}>
-
-            <div className="ml-auto mr-auto"
-                 style={{
-                     display: 'flex'
-                 }}>
-
-                <PlanIcon plan="free" active={this.props.plan === 'free'}/>
-
-                <Joiner/>
-
-                <PlanIcon plan="bronze" active={this.props.plan === 'bronze'}/>
-
-                <Joiner/>
-
-                <PlanIcon plan="silver" active={this.props.plan === 'silver'}/>
-
-                <Joiner/>
-
-                <PlanIcon plan="gold" active={this.props.plan === 'gold'}/>
-
-            </div>
-
-        </div>;
-    }
-
-}
 
 interface IProps {
+
     /**
      * The current user's plan.
      */
-    readonly plan: accounts.Plan;
+    readonly plan: Billing.Plan;
+
 }
+
+export const AccountOverview = deepMemo((props: IProps) => {
+
+    const v2Plan = Plans.toV2(props.plan);
+
+    return <div style={{display: 'flex'}}>
+
+        <div className="ml-auto mr-auto"
+             style={{
+                 display: 'flex'
+             }}>
+
+            <PlanIcon level='free' active={v2Plan.level === 'free'}/>
+
+            <Joiner/>
+
+            <PlanIcon level='plus' active={v2Plan.level === 'plus'}/>
+
+            <Joiner/>
+
+            <PlanIcon level='pro' active={v2Plan.level === 'pro'}/>
+
+        </div>
+
+    </div>;
+
+});

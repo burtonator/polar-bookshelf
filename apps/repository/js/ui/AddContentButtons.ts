@@ -1,42 +1,32 @@
-import { Logger } from "polar-shared/src/logger/Logger";
-import {AccountUpgrader} from "../../../../web/js/ui/account_upgrade/AccountUpgrader";
+import React from 'react';
+import {useAccountUpgrader} from "../../../../web/js/ui/account_upgrade/AccountUpgrader";
+import {useDialogManager} from "../../../../web/js/mui/dialogs/MUIDialogControllers";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 
-const log = Logger.create();
+export namespace AddContentButtons {
 
-export class AddContentButtons {
+    export function useAccountVerifiedAction() {
 
-    public static triggerFileUpload() {
+        const accountUpgrade = useAccountUpgrader();
+        const dialogs = useDialogManager();
 
-        const fileUpload = document.getElementById('file-upload');
+        return React.useCallback((delegate: () => void) => {
 
-        if (fileUpload) {
-            fileUpload.focus();
-            fileUpload.click();
-        } else {
-            log.warn("No file upload button");
-        }
+            if (accountUpgrade?.required) {
 
-    }
+                dialogs.confirm({
+                    title: 'Account upgrade required',
+                    subtitle: `You've reach the limits of your plan and need to upgrade to ${accountUpgrade.toPlan.level}`,
+                    onAccept: NULL_FUNCTION
+                })
 
-    public static doAccountVerifiedAction(delegate: () => void) {
-
-        const handler = async () => {
-
-            const accountUpgrader = new AccountUpgrader();
-
-            if (await accountUpgrader.upgradeRequired()) {
-                log.warn("Account upgrade required");
-                accountUpgrader.startUpgrade();
-                return;
+            } else {
+                delegate();
             }
 
-            delegate();
-
-        };
-
-        handler()
-            .catch(err => log.error("Unable to add to repository: ", err));
+        }, [accountUpgrade, dialogs]);
 
     }
+
 
 }

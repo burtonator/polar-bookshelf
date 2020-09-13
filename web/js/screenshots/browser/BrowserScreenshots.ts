@@ -1,4 +1,4 @@
-import {webextensions} from 'polar-web-extension-api/src/WebExtensions';
+import {WebExtensions} from 'polar-web-extension-api/src/WebExtensions';
 import {Result} from 'polar-shared/src/util/Result';
 import {ILTRect} from 'polar-shared/src/util/rects/ILTRect';
 import {Results} from 'polar-shared/src/util/Results';
@@ -23,7 +23,7 @@ export class BrowserScreenshots {
                 };
 
                 const response: BrowserScreenshot
-                    = await webextensions.Messaging.sendMessage(request);
+                    = await WebExtensions.Messaging.sendMessage(request);
 
                 if (! response) {
                     throw new Error("No response from web extension");
@@ -48,7 +48,7 @@ export class BrowserScreenshots {
                     };
 
                     const response: BrowserScreenshot
-                        = await webextensions.Messaging.sendMessage(request);
+                        = await WebExtensions.Messaging.sendMessage(request);
 
                     if (! response) {
                         throw new Error("No response from web extension");

@@ -6,8 +6,9 @@ import {AppRuntime} from "polar-shared/src/util/AppRuntime";
 import {AnkiSyncClient} from "../../../../web/js/controller/AnkiSyncClient";
 import Divider from "@material-ui/core/Divider";
 import {Nav} from "../../../../web/js/ui/util/Nav";
-import ChatIcon from '@material-ui/icons/Chat';
 import SyncIcon from '@material-ui/icons/Sync';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
+import {FADiscordIcon} from "../../../../web/js/mui/MUIFontAwesome";
 
 export const MoreActionsDropdown = React.memo(() => {
 
@@ -15,6 +16,10 @@ export const MoreActionsDropdown = React.memo(() => {
 
     function onChat() {
         Nav.openLinkWithNewTab('https://discord.gg/GT8MhA6')
+    }
+
+    function onDocumentation() {
+        Nav.openLinkWithNewTab('https://getpolarized.io/docs/')
     }
 
     function onStartAnkiSync() {
@@ -31,12 +36,18 @@ export const MoreActionsDropdown = React.memo(() => {
                  placement="bottom-end"
                  button={{
                      icon: <MoreVertIcon/>,
-                     size: 'small'
+                     size: 'large'
                  }}>
 
             <div>
 
-                <MUIMenuItem icon={<ChatIcon/>} text="Chat with Polar Community" onClick={onChat}/>
+                <MUIMenuItem icon={<FADiscordIcon/>}
+                             text="Chat with Polar Community"
+                             onClick={onChat}/>
+
+                <MUIMenuItem icon={<LibraryBooksIcon/>}
+                             text="Documentation"
+                             onClick={onDocumentation}/>
 
                 {isElectron && (
                     <>

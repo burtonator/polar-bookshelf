@@ -9,7 +9,7 @@ const keyMap = KeyMaps.keyMap({
        COMPLETE: {
            name: "Complete Action",
            description: "Complete the current action",
-           sequences: ['return'],
+           sequences: ['ctrl+return', 'command+return'],
        },
    }
 });
@@ -19,6 +19,9 @@ interface IProps {
     readonly children: React.ReactElement;
 }
 
+/**
+ * @Deprecated
+ */
 export const HotKeyCompleteListener = (props: IProps) => {
 
     const handlers = {

@@ -1,5 +1,5 @@
 import {ISODateTimeString} from "polar-shared/src/metadata/ISODateTimeStrings";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from 'polar-accounts/src/Billing';
 
 export interface AccountUsage {
     readonly storageInBytes: number;
@@ -7,8 +7,8 @@ export interface AccountUsage {
 
 export interface AccountInit {
 
-    readonly plan: accounts.Plan;
-    readonly interval?: accounts.Interval;
+    readonly plan: Billing.Plan;
+    readonly interval?: Billing.Interval;
 
 }
 
@@ -34,42 +34,25 @@ export interface Account extends AccountInit {
 
 }
 
-export class AccountPlans {
+export namespace AccountPlans {
 
-    public static toInt(plan: accounts.Plan) {
+    import V2Plan = Billing.V2Plan;
+    import V2PlanFree = Billing.V2PlanFree;
+    import V2PlanPlus = Billing.V2PlanPlus;
+    import V2PlanPro = Billing.V2PlanPro;
 
-        switch (plan) {
-            case "free":
-                return 0;
-            case "bronze":
-                return 1;
-            case "silver":
-                return 2;
-            case "gold":
-                return 3;
-        }
-
-    }
-
-    /**
-     * Return true if the required plan level is ok vs the actual plan level.
-     */
-    public static hasLevel(required: accounts.Plan, actual: accounts.Plan) {
-        return this.toInt(required) <= this.toInt(actual);
-    }
-
-    public static toColor(plan: accounts.Plan) {
-        switch (plan) {
-            case "free":
-                return "";
-            case "bronze":
-                return "#cc6633";
-            case "silver":
-                return "#C0C0C0";
-            case "gold":
-                return "#D4AF37";
-        }
-    }
+    // export function toColor(plan: Billing.Plan) {
+    //     switch (plan) {
+    //         case "free":
+    //             return "";
+    //         case "bronze":
+    //             return "#cc6633";
+    //         case "silver":
+    //             return "#C0C0C0";
+    //         case "gold":
+    //             return "#D4AF37";
+    //     }
+    // }
 
 }
 

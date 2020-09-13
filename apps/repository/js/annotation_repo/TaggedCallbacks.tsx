@@ -22,7 +22,6 @@ export namespace TaggedCallbacks {
          */
         readonly targets: () => ReadonlyArray<T>;
 
-
         readonly tagsProvider: () => ReadonlyArray<Tag>;
 
         readonly dialogs: DialogManager;
@@ -77,17 +76,15 @@ export namespace TaggedCallbacks {
 
                 return {
                     strategy: 'set',
-                    existingTags: Object.values(annotation.tags || {}),
+                    existingTags: Tags.sortByLabel(Object.values(annotation.tags || {})),
                 };
 
             }
 
             const autocompleteStrategy = computeAutocompleteStrategy();
 
-            const doTaggedWithTimeout = (tags: ReadonlyArray<Tag>) => {
-                setTimeout(() => {
-                    doTagged(targets, tags, autocompleteStrategy.strategy);
-                }, 1);
+            const handleDone = (tags: ReadonlyArray<Tag>) => {
+                doTagged(targets, tags, autocompleteStrategy.strategy);
             }
 
             const autocompleteProps: AutocompleteDialogProps<Tag> = {
@@ -99,7 +96,7 @@ export namespace TaggedCallbacks {
                 onCancel: NULL_FUNCTION,
                 onChange: NULL_FUNCTION,
                 relatedOptionsCalculator: opts.relatedOptionsCalculator,
-                onDone: tags => doTaggedWithTimeout(tags)
+                onDone: tags => handleDone(tags)
             };
 
             dialogs.autocomplete(autocompleteProps);

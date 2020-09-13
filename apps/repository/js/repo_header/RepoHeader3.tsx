@@ -7,11 +7,11 @@ import {RepoNavbar} from "../RepoNavbar";
 import {DeviceRouter} from "../../../../web/js/ui/DeviceRouter";
 import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from "@material-ui/core/IconButton";
-import Grid from "@material-ui/core/Grid";
 import {AccountAuthButton} from "../../../../web/js/ui/cloud_auth/AccountAuthButton";
 import {CloudConnectivityButton} from "../../../../web/js/apps/repository/connectivity/CloudConnectivityButton";
 import {MoreActionsDropdown} from "./MoreActionsDropdown";
 import {MUIButtonBar} from "../../../../web/js/mui/MUIButtonBar";
+import {ChromeExtensionInstallButton} from "../ChromeExtensionInstallButton";
 
 export namespace RepoHeader {
 
@@ -42,7 +42,8 @@ const Handheld = () => {
                      style={{
                          flexGrow: 1,
                          display: 'flex',
-                         alignItems: 'center'
+                         alignItems: 'center',
+                         flexWrap: 'nowrap',
                      }}>
 
                     <RepoHeader.LeftMenuTarget/>
@@ -104,7 +105,8 @@ const Desktop = () => {
 
             <div className=""
                  style={{
-                     display: 'flex'
+                     display: 'flex',
+                     flexWrap: 'nowrap',
                  }}>
 
                 <div>
@@ -114,10 +116,13 @@ const Desktop = () => {
                 <div style={{
                          flexGrow: 1,
                          display: 'flex',
-                         justifyContent: 'flex-end'
+                         justifyContent: 'flex-end',
+                         flexWrap: 'nowrap',
                      }}>
 
                     <MUIButtonBar>
+
+                        <ChromeExtensionInstallButton/>
 
                         <CloudConnectivityButton/>
 
@@ -128,38 +133,6 @@ const Desktop = () => {
                         <MoreActionsDropdown/>
 
                     </MUIButtonBar>
-
-                    {/*<Grid*/}
-                    {/*    container*/}
-                    {/*    spacing={1}*/}
-                    {/*    direction="row"*/}
-                    {/*    justify="flex-end"*/}
-                    {/*    alignItems="center">*/}
-
-                    {/*    <Grid item>*/}
-                    {/*    </Grid>*/}
-
-                    {/*    <Grid item>*/}
-                    {/*    </Grid>*/}
-
-                    {/*    /!*<Grid item>*!/*/}
-                    {/*    /!*    <HelpDropdown/>*!/*/}
-                    {/*    /!*</Grid>*!/*/}
-
-                    {/*    <Grid item>*/}
-                    {/*    </Grid>*/}
-
-                    {/*    <Grid item>*/}
-                    {/*    </Grid>*/}
-
-                    {/*</Grid>*/}
-
-
-                    {/*<ChromeExtensionInstallButton/>*/}
-
-                    {/*<Notifications persistenceLayerProvider={this.props.persistenceLayerProvider}/>*/}
-
-                    {/*<LinkDropdown hidden={! isDesktop}/>*/}
 
                 </div>
 

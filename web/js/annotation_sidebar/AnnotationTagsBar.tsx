@@ -1,28 +1,36 @@
 import Chip from "@material-ui/core/Chip";
 import React from "react";
 import {Tag, Tags} from "polar-shared/src/tags/Tags";
-import isEqual from "react-fast-compare";
 import {MUIButtonBar} from "../mui/MUIButtonBar";
+import {deepMemo} from "../react/ReactUtils";
+import {Mappers} from "polar-shared/src/util/Mapper";
 
 interface IProps {
     readonly tags?: {[id: string]: Tag};
 }
 
-export const AnnotationTagsBar = React.memo((props: IProps) => {
+export const AnnotationTagsBar = deepMemo((props: IProps) => {
 
-    const tags = Tags.sortByLabel(Tags.onlyRegular(Object.values(props.tags || {})));
+    // TODO: remove document tags too.. .
+
+    const tags = Mappers.create(props.tags)
+        .map(current => Object.values(current || {}))
+        .map(Tags.onlyRegular)
+        .map(Tags.sortByLabel)
+        .collect();
 
     return (
         <>
-            <MUIButtonBar className="mb-1">
+            <MUIButtonBar className="mb-1"
+                          style={{overflow: 'hidden'}}>
                 {tags.map(tag => <Chip key={tag.label}
+                                       style={{
+                                           userSelect: 'none'
+                                       }}
                                        label={tag.label}
                                        size="small"/>)}
             </MUIButtonBar>
-            {/*<div className="mb-1">*/}
-            {/*    <Divider/>*/}
-            {/*</div>*/}
         </>
     );
 
-}, isEqual);
+});

@@ -70,7 +70,8 @@ export class DefaultPersistenceLayer extends AbstractPersistenceLayer implements
 
         await this.doInitUserTagsDB();
 
-        // FIXME: this has to go in as part of 2.0
+        // TODO: we might have to put this in as part of 2.0 but I think most
+        // users have migrated.
         // await this.doInitUserTagsLegacyData();
 
     }
@@ -247,6 +248,10 @@ export class DefaultPersistenceLayer extends AbstractPersistenceLayer implements
         Preconditions.assertPresent(docMeta.docInfo.fingerprint, "No fingerprint on docInfo");
 
         // TODO: this could be made faster by using Promise.all and a latch
+
+        // we have to update the reference DocMeta docInfo uuid so that we don't
+        // get a latent / stale one from a future snapshot.
+        docMeta.docInfo.uuid = UUIDs.create();
 
         await this.writeDocMetaTags(docMeta);
 

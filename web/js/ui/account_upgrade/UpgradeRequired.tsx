@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Link} from "react-router-dom";
-import {accounts} from 'polar-accounts/src/accounts';
+import {Billing} from 'polar-accounts/src/Billing';
 import {Analytics} from "../../analytics/Analytics";
 import Button from "@material-ui/core/Button";
 
@@ -54,7 +54,7 @@ export class UpgradeRequired extends React.Component<IProps, IState> {
 }
 
 interface IProps {
-    readonly planRequired?: accounts.Plan;
+    readonly planRequired?: Billing.Plan;
 }
 
 interface IState {

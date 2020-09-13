@@ -1,7 +1,7 @@
 import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import React from "react";
 import isEqual from "react-fast-compare";
-import {FACheckSquare, FASquare} from "../../../../web/js/mui/MUIFontAwesome";
+import {FACheckSquareIcon, FASquareIcon} from "../../../../web/js/mui/MUIFontAwesome";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -27,8 +27,8 @@ export const MUIEfficientCheckbox = React.memo((props: IProps) => {
 
     if (props.checked) {
         return (
-            <FACheckSquare className={props.checked ? classes.active : classes.inactive}
-                           style={{
+            <FACheckSquareIcon className={props.checked ? classes.active : classes.inactive}
+                               style={{
                                fontSize: '1.2em',
                                margin: '2px'
                            }}
@@ -36,8 +36,8 @@ export const MUIEfficientCheckbox = React.memo((props: IProps) => {
         )
     } else {
         return (
-            <FASquare className={props.checked ? classes.active : classes.inactive}
-                      style={{
+            <FASquareIcon className={props.checked ? classes.active : classes.inactive}
+                          style={{
                           fontSize: '1.2em',
                           margin: '2px'
                       }}

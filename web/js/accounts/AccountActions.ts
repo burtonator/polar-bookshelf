@@ -1,56 +1,45 @@
 import {Firebase} from '../firebase/Firebase';
 import {Fetches, RequestInit} from 'polar-shared/src/util/Fetch';
-import {accounts} from 'polar-accounts/src/accounts';
-import {PersistenceLayerController} from "../datastore/PersistenceLayerManager";
+import {Billing} from "polar-accounts/src/Billing";
 import * as firebase from "firebase/app";
 import 'firebase/auth';
 import {LoginURLs} from "../apps/viewer/LoginURLs";
-import {Logger} from "polar-shared/src/logger/Logger";
+import {Firestore} from "../firebase/Firestore";
 
-const log = Logger.create();
+export namespace AccountActions {
 
-export class AccountActions {
+    export async function logout() {
 
-    public static logout(persistenceLayerController: PersistenceLayerController) {
-
-        persistenceLayerController.reset();
-
-        // FIXME: refactor this completely , redirect to /do-logout, then, once that's complete,
-        // redirect to #logout.
-
-        firebase.auth().signOut()
-            .then(() => {
-
-                window.location.reload();
-
-            })
-            .catch(err => log.error("Unable to logout: ", err));
+        await firebase.auth().signOut();
+        const firestore = await Firestore.getInstance();
+        await firestore.terminate();
+        await firestore.clearPersistence();
 
     }
 
-    public static login() {
+    export function login() {
         window.location.href = LoginURLs.create();
     }
 
 
-    public static async cancelSubscription() {
+    export async function cancelSubscription() {
         const url = `https://us-central1-polar-cors.cloudfunctions.net/StripeCancelSubscription/`;
-        const data = await this.createAccountData();
+        const data = await createAccountData();
 
-        await this.executeAccountMethod(url, data);
+        await executeAccountMethod(url, data);
 
     }
 
-    public static async changePlan(plan: accounts.Plan, interval: accounts.Interval) {
+    export async function changePlan(plan: Billing.Plan, interval: Billing.Interval) {
         const url = `https://us-central1-polar-cors.cloudfunctions.net/StripeChangePlan/`;
-        const accountData = await this.createAccountData();
+        const accountData = await createAccountData();
         const data = {plan, interval, ...accountData};
 
-        await this.executeAccountMethod(url, data);
+        await executeAccountMethod(url, data);
 
     }
 
-    private static async executeAccountMethod(url: string, data: any) {
+    async function executeAccountMethod(url: string, data: any) {
 
         const body = JSON.stringify(data);
 
@@ -71,7 +60,7 @@ export class AccountActions {
 
     }
 
-    private static async createAccountData(): Promise<AccountData> {
+    async function createAccountData(): Promise<AccountData> {
 
         const user = await Firebase.currentUserAsync();
 

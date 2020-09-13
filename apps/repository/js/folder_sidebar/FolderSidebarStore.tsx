@@ -20,13 +20,14 @@ import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Paths} from "polar-shared/src/util/Paths";
 import {Logger} from "polar-shared/src/logger/Logger";
 import {PersistenceLayerMutator} from "../persistence_layer/PersistenceLayerMutator";
-import {BatchMutators} from "../BatchMutators";
+import {BatchMutators, PromiseFactory} from "../BatchMutators";
 import TagID = Tags.TagID;
 import Selected = FolderSelectionEvents.Selected;
 import SelfSelected = FolderSelectionEvents.SelfSelected;
 import BatchMutatorOpts = BatchMutators.BatchMutatorOpts;
 import {TRoot} from "../../../../web/js/ui/tree/TRoot";
 import {useLogger} from "../../../../web/js/mui/MUILogger";
+import {IAsyncTransaction} from "polar-shared/src/util/IAsyncTransaction";
 
 export interface TagDescriptorSelected extends TagDescriptor {
     readonly selected: boolean
@@ -396,10 +397,10 @@ function callbacksFactory(storeProvider: Provider<IFolderSidebarStore>,
         return store.selected.map(current => tagsMap[current]);
     }
 
-    async function withBatch<T>(promises: ReadonlyArray<Promise<T>>,
+    async function withBatch<T>(transactions: ReadonlyArray<IAsyncTransaction<T>>,
                                 opts: Partial<BatchMutatorOpts> = {}) {
 
-        await BatchMutators.exec(promises, {
+        await BatchMutators.exec(transactions, {
             ...opts,
             refresh: NULL_FUNCTION,
             dialogs
@@ -409,10 +410,23 @@ function callbacksFactory(storeProvider: Provider<IFolderSidebarStore>,
 
     function doDelete(selected: ReadonlyArray<Tag>) {
 
-        const promises = selected.map(tag => tag.id)
-                                 .map(tag => persistenceLayerMutator.deleteTag(tag));
+        function toAsyncTransaction(tag: Tag) {
 
-        withBatch(promises, {error: "Unable to delete tag: "})
+            function prepare() {
+                // TODO write a tombstone that this is deleted
+            }
+
+            function commit() {
+                return persistenceLayerMutator.deleteTag(tag.id)
+            }
+
+            return {prepare, commit};
+
+        }
+
+        const transactions = selected.map(toAsyncTransaction);
+
+        withBatch(transactions, {error: "Unable to delete tag: "})
             .catch(err => log.error(err));
 
     }

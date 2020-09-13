@@ -43,6 +43,7 @@ export const DocRepoFilterBar = deepMemo((props: IProps) => {
                   container
                   direction="row"
                   justify="flex-start"
+                  style={{flexWrap: 'nowrap'}}
                   alignItems="center">
 
                 <Grid item>

@@ -6,6 +6,7 @@ import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
 interface IProps {
     readonly datetime: ISODateTimeString | null | undefined;
     readonly className?: string;
+    readonly style?: React.CSSProperties;
 }
 
 export const DateTimeTableCell = React.memo((props: IProps) => {
@@ -18,7 +19,8 @@ export const DateTimeTableCell = React.memo((props: IProps) => {
                     className={props.className || ''}
                     style={{
                         whiteSpace: 'nowrap',
-                        userSelect: "none"
+                        userSelect: "none",
+                        ...props.style
                     }}
                     titleFormat="D MMM YYYY hh:MM A"
                     // filter={(value) => value.replace(/^an? /g, '1 ')}

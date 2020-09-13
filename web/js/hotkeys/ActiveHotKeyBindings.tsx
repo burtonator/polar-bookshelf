@@ -1,11 +1,4 @@
 import React from 'react';
-import {
-    ApplicationKeyMap,
-    getApplicationKeyMap,
-    GlobalHotKeys,
-    KeyMapOptions
-} from "react-hotkeys"
-import {arrayStream} from "polar-shared/src/util/ArrayStreams";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -16,6 +9,12 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from '@material-ui/core/TableCell';
 import grey from "@material-ui/core/colors/grey";
 import Dialog from '@material-ui/core/Dialog';
+import {deepMemo} from '../react/ReactUtils';
+import {
+    IBaseKeyboardShortcut,
+    useKeyboardShortcutsStore
+} from '../keyboard_shortcuts/KeyboardShortcutsStore';
+import {GlobalKeyboardShortcuts} from "../keyboard_shortcuts/GlobalKeyboardShortcuts";
 
 interface KeySequenceProps {
     readonly sequence: string;
@@ -38,33 +37,12 @@ const KeySequence = (props: KeySequenceProps) => {
 
 }
 
-interface ActiveKeyBindingProps {
+interface ActiveKeyBindingProps extends IBaseKeyboardShortcut {
 
-    readonly sequences: ReadonlyArray<KeyMapOptions>;
-    readonly name?: string;
-    readonly group?: string;
-    readonly description?: string;
 
 }
 
 const ActiveBinding = (props: ActiveKeyBindingProps) => {
-
-    function toSequences(sequence: string | ReadonlyArray<string>): ReadonlyArray<string> {
-
-        if (typeof sequence === 'string') {
-            return [sequence];
-        }
-
-        return sequence;
-
-    }
-
-    const sequences: ReadonlyArray<string> =
-        arrayStream(props.sequences)
-            .map(current => current.sequence)
-            .map(toSequences)
-            .flatMap(current => current)
-            .collect()
 
     return (
         <TableRow>
@@ -79,7 +57,7 @@ const ActiveBinding = (props: ActiveKeyBindingProps) => {
 
             <TableCell>
                 <div style={{display: 'flex'}}>
-                    {sequences.map((current, idx) =>
+                    {props.sequences.map((current, idx) =>
                                        <KeySequence key={idx} sequence={current}/>)}
                 </div>
             </TableCell>
@@ -91,9 +69,10 @@ const ActiveBinding = (props: ActiveKeyBindingProps) => {
 
 export const ActiveHotKeys = () => {
 
-    const keyMap: ApplicationKeyMap = getApplicationKeyMap();
+    const {shortcuts} = useKeyboardShortcutsStore(['shortcuts'])
 
-    const bindings = Object.values(keyMap);
+    const bindings = Object.values(shortcuts)
+                           .sort((a, b) => (b.priority || 0) - (a.priority || 0))
 
     return (
         <Table size="small">
@@ -108,9 +87,16 @@ export const ActiveHotKeys = () => {
 
 }
 
-const keyMap = { SHOW_ALL_HOTKEYS: ["shift+?", '/'] };
+const keyMap = {
+    SHOW_ALL_HOTKEYS: {
+        name: 'Show Keyboard Shortcuts',
+        description: "Show the currently active keyboard shortcuts",
+        sequences: ["shift+?", '/'],
+        priority: -1
+    }
+};
 
-export const ActiveHotKeyBindings = () => {
+export const ActiveHotKeyBindings = deepMemo(() => {
 
     const [open, setOpen] = React.useState(false);
 
@@ -118,18 +104,22 @@ export const ActiveHotKeyBindings = () => {
         setOpen(false);
     }
 
-    const handlers = { SHOW_ALL_HOTKEYS: () => setOpen(true) };
+    const handlers = {
+        SHOW_ALL_HOTKEYS: () => {
+            setOpen(true)
+        }
+    };
 
     return (
-        <GlobalHotKeys allowChanges
-                       keyMap={keyMap}
-                       handlers={handlers}>
+        <>
+        <GlobalKeyboardShortcuts keyMap={keyMap}
+                                 handlerMap={handlers}/>
 
             <Dialog fullWidth={true}
                     maxWidth="md"
                     open={open}
                     onClose={handleClose}>
-                <DialogTitle>Active Key Bindings</DialogTitle>
+                <DialogTitle>Active Keyboard Shortcuts</DialogTitle>
                 <DialogContent>
                     <ActiveHotKeys/>
                 </DialogContent>
@@ -142,7 +132,7 @@ export const ActiveHotKeyBindings = () => {
                 </DialogActions>
             </Dialog>
 
-        </GlobalHotKeys>
-    )
+        </>
+    );
 
-}
+});

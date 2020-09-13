@@ -58,7 +58,7 @@ export class MachineDatastores {
     /**
      * Callback for when we have new data for the account.
      */
-    public static async onSnapshot(handler: (machineDatastore: MachineDatastore) => void) {
+    public static async onSnapshot(onNext: (machineDatastore: MachineDatastore) => void) {
 
         const ref = await this.ref();
 
@@ -70,7 +70,7 @@ export class MachineDatastores {
                 return;
             }
 
-            handler(doc);
+            onNext(doc);
 
         }, ERR_HANDLER);
 

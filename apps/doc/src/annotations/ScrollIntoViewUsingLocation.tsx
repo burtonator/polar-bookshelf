@@ -1,10 +1,10 @@
 import React from 'react';
 import {HashURLs} from "polar-shared/src/util/HashURLs";
 import {IDStr} from "polar-shared/src/util/Strings";
-import {IListenable, useLocationUpdateListener} from './UseLocationChangeHook';
+import {IListenable} from './UseLocationChangeHook';
 import {useLocationChangeStore} from './UseLocationChangeStore';
-import {useComponentWillUnmount} from "../../../../web/js/hooks/ReactLifecycleHooks";
-import { useHistory, useLocation } from 'react-router-dom';
+import {useHistory, useLocation} from 'react-router-dom';
+import {Optional} from 'polar-shared/src/util/ts/Optional';
 
 export function scrollIntoView(scrollTarget: IScrollTarget, ref: HTMLElement) {
 
@@ -23,11 +23,19 @@ export function useScrollIntoViewUsingLocation() {
     const {initialScrollLoader} = useLocationChangeStore(['initialScrollLoader'])
     const scrollTarget = useScrollTarget();
 
+    // There are two times when this needs to be called:
+    //
+    // - when the ref is defined because we then might have a ref + scrollTarget
+    //
+    // - when the scrollTarget has changed due to a locatoin change.
+
     function handleRef() {
-        if (scrollTarget) {
+        if (scrollTarget && ref.current) {
             initialScrollLoader(scrollTarget, ref.current);
         }
     }
+
+    handleRef();
 
     return (newRef: HTMLElement | null) => {
 
@@ -49,6 +57,12 @@ export interface IScrollTarget {
 
     readonly n: string;
 
+    /**
+     * Add some scroll buffer so that we scroll a bit more to better highlight
+     * the item we scrolled to.
+     */
+    readonly b: number;
+
 }
 
 export namespace ScrollTargets {
@@ -60,6 +74,9 @@ export namespace ScrollTargets {
         const params = HashURLs.parse(queryOrLocation);
         const target = params.get('target') || undefined;
         const n = params.get('n');
+        const b = Optional.of(params.get('b'))
+                          .map(parseInt)
+                          .getOrElse(0);
 
         const pos = params.get('pos') === 'bottom' ? 'bottom' : 'top';
 
@@ -71,7 +88,7 @@ export namespace ScrollTargets {
             return undefined;
         }
 
-        return {target, pos, n};
+        return {target, pos, n, b};
 
     }
 

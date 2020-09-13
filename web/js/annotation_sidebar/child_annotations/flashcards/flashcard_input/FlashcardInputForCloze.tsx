@@ -46,7 +46,7 @@ export class FlashcardInputForCloze extends React.Component<IProps, IState> {
 
         return (
 
-            <div id="annotation-flashcard-box" className="mt-1">
+            <div id="annotation-flashcard-box" className="m-1">
 
                 <RichTextArea id={`text-${this.props.id}`}
                               value={fields.text}

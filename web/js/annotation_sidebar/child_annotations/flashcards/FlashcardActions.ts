@@ -3,15 +3,13 @@ import {
     ClozeFields,
     FrontAndBackFields
 } from './flashcard_input/FlashcardInputs';
-import {IDocAnnotation, IDocAnnotationRef} from '../../DocAnnotation';
-import {Functions} from 'polar-shared/src/util/Functions';
+import {IDocAnnotation} from '../../DocAnnotation';
 import {Flashcard} from '../../../metadata/Flashcard';
 import {IRef, Refs} from 'polar-shared/src/metadata/Refs';
 import {Flashcards} from '../../../metadata/Flashcards';
 import {DocMetas} from '../../../metadata/DocMetas';
 import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
-import {IFlashcard} from "polar-shared/src/metadata/IFlashcard";
 import {IDStr} from "polar-shared/src/util/Strings";
 
 export class FlashcardActions {
@@ -21,15 +19,11 @@ export class FlashcardActions {
                          type: FlashcardType,
                          fields: FrontAndBackFields | ClozeFields) {
 
-        Functions.withTimeout(() => {
+        const flashcard = this.newInstanceFromParentRef(parent, type, fields);
 
-            const flashcard = this.newInstanceFromParentRef(parent, type, fields);
-
-            if (flashcard) {
-                pageMeta.flashcards[flashcard.id] = Flashcards.createMutable(flashcard);
-            }
-
-        });
+        if (flashcard) {
+            pageMeta.flashcards[flashcard.id] = Flashcards.createMutable(flashcard);
+        }
 
     }
 

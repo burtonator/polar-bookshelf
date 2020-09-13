@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {IDocAnnotationRef} from '../../DocAnnotation';
+import {deepMemo} from "../../../react/ReactUtils";
 
 interface IProps {
     readonly comment: IDocAnnotationRef;
@@ -7,14 +8,14 @@ interface IProps {
     readonly onEdit: () => void;
 }
 
-export const CommentAnnotationView2 = (props: IProps) => {
+export const CommentAnnotationView2 = deepMemo((props: IProps) => {
 
     const { comment } = props;
 
     return (
         <div className="comment muted-color-root">
 
-            <div className="pt-1 pb-1">
+            <div className="text-sm">
 
                 {/*TODO: based on the state determine if we should be*/}
                 {/*editing or just displaying the comment*/}
@@ -28,7 +29,7 @@ export const CommentAnnotationView2 = (props: IProps) => {
         </div>
     );
 
-}
+});
 
 
 

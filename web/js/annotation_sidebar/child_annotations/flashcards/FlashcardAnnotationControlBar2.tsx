@@ -1,9 +1,7 @@
 import * as React from 'react';
 import {IDocAnnotationRef} from '../../DocAnnotation';
-import {FlashcardViewDropdown} from './FlashcardViewDropdown';
 import {DocAnnotationMoment} from "../../DocAnnotationMoment";
 import {DocAuthor} from "../../DocAuthor";
-import isEqual from "react-fast-compare";
 import Divider from "@material-ui/core/Divider";
 import {useDocMetaContext} from "../../DocMetaContextProvider";
 import {AnnotationTagButton2} from "../../AnnotationTagButton2";
@@ -12,6 +10,8 @@ import {
     IDeleteMutation,
     useAnnotationMutationsContext
 } from "../../AnnotationMutationsContext";
+import {deepMemo} from "../../../react/ReactUtils";
+import {MUIDocDeleteButton} from "../../../../../apps/repository/js/doc_repo/buttons/MUIDocDeleteButton";
 
 interface IProps {
     readonly flashcard: IDocAnnotationRef;
@@ -22,7 +22,7 @@ interface IProps {
 /**
  * A generic wrapper that determines which sub-component to render.
  */
-export const FlashcardAnnotationControlBar2 = React.memo((props: IProps) => {
+export const FlashcardAnnotationControlBar2 = deepMemo((props: IProps) => {
 
     const { flashcard } = props;
 
@@ -57,14 +57,12 @@ export const FlashcardAnnotationControlBar2 = React.memo((props: IProps) => {
                                    flexGrow: 1
                                }}>
 
-                       {props.editButton}
+                    {props.editButton}
 
-                       <AnnotationTagButton2 annotation={props.flashcard}/>
+                    <AnnotationTagButton2 annotation={props.flashcard}/>
 
-                       <FlashcardViewDropdown id={'flashcard-dropdown-' + flashcard.id}
-                                              disabled={! doc?.mutable}
-                                              flashcard={flashcard}
-                                              onDelete={handleDelete}/>
+                    <MUIDocDeleteButton size="small"
+                                        onClick={handleDelete}/>
 
                 </MUIButtonBar>
 
@@ -75,6 +73,6 @@ export const FlashcardAnnotationControlBar2 = React.memo((props: IProps) => {
         </>
 
     );
-}, isEqual);
+});
 
 

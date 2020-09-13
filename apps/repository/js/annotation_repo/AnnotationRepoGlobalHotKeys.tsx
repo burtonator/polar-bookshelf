@@ -1,12 +1,12 @@
-import {GlobalHotKeys} from "react-hotkeys";
 import React from "react";
 import {useAnnotationRepoCallbacks} from "./AnnotationRepoStore";
-import {KeyMaps} from "../../../../web/js/hotkeys/KeyMaps";
-import {HotKeyCallbacks} from "../../../../web/js/hotkeys/HotKeyCallbacks";
-import {KeyHandlers} from "../../../../web/js/hotkeys/KeyHandlers";
-import keyMap = KeyMaps.keyMap;
+import {
+    GlobalKeyboardShortcuts,
+    keyMapWithGroup
+} from "../../../../web/js/keyboard_shortcuts/GlobalKeyboardShortcuts";
+import {KeyboardShortcutHandlers} from "../../../../web/js/keyboard_shortcuts/KeyboardShortcutHandlers";
 
-const globalKeyMap = keyMap(
+const globalKeyMap = keyMapWithGroup(
     {
         group: "Annotations",
         keyMap: {
@@ -18,7 +18,7 @@ const globalKeyMap = keyMap(
             DELETE: {
                 name: "Delete",
                 description: "Delete the current annotation.",
-                sequences: ['del', 'backspace'],
+                sequences: ['Delete', 'Backspace'],
             }
         }
     });
@@ -27,18 +27,17 @@ export const AnnotationRepoGlobalHotKeys = React.memo(() => {
 
     const callbacks = useAnnotationRepoCallbacks();
     
-    const globalKeyHandlers = KeyHandlers.withDefaultBehavior({
-        TAG: HotKeyCallbacks.withPreventDefault(callbacks.onTagged),
-        DELETE: HotKeyCallbacks.withPreventDefault(callbacks.onDeleted),
+    const globalKeyHandlers = {
+        TAG: KeyboardShortcutHandlers.withPreventDefault(callbacks.onTagged),
+        DELETE: KeyboardShortcutHandlers.withPreventDefault(callbacks.onDeleted),
         // FLAG: callbacks.onFlagged,
         // ARCHIVE: callbacks.onArchived
-    });
+    };
 
     return (
 
-        <GlobalHotKeys allowChanges={true}
-                       keyMap={globalKeyMap}
-                       handlers={globalKeyHandlers}/>
+        <GlobalKeyboardShortcuts keyMap={globalKeyMap}
+                                 handlerMap={globalKeyHandlers}/>
 
     );
 

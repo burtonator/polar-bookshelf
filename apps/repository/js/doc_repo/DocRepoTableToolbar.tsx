@@ -53,6 +53,9 @@ export const DocRepoTableToolbar = React.memo(() => {
                               spacing={1}
                               direction="row"
                               justify="flex-start"
+                              style={{
+                                  flexWrap: 'nowrap'
+                              }}
                               alignItems="center">
 
                             <Grid item>

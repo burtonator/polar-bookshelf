@@ -172,8 +172,28 @@ export namespace Highlights {
 
         const range = doc.createRange();
 
-        range.setStart(node, highlight.start);
-        range.setEnd(node, highlight.end + 1);
+        function computeEnd() {
+
+            if (! node.nodeValue ) {
+                return 0;
+            }
+
+            // this is a workaround for a small bug with the
+            // polar-dom-text-search where sometimes the length is off by one.
+            // we need to find the root cause but at last this works around it
+            // for now and shouldn't impact anything once the bug is fixed.
+            return Math.min(node.nodeValue?.length, highlight.end + 1);
+
+        }
+
+        try {
+            range.setStart(node, highlight.start);
+            range.setEnd(node, computeEnd());
+        } catch (e) {
+            console.warn(`Unable to mount annotation on node: ${e.message}`, node);
+            throw e;
+        }
+
         const rect = range.getBoundingClientRect();
 
         return {

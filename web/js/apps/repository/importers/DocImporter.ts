@@ -109,6 +109,8 @@ export namespace DocImporter {
 
         const persistenceLayer = persistenceLayerProvider();
 
+        // TODO: this is slow to begin with... maybe we NEVER need to check if
+        // we know we're always writing a NEW document.
         if (await persistenceLayer.contains(docMetadata.fingerprint)) {
 
             log.warn(`File already present in datastore: fingerprint=${docMetadata.fingerprint}: ${docPathOrURL}`);

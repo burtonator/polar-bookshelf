@@ -575,7 +575,9 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
                     const writeFileProgress: WriteFileProgress = {
                         ref: {backend, ...ref},
-                        ...progress
+                        ...progress,
+                        value: progress.progress,
+                        type: 'determinate'
                     }
 
                     opts.progressListener(writeFileProgress);

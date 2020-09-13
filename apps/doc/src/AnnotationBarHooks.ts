@@ -89,6 +89,7 @@ export function useAnnotationBar(opts: AnnotationBarOpts = {}): AnnotationBarEve
     const store = React.useRef<Pick<IDocViewerStore, 'docMeta' | 'docScale'> | undefined>(undefined)
     const createTextHighlightCallbackRef = React.useRef<CreateTextHighlightCallback | undefined>(undefined)
     const {fileType} = useDocViewerContext();
+    const docViewerElementsContext = useDocViewerElementsContext();
 
     store.current = useDocViewerStore(['docMeta', 'docScale']);
     createTextHighlightCallbackRef.current = useCreateTextHighlightCallback();
@@ -140,9 +141,11 @@ export function useAnnotationBar(opts: AnnotationBarOpts = {}): AnnotationBarEve
 
         return () => {
 
+            const docViewerElementProvider = () => docViewerElementsContext.getDocViewerElement();
+
             ControlledAnnotationBars.create(annotationBarControlledPopupProps,
                                             annotationBarCallbacks,
-                                            {fileType});
+                                            {fileType, docViewerElementProvider});
 
         }
 

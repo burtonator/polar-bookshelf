@@ -1,29 +1,75 @@
 import * as React from "react";
 import {Callback} from "polar-shared/src/util/Functions";
+import {deepMemo} from "../../react/ReactUtils";
+import {Providers} from "polar-shared/src/util/Providers";
+import {
+    useComponentDidMount,
+    useComponentWillUnmount
+} from "../../hooks/ReactLifecycleHooks";
 
-interface IProps {
-    readonly onComplete: Callback;
-    readonly children: JSX.Element;
+export function isInputCompleteEvent(event: KeyboardEvent) {
+    return event.key === 'Enter';
 }
 
-export const InputCompleteListener = (props: IProps) => {
+interface InputCompleteListenerOpts {
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    readonly onComplete: () => void;
+
+    readonly onCancel?: Callback;
+
+    /**
+     * Provide a function which returns true if input is completable.
+     */
+    readonly completable?: () => boolean;
+
+}
+
+export function useInputCompleteListener(opts: InputCompleteListenerOpts) {
+
+    const completable = opts.completable || Providers.of(true);
+
+    const onKeyDown = React.useCallback((event: KeyboardEvent) => {
+
+        if (! completable()) {
+            return;
+        }
 
         // note that react-hotkeys is broken when you listen to 'Enter' on
         // ObserveKeys when using an <input> but it doesn't matter because we
         // can just listen to the key directly
 
-        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-            props.onComplete();
-            event.stopPropagation();
+        if (isInputCompleteEvent(event)) {
+            opts.onComplete();
             return;
         }
 
-    };
+        if (event.key === 'Escape' && opts.onCancel) {
+            opts.onCancel();
+            return;
+        }
 
-    return <div onKeyDown={handleKeyDown}>
-        {props.children}
-    </div>;
+    }, []);
 
-};
+    useComponentDidMount(() => {
+        window.addEventListener('keydown', onKeyDown, {capture: true});
+    });
+
+    useComponentWillUnmount(() => {
+        window.removeEventListener('keydown', onKeyDown, {capture: true});
+    });
+
+}
+
+interface IProps extends InputCompleteListenerOpts {
+
+    readonly children: JSX.Element;
+
+}
+
+export const InputCompleteListener = deepMemo((props: IProps) => {
+
+    useInputCompleteListener(props);
+
+    return props.children;
+
+});

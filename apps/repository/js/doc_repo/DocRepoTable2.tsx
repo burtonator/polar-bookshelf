@@ -8,12 +8,12 @@ import {DocRepoTableHead} from "./DocRepoTableHead";
 import {MUIDocContextMenu} from "./MUIDocContextMenu";
 import {DocRepoTableRow} from "./DocRepoTableRow";
 import {useDocRepoStore} from "./DocRepoStore2";
-import isEqual from "react-fast-compare";
+import {deepMemo} from "../../../../web/js/react/ReactUtils";
 
-export const DocRepoTable2 = React.memo(() => {
+export const DocRepoTable2 = deepMemo(() => {
 
-    const {page, rowsPerPage, viewPage, selected} 
-        = useDocRepoStore(['page', 'rowsPerPage', 'viewPage', 'selected']);
+    const {page, rowsPerPage, viewPage, view, selected}
+        = useDocRepoStore(['page', 'rowsPerPage', 'view', 'viewPage', 'selected']);
 
     return (
         <div style={{
@@ -77,4 +77,4 @@ export const DocRepoTable2 = React.memo(() => {
         </div>
     )
 
-}, isEqual);
+});

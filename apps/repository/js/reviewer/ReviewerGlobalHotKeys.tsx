@@ -1,10 +1,10 @@
 // @NotStale
 
 import React from "react";
-import {GlobalHotKeys} from "react-hotkeys";
 import {KeyMaps} from "../../../../web/js/hotkeys/KeyMaps";
+import {keyMapWithGroup} from "../../../../web/js/keyboard_shortcuts/GlobalKeyboardShortcuts";
 
-const keyMap = KeyMaps.keyMap({
+const keyMap = keyMapWithGroup({
     group: "Reviewer",
     keyMap: {
     }

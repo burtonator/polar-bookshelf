@@ -212,21 +212,21 @@ export class Rects {
      */
     static intersectedPositions(a: Rect, b: Rect) {
 
-        let result = [];
+        const result = [];
 
-        if(_interval(a.left, b.right, a.right)) {
+        if(interval(a.left, b.right, a.right)) {
             result.push("left");
         }
 
-        if(_interval(a.left, b.left, a.right)) {
+        if(interval(a.left, b.left, a.right)) {
             result.push("right");
         }
 
-        if(_interval(a.top, b.bottom, a.bottom)) {
+        if(interval(a.top, b.bottom, a.bottom)) {
             result.push("top");
         }
 
-        if(_interval(a.top, b.top, a.bottom)) {
+        if(interval(a.top, b.top, a.bottom)) {
             result.push("bottom");
         }
 
@@ -247,7 +247,7 @@ export class Rects {
         Rects.validate(a);
         Rects.validate(b);
 
-        let result: any = {};
+        const result: any = {};
 
         // basically this is the degree AWAY from given position.  Negative
         // values would be BEFORE the position.
@@ -275,9 +275,9 @@ export class Rects {
         a = Rects.validate(a);
         b = Rects.validate(b);
 
-        let keys: (keyof Rect)[] = ["left", "top", "right", "bottom", "width", "height"];
+        const keys: (keyof Rect)[] = ["left", "top", "right", "bottom", "width", "height"];
 
-        let result: any = {};
+        const result: any = {};
 
         keys.forEach(key => {
             result[key] = <number>a[key] - <number>b[key];
@@ -299,9 +299,9 @@ export class Rects {
         a = Rects.validate(a);
         b = Rects.validate(b);
 
-        let keys: (keyof Rect)[] = ["left", "top", "right", "bottom", "width", "height"];
+        const keys: (keyof Rect)[] = ["left", "top", "right", "bottom", "width", "height"];
 
-        let result: any = {};
+        const result: any = {};
 
         keys.forEach(key => {
             result[key] = <number>a[key] + <number>b[key];
@@ -325,7 +325,7 @@ export class Rects {
             throw new Error(`Dimensions invalid ${a.dimensions} vs ${b.dimensions}`);
         }
 
-        let result = {
+        const result = {
             left: 100 * (a.left / b.width),
             right: 100 * (a.right / b.width),
             top: 100 * (a.top / b.height),
@@ -394,12 +394,7 @@ export class Rects {
 
     }
 
-    /**
-     *
-     * @param element {HTMLElement}
-     * @return {Rect}
-     */
-    static createFromOffset(element: HTMLElement) {
+    static createFromOffset(element: HTMLElement): Rect {
 
         // FIXME: if I'm using this it might not be what I want.
 
@@ -419,7 +414,7 @@ export class Rects {
      */
     static fromElementStyle(element: HTMLElement) {
 
-        let rect = {
+        const rect = {
 
             left: Styles.parsePX(element.style.left),
             top: Styles.parsePX(element.style.top),
@@ -437,13 +432,8 @@ export class Rects {
 /**
  * Return true if the point is within the given min and max interval.
  *
- * @param min {number}
- * @param point {number}
- * @param max {number}
- * @private
- * @return {boolean}
  */
-function _interval(min: number, point: number, max: number): boolean {
+function interval(min: number, point: number, max: number): boolean {
     // TODO: migrate this to use a Line.holds
     return min <= point && point <= max;
 }

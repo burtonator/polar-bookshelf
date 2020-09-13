@@ -1,7 +1,14 @@
+import React from 'react';
 import {Finder, FindHandler, IFindOpts} from "../../Finders";
 import {DOMTextHitWithIndex, useEPUBFinderCallbacks} from "./EPUBFinderStore";
 import {useHistory} from "react-router-dom";
-import {EPUBFinders, useEPUBRoot} from "./EPUBFinders";
+import {EPUBFinders, useEPUBRootProvider} from "./EPUBFinders";
+import {URLStr} from 'polar-shared/src/util/Strings';
+import {Provider} from 'polar-shared/src/util/Providers';
+import {useJumpToAnnotationHandler} from "../../../../../web/js/annotation_sidebar/JumpToAnnotationHook";
+import {IAnnotationPtr} from "../../../../../web/js/annotation_sidebar/AnnotationLinks";
+import {useDocViewerContext} from "../DocRenderer";
+import {useDocViewerStore} from '../../DocViewerStore';
 import EPUBFinder = EPUBFinders.EPUBFinder;
 
 export namespace EPUBFindControllers {
@@ -10,8 +17,14 @@ export namespace EPUBFindControllers {
 
         const history = useHistory();
         const callbacks = useEPUBFinderCallbacks();
-
-        const epubFinderCache = EPUBFinderCaches.create();
+        const epubFinderCacheProvider = useEPUBFinderCache();
+        const jumpToAnnotationHandler = useJumpToAnnotationHandler();
+        const {docID} = useDocViewerContext();
+        const {page} = useDocViewerStore(['page']);
+        // this is a big of a hack because the hooks aren't getting rebuilt and
+        // updated for the caller.
+        const pageRef = React.useRef(page);
+        pageRef.current = page;
 
         const exec = (opts: IFindOpts): FindHandler => {
 
@@ -28,10 +41,15 @@ export namespace EPUBFindControllers {
                 }
 
                 function scrollTo() {
-                    const {root} = useEPUBRoot();
 
-                    history.replace({hash: hit!.id});
-                    root.querySelector('#' + hit!.id)!.scrollIntoView();
+                    const ptr: IAnnotationPtr = {
+                        target: hit!.id,
+                        docID,
+                        pageNum: pageRef.current
+                    }
+
+                    jumpToAnnotationHandler(ptr);
+
                 }
 
                 function updateMatches() {
@@ -51,7 +69,7 @@ export namespace EPUBFindControllers {
                 updateHit(callbacks.prev());
             }
 
-            const finder = epubFinderCache.get();
+            const finder = epubFinderCacheProvider();
 
             // TODO: I think this should/could go into the store
             const hits = finder.exec({
@@ -60,7 +78,7 @@ export namespace EPUBFindControllers {
             });
 
             callbacks.setHits(hits);
-
+            next();
             opts.onMatches({total: hits.length, current: hits.length > 0 ? 1 : 0});
 
             return {opts, cancel, next, prev};
@@ -72,42 +90,37 @@ export namespace EPUBFindControllers {
     }
 }
 
-interface EPUBFinderCache {
-    get(): EPUBFinder;
+interface EPUBFinderCacheEntry {
+    readonly location: string;
+    readonly finder: EPUBFinder;
+    readonly pageNum: number;
 }
 
-export namespace EPUBFinderCaches {
+export function useEPUBFinderCache(): Provider<EPUBFinder> {
 
-    export function create(): EPUBFinderCache {
+    const cacheRef = React.useRef<EPUBFinderCacheEntry | undefined>();
+    const epubRootProvider = useEPUBRootProvider();
+    const {page} = useDocViewerStore(['page']);
 
-        function getLocation() {
-            const {root} = useEPUBRoot();
-            return root.ownerDocument!.location.href;
-        }
+    const getLocation = React.useCallback((): URLStr => {
+        const {root} = epubRootProvider();
+        return root.ownerDocument!.location.href;
+    }, [epubRootProvider]);
 
-        interface CacheEntry {
-            readonly location: string;
-            readonly finder: EPUBFinder;
-        }
+    return React.useCallback((): EPUBFinder => {
 
-        let cache: CacheEntry | undefined;
+        if (cacheRef.current?.location !== getLocation()) {
 
-        function get() {
-
-            if (cache?.location !== getLocation()) {
-                const location = getLocation();
-                const finder = EPUBFinders.create();
-                cache = {
-                    location, finder
-                }
+            const location = getLocation();
+            const finder = EPUBFinders.create(epubRootProvider);
+            cacheRef.current = {
+                location, finder, pageNum: page
             }
 
-            return cache.finder;
-
         }
 
-        return {get};
+        return cacheRef.current.finder;
 
-    }
+    }, [epubRootProvider, getLocation, page])
 
 }

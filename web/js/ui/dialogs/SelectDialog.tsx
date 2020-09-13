@@ -10,6 +10,8 @@ import ListItem from '@material-ui/core/ListItem';
 import List from "@material-ui/core/List";
 import Box from "@material-ui/core/Box";
 import DialogContentText from "@material-ui/core/DialogContentText";
+import {WithDeactivatedKeyboardShortcuts} from "../../keyboard_shortcuts/WithDeactivatedKeyboardShortcuts";
+import { MUIDialog } from "./MUIDialog";
 
 export interface ISelectOption<V> {
     readonly id: IDStr;
@@ -77,32 +79,37 @@ export const SelectDialog = function<V>(props: SelectDialogProps<V>) {
 
     return (
 
-        <Dialog open={open}
-                onClose={handleClose}
-                aria-labelledby="form-dialog-title">
+        <MUIDialog open={open}
+                   onClose={handleClose}
+                   aria-labelledby="form-dialog-title">
 
-            <DialogTitle id="form-dialog-title">{props.title}</DialogTitle>
+            <WithDeactivatedKeyboardShortcuts>
+                <>
+                    <DialogTitle id="form-dialog-title">{props.title}</DialogTitle>
 
-            <DialogContent>
+                    <DialogContent>
 
-                {props.description !== undefined && (
-                    <Box pt={1}>
-                        <DialogContentText id="dialog-description">
-                            {props.description}
-                        </DialogContentText>
-                    </Box>
-                )}
+                        {props.description !== undefined && (
+                            <Box pt={1}>
+                                <DialogContentText id="dialog-description">
+                                    {props.description}
+                                </DialogContentText>
+                            </Box>
+                        )}
 
-                <List>
-                    {props.options.map(convertOptionToListItem)}
-                </List>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleCancel}>
-                    Cancel
-                </Button>
-            </DialogActions>
-        </Dialog>
+                        <List>
+                            {props.options.map(convertOptionToListItem)}
+                        </List>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCancel}>
+                            Cancel
+                        </Button>
+                    </DialogActions>
+                </>
+            </WithDeactivatedKeyboardShortcuts>
+
+        </MUIDialog>
 
     );
 

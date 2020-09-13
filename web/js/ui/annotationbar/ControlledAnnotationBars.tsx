@@ -19,6 +19,7 @@ import {FileType} from "../../apps/main/file_loaders/FileType";
 
 export interface RegisterOpts {
     readonly fileType: FileType;
+    readonly docViewerElementProvider: () => HTMLElement;
 }
 
 export namespace ControlledAnnotationBars {
@@ -122,7 +123,7 @@ export namespace ControlledAnnotationBars {
             }, target);
         };
 
-        const targets = computeTargets(opts.fileType);
+        const targets = computeTargets(opts.fileType, opts.docViewerElementProvider);
 
         for (const target of targets) {
             handleTarget(target);
@@ -130,26 +131,20 @@ export namespace ControlledAnnotationBars {
 
     }
 
-    function computeTargets(fileType: FileType): ReadonlyArray<HTMLElement> {
+    function computeTargets(fileType: FileType, docViewerElementProvider: () => HTMLElement): ReadonlyArray<HTMLElement> {
+
+        const docViewerElement = docViewerElementProvider();
 
         function computeTargetsForPDF(): ReadonlyArray<HTMLElement> {
-            // FIXME: this is not portable to Polar 2.0 tabbed browsing.
-            // FIXME: migrate to useDocViewerElementsContext
-
-            const pageElements = Array.from(document.querySelectorAll(".page")) as HTMLElement[];
-            return pageElements;
+            return Array.from(docViewerElement.querySelectorAll(".page")) as HTMLElement[];
         }
 
         function computeTargetsForEPUB(): ReadonlyArray<HTMLElement> {
-
-            return Array.from(document.querySelectorAll("iframe"))
+            return Array.from(docViewerElement.querySelectorAll("iframe"))
                         .map(iframe => iframe.contentDocument)
                         .filter(contentDocument => isPresent(contentDocument))
                         .map(contentDocument => contentDocument!)
                         .map(contentDocument => contentDocument.documentElement)
-                        // .map(documentElement => computeDocumentElements(documentElement))
-                        // .reduce(Reducers.FLAT, []);
-
         }
 
         switch(fileType) {

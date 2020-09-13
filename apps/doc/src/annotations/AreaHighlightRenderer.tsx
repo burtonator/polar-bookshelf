@@ -14,7 +14,7 @@ import {ResizeBox} from "./ResizeBox";
 import isEqual from "react-fast-compare";
 import {useDocViewerStore} from "../DocViewerStore";
 import {useAreaHighlightHooks} from "./AreaHighlightHooks";
-import {DocMetas} from "polar-shared/src/metadata/DocMetas";
+import {IDocMetas} from "polar-shared/src/metadata/IDocMetas";
 import {useDocViewerElementsContext} from "../renderers/DocViewerElementsContext";
 
 interface IProps {
@@ -73,7 +73,7 @@ export const AreaHighlightRenderer = React.memo((props: IProps) => {
         // get the most recent area highlight as since this is using state
         // we have can have a stale highlight.
 
-        const pageMeta = DocMetas.getPageMeta(docMeta!, pageNum);
+        const pageMeta = IDocMetas.getPageMeta(docMeta!, pageNum);
         const areaHighlight = (pageMeta.areaHighlights || {})[id];
 
         onAreaHighlightUpdated({areaHighlight, pageNum, overlayRect});

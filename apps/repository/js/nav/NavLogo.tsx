@@ -5,13 +5,7 @@ import {Devices} from "polar-shared/src/util/Devices";
 import {MUIRouterLink} from "../../../../web/js/mui/MUIRouterLink";
 
 const Styles: IStyleMap = {
-    parent: {
-        display: 'inline-block'
-    },
-
     child: {
-        display: 'inline-block',
-        verticalAlign: 'middle',
         userSelect: 'none'
     },
 
@@ -25,8 +19,6 @@ const Styles: IStyleMap = {
 
 };
 
-/**
- */
 export const NavLogo = React.memo(() => {
 
     const createLink = () => {
@@ -50,7 +42,11 @@ export const NavLogo = React.memo(() => {
     };
 
     return (
-        <div style={Styles.parent}>
+        <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'nowrap',
+             }}>
             <div style={Styles.child}>
                 <NavLink>
 
@@ -58,7 +54,8 @@ export const NavLogo = React.memo(() => {
                              height: '50px',
                              width: '50px',
                              display: 'flex',
-                             alignItems: 'center'
+                             alignItems: 'center',
+                             flexWrap: 'nowrap',
                          }}>
                         <PolarSVGIcon width={50} height={50}/>
                     </div>

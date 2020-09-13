@@ -5,11 +5,8 @@ import CommentIcon from '@material-ui/icons/Comment';
 import {DocAnnotationMoment} from "./DocAnnotationMoment";
 import {DocAuthor} from "./DocAuthor";
 import EditIcon from '@material-ui/icons/Edit';
-import IconButton from '@material-ui/core/IconButton';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import {MUIAnchor} from "../mui/MUIAnchor";
-import Divider from "@material-ui/core/Divider";
-import isEqual from "react-fast-compare";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {useAnnotationActiveInputContext} from "./AnnotationActiveInputContext";
 import {useDocMetaContext} from "./DocMetaContextProvider";
@@ -18,8 +15,8 @@ import {useAnnotationMutationsContext} from "./AnnotationMutationsContext";
 import {AnnotationTagButton2} from './AnnotationTagButton2';
 import {MUIButtonBar} from "../mui/MUIButtonBar";
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import {createStyles, Tooltip} from "@material-ui/core";
-import {deepMemo, memoForwardRef} from "../react/ReactUtils";
+import {createStyles} from "@material-ui/core";
+import {deepMemo} from "../react/ReactUtils";
 import {JumpToAnnotationButton} from "./buttons/JumpToAnnotationButton";
 import {MUIDocDeleteButton} from "../../../apps/repository/js/doc_repo/buttons/MUIDocDeleteButton";
 import {StandardIconButton} from "../../../apps/repository/js/doc_repo/buttons/StandardIconButton";
@@ -127,7 +124,7 @@ export const AnnotationViewControlBar2 = React.memo((props: IProps) => {
 
         <>
             <div style={{userSelect: 'none'}}
-                 className="pt-1 pb-1">
+                 className="pt-1">
 
                 {/*<AnnotationTagsBar tags={annotation.tags}/>*/}
 
@@ -139,7 +136,7 @@ export const AnnotationViewControlBar2 = React.memo((props: IProps) => {
 
                         <MUIAnchor href="#"
                                    onClick={NULL_FUNCTION}>
-                            <DocAnnotationMoment created={annotation.created}/>
+                            <DocAnnotationMoment created={annotation.lastUpdated}/>
                         </MUIAnchor>
 
                     </MUIButtonBar>
@@ -181,7 +178,6 @@ export const AnnotationViewControlBar2 = React.memo((props: IProps) => {
                 </div>
 
             </div>
-            <Divider/>
         </>
     );
 });

@@ -79,10 +79,10 @@ export const GlobalPDFCss = React.memo(() => {
             {theme.palette.type === 'dark' &&
                 <GlobalCssDark/>}
 
-            {mode === 'invert' &&
+            {theme.palette.type === 'dark' && mode === 'invert' &&
                 <GlobalCssDarkForInvert/>}
 
-            {mode === 'invert-greyscale' &&
+            {theme.palette.type === 'dark' && mode === 'invert-greyscale' &&
                 <GlobalCssDarkForInvertGreyscale/>}
 
 

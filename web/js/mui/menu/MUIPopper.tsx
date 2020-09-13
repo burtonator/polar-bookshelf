@@ -47,6 +47,16 @@ interface IProps {
 
 }
 
+interface IPopperController {
+    readonly dismiss: () => void;
+}
+
+const PopperControllerContext = React.createContext<IPopperController>({dismiss: NULL_FUNCTION});
+
+export function usePopperController() {
+    return React.useContext(PopperControllerContext);
+}
+
 export const MUIPopper = deepMemo((props: IProps) => {
 
     const theme = useTheme();
@@ -130,9 +140,15 @@ export const MUIPopper = deepMemo((props: IProps) => {
                         <Grow {...TransitionProps}>
                             <Paper elevation={10}
                                    className={classes.paper}>
-                                <ClickAwayListener onClickAway={handleClose}>
-                                    {props.children}
-                                </ClickAwayListener>
+
+                                <PopperControllerContext.Provider value={{dismiss: () => setOpen(false)}}>
+
+                                    <ClickAwayListener onClickAway={handleClose}>
+                                        {props.children}
+                                    </ClickAwayListener>
+
+                                </PopperControllerContext.Provider>
+
                             </Paper>
                         </Grow>
                     )}

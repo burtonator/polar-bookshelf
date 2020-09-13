@@ -1,6 +1,8 @@
 import React from 'react';
 import {EPUBContextMenuRoot} from '../doc/src/renderers/epub/contextmenu/EPUBContextMenuRoot';
 import {Resizable} from "../../web/js/ui/resizable/Resizable";
+import {UploadProgressDialog} from "../../web/js/ui/dialogs/UploadProgressDialog";
+import {MUIAppRoot} from "../../web/js/mui/MUIAppRoot";
 
 const IFrameContent = React.memo(() => {
 
@@ -33,28 +35,37 @@ const IFrameContent = React.memo(() => {
 
 
 export const App = () => (
-    <div style={{width: '100%'}}>
+    <MUIAppRoot>
 
-        <div style={{
-                 width: '800px',
-                 height: '1000px',
-                 marginLeft: 'auto',
-                 marginRight: 'auto',
-                 backgroundColor: 'orange',
-                 position: 'relative'
-             }}>
+        <div style={{height: '1200px', position: 'absolute'}}>
 
-            <Resizable computeInitialPosition={() => {
-                           return {
+            <div style={{
+                     position: "absolute",
+                     top: '100px',
+                     left: '100px',
+                     width: '800px',
+                     height: '1000px',
+                     marginLeft: 'auto',
+                     marginRight: 'auto',
+                     backgroundColor: 'orange',
+                     // position: 'relative'
+                 }}>
+
+                <Resizable computeInitialPosition={() => ({
                                top: 0,
                                left: 0,
                                width: 100,
                                height: 100
-                           };
-                       }}
-                       color="rgb(255, 0, 0)"/>
+                           })}
+                           bounds="parent"
+                           color="rgb(255, 0, 0)"/>
 
+
+            </div>
+
+            {/*<UploadProgressDialog value='indeterminate'/>*/}
 
         </div>
-    </div>
+
+    </MUIAppRoot>
 );

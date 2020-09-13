@@ -4,7 +4,7 @@ import {Tuples} from "polar-shared/src/util/Tuples";
 import {IDStr} from "polar-shared/src/util/Strings";
 import {Callback, NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Debouncers} from "polar-shared/src/util/Debouncers";
-
+import {DockSplitter} from "./DockSplitter";
 
 class Styles {
 
@@ -64,34 +64,6 @@ export class DockLayout extends React.Component<IProps, IState> {
 
     public render() {
 
-        const createSplitter = (resizeTarget: ResizeTarget) => {
-
-            const createSplitterStyle = () => {
-
-                const result: React.CSSProperties = {
-                    width: '4px',
-                    minWidth: '4px',
-                    maxWidth: '4px',
-                    cursor: 'col-resize',
-                    backgroundColor: 'var(--grey500)',
-                    minHeight: 0
-                };
-
-                return result;
-
-            };
-
-            const splitterStyle = createSplitterStyle();
-
-            return (
-                <div draggable={false}
-                     onMouseDown={() => this.onMouseDown(resizeTarget)}
-                     style={splitterStyle}>
-
-                </div>
-            );
-        };
-
         const createDockPanels = (): ReadonlyArray<JSX.Element> => {
 
             const tuples = Tuples.createSiblings(this.props.dockPanels.filter(current => ! current.disabled));
@@ -133,7 +105,10 @@ export class DockLayout extends React.Component<IProps, IState> {
                 };
 
                 return (
-                    <div className="dock-layout-fixed" style={style} key={idx} id={docPanel.id}>
+                    <div className="dock-layout-fixed"
+                         style={style}
+                         key={idx}
+                         id={docPanel.id}>
                         {docPanel.component}
                     </div>
                 );
@@ -188,8 +163,9 @@ export class DockLayout extends React.Component<IProps, IState> {
 
                 if  (tuple.next !== undefined) {
                     const resizeTarget = computeResizeTarget();
-                    const splitter = createSplitter(resizeTarget);
-                    result.push({...splitter, key: tuple.idx});
+                    const splitter = <DockSplitter key={'splitter-' + tuple.idx}
+                                                   onMouseDown={() => this.onMouseDown(resizeTarget)}/>;
+                    result.push(splitter);
                 }
 
             }
@@ -326,7 +302,7 @@ interface FixedDocPanelState {
     readonly width: CSSWidth;
 }
 
-interface ResizeTarget {
+export interface ResizeTarget {
     readonly id: IDStr;
     readonly direction: 'left' | 'right';
 }

@@ -1,7 +1,7 @@
 /* eslint react/no-multi-comp: 0, react/prop-types: 0 */
 import React from 'react';
 import {NullCollapse} from '../../../../web/js/ui/null_collapse/NullCollapse';
-import {accounts} from 'polar-accounts/src/accounts';
+import {Billing} from "polar-accounts/src/Billing";
 import {MachineIDs} from "polar-shared/src/util/MachineIDs";
 import {useUserInfoContext} from "../../../../web/js/apps/repository/auth_handler/UserInfoProvider";
 

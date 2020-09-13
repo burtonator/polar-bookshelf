@@ -2,11 +2,12 @@ import {Dimensions} from './util/Dimensions';
 import {Line} from './util/Line';
 import {Preconditions} from 'polar-shared/src/Preconditions';
 import {IRect} from 'polar-shared/src/util/rects/IRect';
+import {ILTRect} from "polar-shared/src/util/rects/ILTRect";
 
 /**
  * Basic DOM style rect without a hard requirement to use a DOMRect.
  */
-export class Rect implements IRect {
+export class Rect implements IRect, ILTRect {
 
     // TODO: some rects have x,y as well as left,top ... should we add them here
     // to be complete and closer to a DOMRect?

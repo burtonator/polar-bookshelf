@@ -14,9 +14,9 @@ export class ProgressMessages {
     public static broadcast(progressMessage: ProgressMessage) {
 
         if (AppRuntime.get() === 'electron-main') {
-
+            // this is done so that the main process in electron can send a
+            // progress message.
             Broadcasters.send(this.CHANNEL, progressMessage);
-
         } else {
 
             const message: TypedMessage<ProgressMessage> = {

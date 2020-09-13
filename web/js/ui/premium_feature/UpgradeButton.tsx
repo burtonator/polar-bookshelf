@@ -2,11 +2,10 @@ import {useHistory} from "react-router-dom";
 import React from "react";
 import Button from '@material-ui/core/Button';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
-import {accounts} from "polar-accounts/src/accounts";
-
+import {Billing} from "polar-accounts/src/Billing";
 
 interface IProps {
-    readonly required: accounts.Plan;
+    readonly required: Billing.Plan;
     readonly feature: string;
 }
 

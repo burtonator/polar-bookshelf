@@ -38,7 +38,7 @@ export class FlashcardInputForFrontAndBack extends React.Component<IProps, IStat
 
         return (
 
-            <div id="annotation-flashcard-box" className="mt-1">
+            <div id="annotation-flashcard-box" className="m-1">
 
                 <RichTextArea label="front"
                               id={`front-${this.props.id}`}

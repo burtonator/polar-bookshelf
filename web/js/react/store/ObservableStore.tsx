@@ -66,24 +66,40 @@ export function useObservableStore<V, K extends keyof V>(context: React.Context<
     const internalObservableStore = useContext(context) as InternalObservableStore<V>;
 
     const [value, setValue] = useState<V>(internalObservableStore.current);
+    const valueRef = React.useRef(value);
 
-    const subscriptionRef = React.useRef(internalObservableStore.subject.subscribe((newValue) => {
+    function doUpdateValue(newValue: V) {
+        setValue(newValue);
+        valueRef.current = newValue;
+    }
+
+    const subscriptionRef = React.useRef(internalObservableStore.subject.subscribe((nextValue) => {
 
         if (keys) {
 
             // we have received an update but we're only interested in a few
             // keys so compare them.
 
-            const newValuePicked = pick(newValue, keys);
-            const valuePicked = pick(value, keys);
+            const currValue = valueRef.current;
 
-            if (! isEqual(valuePicked, newValuePicked)) {
+            const nextValuePicked = pick(nextValue, keys);
+            const currValuePicked = pick(currValue, keys);
+
+            if (! isEqual(currValuePicked, nextValuePicked)) {
                 // the internal current in the context is already updated.
-                return setValue(newValue);
+                return doUpdateValue(nextValue);
             }
 
         } else {
-            return setValue(newValue);
+
+            const currValue = valueRef.current;
+
+            if (! isEqual(currValue, nextValue)) {
+                // we can STILL do the lazy comparison here and only
+                // update when the value has actually changed.
+                return doUpdateValue(nextValue);
+
+            }
         }
 
     }));

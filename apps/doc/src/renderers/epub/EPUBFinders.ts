@@ -1,6 +1,7 @@
-import {DOMTextSearch} from "polar-dom-text-search/src/DOMTextSearch";
 import {DOMTextHit} from "polar-dom-text-search/src/DOMTextHit";
 import {useDocViewerElementsContext} from "../DocViewerElementsContext";
+import {DOMTextIndexes} from "polar-dom-text-search/src/DOMTextIndexes";
+import {Provider} from "polar-shared/src/util/Providers";
 
 export namespace EPUBFinders {
 
@@ -13,9 +14,9 @@ export namespace EPUBFinders {
         readonly exec: (opts: Opts) => ReadonlyArray<DOMTextHit>
     }
 
-    export function create(): EPUBFinder {
+    export function create(epubRootProvider: Provider<EPUBRoot>): EPUBFinder {
 
-        const index = createIndex();
+        const index = createIndex(epubRootProvider);
 
         function exec(opts: Opts) {
 
@@ -33,11 +34,10 @@ export namespace EPUBFinders {
 
     }
 
-    function createIndex() {
+    function createIndex(epubRootProvider: Provider<EPUBRoot>) {
 
-        const {doc, root} = useEPUBRoot();
-
-        return DOMTextSearch.createIndex(doc, root);
+        const {doc, root} = epubRootProvider();
+        return DOMTextIndexes.create(doc, root);
 
     }
 
@@ -48,24 +48,39 @@ export interface EPUBRoot {
     readonly root: HTMLElement;
 }
 
-export function useEPUBRoot(): EPUBRoot {
+export function useEPUBRootProvider(): Provider<EPUBRoot> {
 
     const docViewerElementsContext = useDocViewerElementsContext();
-    const docViewerElement = docViewerElementsContext.getDocViewerElement();
 
-    const iframe = docViewerElement.querySelector('iframe');
+    return (): EPUBRoot => {
 
-    if (! iframe) {
-        throw new Error("No iframe - epub probably not mounted yet");
-    }
+        const docViewerElement = docViewerElementsContext.getDocViewerElement();
 
-    if (! iframe.contentDocument) {
-        throw new Error("No iframe contentDocument - epub probably not mounted yet");
-    }
+        const iframe = docViewerElement.querySelector('iframe');
 
-    const doc = iframe!.contentDocument!;
-    const root = doc.body;
+        if (! iframe) {
+            throw new Error("No iframe - epub probably not mounted yet");
+        }
 
-    return {doc, root};
+        if (! iframe.contentDocument) {
+            throw new Error("No iframe contentDocument - epub probably not mounted yet");
+        }
+
+        const doc = iframe!.contentDocument!;
+        const root = doc.body;
+
+        return {doc, root};
+
+    };
+
+}
+
+/**
+ * Like useEPUBRootProvider but is not late bound.
+ */
+export function useEPUBRoot(): EPUBRoot {
+
+    const provider = useEPUBRootProvider();
+    return provider();
 
 }

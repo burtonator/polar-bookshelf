@@ -148,10 +148,10 @@ function callbacksFactory(storeProvider: Provider<IAnnotationSidebarStore>,
         mutator.doUpdate({mutation: 'set-data', data});
     }
 
-    return {
+    return React.useMemo(() => ({
         setFilter,
         setDocMeta
-    };
+    }), [persistenceLayerContext])
 
 }
 

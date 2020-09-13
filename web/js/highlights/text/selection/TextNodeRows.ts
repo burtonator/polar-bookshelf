@@ -1,3 +1,11 @@
+import {Preconditions} from "polar-shared/src/Preconditions";
+import {TextNodes} from './TextNodes';
+import {Rects} from '../../../Rects';
+import {Text} from '../../../util/Text';
+import { arrayStream } from "polar-shared/src/util/ArrayStreams";
+import {Tuples} from "polar-shared/src/util/Tuples";
+import createSiblings = Tuples.createSiblings;
+
 /**
  * A region of text within the document where the nodes are split and are back to
  * back without an element in between but MAY be between different rows.
@@ -21,13 +29,6 @@
  * which would look far more appropriate
  *
  */
-import {Preconditions} from "polar-shared/src/Preconditions";
-import {TextNodes} from './TextNodes';
-import {Rects} from '../../../Rects';
-import {createSiblings} from 'polar-shared/src/util/Functions';
-import {Text} from '../../../util/Text';
-import { arrayStream } from "polar-shared/src/util/ArrayStreams";
-
 export class TextRegion {
 
     private textNodes: any[] = [];
@@ -392,7 +393,7 @@ export class TextNodeRows {
      */
     static splitTextNodePerCharacter(textNode: Node) {
 
-        let result = [
+        const result = [
 
         ];
 

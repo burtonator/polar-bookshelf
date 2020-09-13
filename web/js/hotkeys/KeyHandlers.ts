@@ -30,6 +30,7 @@ export namespace KeyHandlers {
             }
 
             setTimeout(() => delegate(event), 1);
+
         };
 
     }

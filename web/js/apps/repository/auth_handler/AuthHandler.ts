@@ -2,7 +2,7 @@ import {URLs} from 'polar-shared/src/util/URLs';
 import {Firebase} from '../../../firebase/Firebase';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {ISODateTimeString} from 'polar-shared/src/metadata/ISODateTimeStrings';
-import {accounts} from 'polar-accounts/src/accounts';
+import {Billing} from "polar-accounts/src/Billing";
 import {Account} from "../../../accounts/Account";
 import {Accounts} from "../../../accounts/Accounts";
 import {SignInSuccessURLs} from "../../../../../apps/repository/js/login/SignInSuccessURLs";
@@ -74,7 +74,7 @@ abstract class DefaultAuthHandler implements AuthHandler {
 
 export function toUserInfo(user: firebase.User, account: Account | undefined): UserInfo {
 
-    const createSubscription = (): accounts.Subscription => {
+    const createSubscription = (): Billing.Subscription => {
 
         if (account) {
             return {
@@ -192,6 +192,6 @@ export interface UserInfo {
     /**
      * The users subscription level.
      */
-    readonly subscription: accounts.Subscription;
+    readonly subscription: Billing.Subscription;
 
 }

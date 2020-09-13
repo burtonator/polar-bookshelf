@@ -4,13 +4,21 @@ import {AccountOverview} from "../../../../apps/repository/js/account_overview/A
 import {Analytics} from "../../analytics/Analytics";
 import Button from "@material-ui/core/Button";
 import {EmailStr, URLStr} from "polar-shared/src/util/Strings";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from "polar-accounts/src/Billing";
 import {MUIRouterLink} from "../../mui/MUIRouterLink";
 import {AccountAvatar} from "./AccountAvatar";
 import {memoForwardRefDiv} from "../../react/ReactUtils";
-import Subscription = accounts.Subscription;
+import {useLogoutCallback} from "../../accounts/AccountHooks";
+import {Callback} from "polar-shared/src/util/Functions";
+import {useDialogManager} from "../../mui/dialogs/MUIDialogControllers";
+import Subscription = Billing.Subscription;
+import {usePopperController} from "../../mui/menu/MUIPopper";
 
-const LogoutButton = (props: IProps) => {
+interface LogoutButtonProps {
+    readonly onLogout: Callback;
+}
+
+const LogoutButton = (props: LogoutButtonProps) => {
 
     return <Button id="cloud-sync-logout"
                    color="secondary"
@@ -41,8 +49,11 @@ const LogoutButton = (props: IProps) => {
 
 const ViewPlansAndPricingButton = () => {
 
+    const popperController = usePopperController();
+
     const handler = () => {
         Analytics.event({category: 'premium', action: 'view-plans-and-pricing-button'});
+        popperController.dismiss();
     };
 
     return (
@@ -73,15 +84,40 @@ interface IProps {
 
     readonly userInfo: IBasicUserInfo;
 
-    readonly onLogout: () => void;
+}
+
+function useLogoutAction(): Callback {
+
+    const dialogs = useDialogManager();
+
+    const logoutCallback = useLogoutCallback();
+
+    return () => {
+
+        dialogs.confirm({
+            type: 'danger',
+            title: "Are you sure you want to logout?",
+            subtitle: "Just wanted to double check. Are you sure you want to logout?",
+            onAccept: logoutCallback
+        });
+
+    }
 
 }
 
 export const AccountControl = memoForwardRefDiv((props: IProps, ref) => {
 
+    const logoutAction = useLogoutAction();
+    const popperController = usePopperController();
+
+    function handleLogout() {
+        popperController.dismiss();
+        logoutAction();
+    }
+
     return (
 
-        <div className="p-2" ref={ref}>
+        <div style={{padding: '10px 20px'}} ref={ref}>
 
             <div>
                 <div className="text-center">
@@ -135,7 +171,7 @@ export const AccountControl = memoForwardRefDiv((props: IProps, ref) => {
                         </div>
 
                         <div>
-                            <LogoutButton {...props}/>
+                            <LogoutButton onLogout={handleLogout}/>
                         </div>
 
                     </div>

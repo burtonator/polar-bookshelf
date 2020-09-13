@@ -3,15 +3,17 @@ import {AnnotationTypes} from '../../metadata/AnnotationTypes';
 import {IDocAnnotationRef} from '../DocAnnotation';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {HighlightColors} from 'polar-shared/src/metadata/HighlightColor';
-import isEqual from "react-fast-compare";
 import {AnnotationViewControlBar2} from "../AnnotationViewControlBar2";
+import {AnnotationTagsBar} from "../AnnotationTagsBar";
+import {deepMemo} from "../../react/ReactUtils";
+import {AnnotationDivider} from "./AnnotationDivider";
 
 
 interface IProps {
     readonly annotation: IDocAnnotationRef;
 }
 
-export const TextHighlightAnnotationView2 = React.memo((props: IProps) => {
+export const TextHighlightAnnotationView2 = deepMemo((props: IProps) => {
 
     const { annotation } = props;
 
@@ -24,52 +26,53 @@ export const TextHighlightAnnotationView2 = React.memo((props: IProps) => {
     const borderColor = HighlightColors.toBackgroundColor(annotation.color, 0.7);
 
     return (
-
-        <div className="m-0">
-
+        <>
             <div key={key}
                  data-annotation-id={annotation.id}
                  data-annotation-type={attrType}
                  data-annotation-color={annotation.color}
-                 className={attrType}>
+                 className={attrType}
+                 style={{
+                     borderLeft: `4px solid ${borderColor}`,
+                     paddingLeft: '8px',
+                     paddingRight: '5px'
+                 }}>
 
-                {/*NOTE: this HTML layout is specifically designed to prevent */}
+                {/*WARNING: this HTML layout is specifically designed to prevent */}
                 {/*excess HTML element copying when the user double clicks the */}
                 {/*text.  Placing the elements in the div layout below (with */}
                 {/*trailing empty div in a flexbox parent) prevents the form */}
                 {/*boxes that follow from being selected.*/}
 
-                <div style={{display: 'flex', flexDirection: 'column'}}>
+                <div style={{
+                         display: 'flex',
+                         flexDirection: 'column'
+                     }}>
 
-                    <div className="mt-1">
-                        <div style={{display: 'flex'}}>
+                    <div style={{marginTop: '5px'}}>
+                        <AnnotationTagsBar tags={annotation.original.tags}/>
+                    </div>
 
-                            <div className="p-1"
-                                        style={{
-                                            borderLeft: `5px solid ${borderColor}`
-                                        }}>
+                    <div style={{display: 'flex'}}>
 
-                            </div>
-
-                            <div className="text-sm"
-                                  dangerouslySetInnerHTML={{__html: html}}>
-
-                            </div>
-
-                            <div/>
+                        <div className="text-sm"
+                             dangerouslySetInnerHTML={{__html: html}}>
 
                         </div>
 
-                        <div>
-                            <AnnotationViewControlBar2 annotation={annotation}/>
+                        <div/>
 
-                        </div>
+                    </div>
+
+                    <div>
+                        <AnnotationViewControlBar2 annotation={annotation}/>
                     </div>
 
                 </div>
 
             </div>
+            <AnnotationDivider/>
+        </>
 
-        </div>
     );
-}, isEqual);
+});

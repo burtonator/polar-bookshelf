@@ -6,12 +6,11 @@ export class TextSelections {
 
     public static compute(selectedContent: ISelectedContent): ReadonlyArray<TextRect> {
 
-        const result: any[] = [
+        const result: TextRect[] = [
 
         ];
 
-        // TODO: could be cleaner as a map...
-
+        // TODO: could be cleaner as a map with a toTextRect 
         selectedContent.rectTexts.forEach((rectText: any) => {
             const textSelection = new TextRect({
                 rect: rectText.boundingPageRect,

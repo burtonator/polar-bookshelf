@@ -186,6 +186,7 @@ module.exports = {
             "window.$": "jquery",
             "window.jQuery": "jquery"
         }),
+        // new BundleAnalyzerPlugin(),
         new ForkTsCheckerWebpackPlugin({}),
         // WARNING: this will ONLY be rebuilt when:
         //

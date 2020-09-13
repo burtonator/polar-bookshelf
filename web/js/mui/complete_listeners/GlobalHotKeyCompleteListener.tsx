@@ -9,6 +9,11 @@ interface IProps {
     readonly onComplete: () => void;
 }
 
+/**
+ * @Deprecated
+ * @param props
+ * @constructor
+ */
 export const GlobalHotKeyCompleteListener = (props: IProps) => {
 
     const handlers = {

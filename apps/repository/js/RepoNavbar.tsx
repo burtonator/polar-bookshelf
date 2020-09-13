@@ -90,6 +90,9 @@ export class RepoNavbar extends React.Component<IProps, IState> {
                   container
                   direction="row"
                   justify="flex-start"
+                  style={{
+                      flexWrap: 'nowrap'
+                  }}
                   alignItems="center">
 
                 <Grid item>

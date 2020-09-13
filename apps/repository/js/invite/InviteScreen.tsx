@@ -2,7 +2,7 @@ import * as React from 'react';
 import {FixedNav, FixedNavBody} from '../FixedNav';
 import {RepoFooter} from '../repo_footer/RepoFooter';
 import {UserInfo} from "../../../../web/js/apps/repository/auth_handler/AuthHandler";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from "polar-accounts/src/Billing";
 import {EmailAddressParser} from "../../../../web/js/util/EmailAddressParser";
 import {InviteUsersContent} from "./InviteUsersContent";
 import {Invitations} from "../../../../web/js/datastore/Invitations";
@@ -84,7 +84,7 @@ export class InviteScreen extends React.Component<IProps> {
 }
 
 export interface IProps {
-    readonly interval?: accounts.Interval;
+    readonly interval?: Billing.Interval;
     readonly userInfo?: UserInfo;
 }
 

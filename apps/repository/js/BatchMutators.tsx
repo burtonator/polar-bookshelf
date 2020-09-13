@@ -3,6 +3,9 @@ import {Hashcodes} from "polar-shared/src/util/Hashcodes";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {ProgressTracker} from "polar-shared/src/util/ProgressTracker";
 import {DialogManager} from "../../../web/js/mui/dialogs/MUIDialogController";
+import {IAsyncTransaction} from "polar-shared/src/util/IAsyncTransaction";
+
+export type PromiseFactory<T> = () => Promise<T>;
 
 export namespace BatchMutators {
 
@@ -20,7 +23,8 @@ export namespace BatchMutators {
 
     }
 
-    export async function exec<T>(promises: ReadonlyArray<Promise<T>>, opts: BatchMutatorOpts) {
+
+    export async function exec<T>(transactions: ReadonlyArray<IAsyncTransaction<T>>, opts: BatchMutatorOpts) {
 
         const refresh = opts.refresh || NULL_FUNCTION;
         const {dialogs} = opts;
@@ -34,7 +38,7 @@ export namespace BatchMutators {
 
         function createProgressReporter(): ProgressReporter {
 
-            if (promises.length <= 1) {
+            if (transactions.length <= 1) {
                 return {
                     incr: NULL_FUNCTION,
                     terminate: NULL_FUNCTION
@@ -42,7 +46,7 @@ export namespace BatchMutators {
             }
 
             const progressTracker = new ProgressTracker({
-                total: promises.length,
+                total: transactions.length,
                 id
             });
 
@@ -63,9 +67,14 @@ export namespace BatchMutators {
 
         try {
 
-            for (const promise of promises) {
+            for (const transaction of transactions) {
+
+                transaction.prepare();
+
+                refresh();
+
                 // TODO update progress of this operation using a snackbar
-                await promise;
+                await transaction.commit();
 
                 // now refresh the UI
                 refresh();

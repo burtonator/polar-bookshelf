@@ -25,7 +25,6 @@ import {ScaleLevelTuple} from "./ScaleLevels";
 import {PageNavigator} from "./PageNavigator";
 import {useLogger} from "../../../web/js/mui/MUILogger";
 import {DocViewerSnapshots} from "./DocViewerSnapshots";
-import {DocMetas} from '../../../web/js/metadata/DocMetas';
 import {Arrays} from 'polar-shared/src/util/Arrays';
 import {
     Direction,
@@ -38,7 +37,22 @@ import {IPagemarkRef} from "polar-shared/src/metadata/IPagemarkRef";
 import {PagemarkMode} from "polar-shared/src/metadata/PagemarkMode";
 import {Numbers} from 'polar-shared/src/util/Numbers';
 import {arrayStream} from "polar-shared/src/util/ArrayStreams";
-import { Hashcodes } from 'polar-shared/src/util/Hashcodes';
+import {Hashcodes} from 'polar-shared/src/util/Hashcodes';
+import {TaggedCallbacks} from "../../repository/js/annotation_repo/TaggedCallbacks";
+import {Tag, Tags} from "polar-shared/src/tags/Tags";
+import {useDialogManager} from "../../../web/js/mui/dialogs/MUIDialogControllers";
+import {LocalRelatedTagsStore} from "../../../web/js/tags/related/LocalRelatedTagsStore";
+import {
+    IRelatedTagsData,
+    RelatedTagsManager
+} from "../../../web/js/tags/related/RelatedTagsManager";
+import {IDocMetas} from 'polar-shared/src/metadata/IDocMetas';
+import TaggedCallbacksOpts = TaggedCallbacks.TaggedCallbacksOpts;
+import ComputeNewTagsStrategy = Tags.ComputeNewTagsStrategy;
+import ITagsHolder = TaggedCallbacks.ITagsHolder;
+import {DocMetas} from "../../../web/js/metadata/DocMetas";
+import {useLogWhenChanged} from "../../../web/js/hooks/ReactHooks";
+import isEqual from 'react-fast-compare';
 
 /**
  * Lightweight metadata describing the currently loaded document.
@@ -262,6 +276,7 @@ export interface IDocViewerCallbacks {
 
     readonly setDocFlagged: (flagged: boolean) => void;
     readonly setDocArchived: (archived: boolean) => void;
+    readonly onDocTagged: () => void;
 
     // readonly getAnnotationsFromDocMeta: (refs: ReadonlyArray<IAnnotationRef>) => void;
 
@@ -305,6 +320,7 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
     const docMetaContext = useDocMetaContext();
     const persistenceLayerContext = usePersistenceLayerContext();
     const annotationSidebarCallbacks = useAnnotationSidebarCallbacks();
+    const dialogs = useDialogManager();
 
     const docMetaProvider = React.useMemo<IDocMetaProvider>(() => {
 
@@ -376,13 +392,7 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
 
         const store = storeProvider();
 
-        type UpdateType = 'fresh' | 'stale';
-
-        function computeUpdateType(): UpdateType {
-            return DocViewerSnapshots.isStaleUpdate(store.docMeta?.docInfo?.uuid, docMeta.docInfo.uuid) ? 'stale' : 'fresh';
-        }
-
-        const updateType = computeUpdateType();
+        const updateType = DocViewerSnapshots.computeUpdateType(store.docMeta?.docInfo?.uuid, docMeta.docInfo.uuid);
 
         console.log(`Update for docMeta was ${updateType} for type=${type} - ${store.docMeta?.docInfo?.uuid} vs ${docMeta.docInfo.uuid}`);
 
@@ -402,6 +412,13 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
 
     function setDocDescriptor(docDescriptor: IDocDescriptor) {
         const store = storeProvider();
+
+        if (isEqual(store.docDescriptor, docDescriptor)) {
+            // TODO: push this into setStore as it's probably ok to not update
+            // when the values are equal.
+            return;
+        }
+
         setStore({...store, docDescriptor});
     }
 
@@ -734,6 +751,13 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
 
     function setPage(page: number) {
         const store = storeProvider();
+
+        if (store.page === page) {
+            // TODO: push this into setStore as it's probably ok to not update
+            // when the values are equal.
+            return;
+        }
+
         setStore({
              ...store,
              page
@@ -768,26 +792,110 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
         writeDocMetaMutation(docMeta => docMeta.docInfo.archived = archived);
     }
 
-    return {
-        updateDocMeta,
-        setDocMeta,
-        setDocDescriptor,
-        setDocScale,
-        setDocLoaded,
-        setPageNavigator,
-        annotationMutations,
-        onPagemark,
-        onPageJump,
-        onPagePrev,
-        onPageNext,
-        setResizer,
-        setScaleLeveler,
-        setScale,
-        setPage,
-        setFluidPagemarkFactory,
-        setDocFlagged,
-        setDocArchived
-    };
+    interface ITaggedDocMetaHolder extends ITagsHolder {
+        readonly docMeta: IDocMeta;
+    }
+
+    function doDocTagged(targets: ReadonlyArray<ITaggedDocMetaHolder>,
+                         tags: ReadonlyArray<Tag>,
+                         strategy: ComputeNewTagsStrategy) {
+
+        if (targets.length === 0) {
+            log.warn("doDocTagged: No targets");
+        }
+
+        for (const target of targets) {
+            const {docMeta} = target;
+            const newTags = Tags.computeNewTags(docMeta.docInfo.tags, tags, strategy);
+            writeDocMetaMutation(docMeta => docMeta.docInfo.tags = Tags.toMap(newTags));
+        }
+
+    }
+
+    function onDocTagged() {
+
+        const {docMeta} = storeProvider();
+
+        if (! docMeta) {
+            return;
+        }
+
+        function targets(): ReadonlyArray<ITaggedDocMetaHolder> {
+
+            if (! docMeta) {
+                return [];
+            }
+
+            return [
+                {
+                    docMeta,
+                    tags: docMeta.docInfo.tags
+                }
+            ];
+
+        }
+
+        function createRelatedTagsManager() {
+
+            function createNullRelatedTagsData(): IRelatedTagsData {
+                console.warn("Using null related tags data");
+                return {
+                    docTagsIndex: {},
+                    tagDocsIndex: {},
+                    tagsIndex: {}
+                };
+            }
+
+            const data = LocalRelatedTagsStore.read() || createNullRelatedTagsData();
+
+            return new RelatedTagsManager(data);
+
+        }
+
+        const relatedTagsManager = createRelatedTagsManager();
+        const relatedOptionsCalculator = relatedTagsManager.toRelatedOptionsCalculator();
+
+        const tagsProvider = () => relatedTagsManager.tags();
+
+        const opts: TaggedCallbacksOpts<ITaggedDocMetaHolder> = {
+            targets,
+            tagsProvider,
+            dialogs,
+            doTagged: doDocTagged,
+            relatedOptionsCalculator
+        };
+
+        const callback = TaggedCallbacks.create(opts);
+
+        callback();
+
+    }
+
+    // HACK: this is a hack until we find a better way memoize our variables.
+    // I really hate this aspect of hook.
+    return React.useMemo(() => {
+        return {
+            updateDocMeta,
+            setDocMeta,
+            setDocDescriptor,
+            setDocScale,
+            setDocLoaded,
+            setPageNavigator,
+            annotationMutations,
+            onPagemark,
+            onPageJump,
+            onPagePrev,
+            onPageNext,
+            setResizer,
+            setScaleLeveler,
+            setScale,
+            setPage,
+            setFluidPagemarkFactory,
+            setDocFlagged,
+            setDocArchived,
+            onDocTagged
+        };
+    }, [log, docMetaContext, persistenceLayerContext, annotationSidebarCallbacks, dialogs]);
 
 }
 

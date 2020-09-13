@@ -3,10 +3,9 @@ import {
     ASYNC_NULL_FUNCTION,
     Callback,
     Callback1,
-    Functions,
     NULL_FUNCTION
 } from "polar-shared/src/util/Functions";
-import {IDocAnnotation, IDocAnnotationRef} from "./DocAnnotation";
+import {IDocAnnotationRef} from "./DocAnnotation";
 import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 import {FlashcardInputFieldsType} from "./child_annotations/flashcards/flashcard_input/FlashcardInputs";
 import {FlashcardType} from "polar-shared/src/metadata/FlashcardType";
@@ -19,12 +18,12 @@ import {AnnotationMutations} from "polar-shared/src/metadata/mutations/Annotatio
 import {IRef} from "polar-shared/src/metadata/Refs";
 import {IPageMeta} from "polar-shared/src/metadata/IPageMeta";
 import {
-    usePersistenceLayerContext, useRepoDocMetaManager,
+    usePersistenceLayerContext,
+    useRepoDocMetaManager,
     useTagsContext
 } from "../../../apps/repository/js/persistence_layer/PersistenceLayerApp";
 import {TaggedCallbacks} from "../../../apps/repository/js/annotation_repo/TaggedCallbacks";
 import {arrayStream} from "polar-shared/src/util/ArrayStreams";
-import {Logger} from "polar-shared/src/logger/Logger";
 import {Tag, Tags} from "polar-shared/src/tags/Tags";
 import {useDialogManager} from "../mui/dialogs/MUIDialogControllers";
 import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
@@ -38,16 +37,16 @@ import {Position} from "polar-shared/src/metadata/IBaseHighlight";
 import {AreaHighlightRects} from "../metadata/AreaHighlightRects";
 import {Arrays} from "polar-shared/src/util/Arrays";
 import {useDocMetaLookupContext} from "./DocMetaLookupContextProvider";
-import {DocMetas} from "polar-shared/src/metadata/DocMetas";
 import {
     IAnnotationRef,
     IAnnotationRefWithDocMeta
 } from "polar-shared/src/metadata/AnnotationRefs";
 import {TextType} from "polar-shared/src/metadata/TextType";
 import {Texts} from "polar-shared/src/metadata/Texts";
-import ComputeNewTagsStrategy = Tags.ComputeNewTagsStrategy;
 import {useLogger} from "../mui/MUILogger";
 import {Preconditions} from "polar-shared/src/Preconditions";
+import {DocMetas} from "../metadata/DocMetas";
+import ComputeNewTagsStrategy = Tags.ComputeNewTagsStrategy;
 
 export interface IAnnotationMutationHolder<M> {
     readonly annotation: IAnnotationRef;
@@ -306,7 +305,7 @@ export namespace DocAnnotationsMutator {
                                         mutation.flashcardType,
                                         mutation.fields);
                 break;
-            //
+
             case "update":
 
                 FlashcardActions.update(docMeta,
@@ -329,25 +328,23 @@ export namespace DocAnnotationsMutator {
 
     }
 
-    export function onAreaHighlight(docMeta: IDocMeta, pageMeta: IPageMeta, mutation: IAreaHighlightMutation) {
+    export function onAreaHighlight(docMeta: IDocMeta,
+                                    pageMeta: IPageMeta,
+                                    mutation: IAreaHighlightMutation) {
+
+        const {areaHighlight} = mutation;
 
         switch (mutation.type) {
 
             case "update":
 
-                Functions.withTimeout(() => {
-                    const {areaHighlight} = mutation;
-                    AreaHighlights.update(areaHighlight.id,docMeta, pageMeta, areaHighlight);
-                });
+                AreaHighlights.update(areaHighlight.id,docMeta, pageMeta, areaHighlight);
 
                 break;
 
             case "create":
 
-                Functions.withTimeout(() => {
-                    const {areaHighlight} = mutation;
-                    pageMeta.areaHighlights[areaHighlight.id] = areaHighlight;
-                });
+                pageMeta.areaHighlights[areaHighlight.id] = areaHighlight;
 
                 break;
 
@@ -360,35 +357,23 @@ export namespace DocAnnotationsMutator {
         switch (mutation.type) {
             case "revert":
 
-                Functions.withTimeout(() => {
-
-                    const selected = mutation.selected || [];
-
-                    for (const textHighlight of selected) {
-                        TextHighlights.resetRevisedText(docMeta,
-                                                        pageMeta,
-                                                        textHighlight.id);
-                    }
-
-                });
+                for (const textHighlight of (mutation.selected || [])) {
+                    TextHighlights.resetRevisedText(docMeta,
+                                                    pageMeta,
+                                                    textHighlight.id);
+                }
 
                 break;
 
             case "update":
 
-                Functions.withTimeout(() => {
+                for (const textHighlight of (mutation.selected || [])) {
 
-                    const selected = mutation.selected || [];
-
-                    for (const textHighlight of selected) {
-
-                        TextHighlights.setRevisedText(docMeta,
-                                                      pageMeta,
-                                                      textHighlight.id,
-                                                      mutation.body);
-                    }
-
-                });
+                    TextHighlights.setRevisedText(docMeta,
+                                                  pageMeta,
+                                                  textHighlight.id,
+                                                  mutation.body);
+                }
                 break;
 
             case "create":
@@ -429,6 +414,8 @@ export namespace AnnotationMutationCallbacks {
         const log = useLogger();
 
         async function writeUpdatedDocMetas(updatedDocMetas: ReadonlyArray<IDocMeta>) {
+
+            updatedDocMetas = updatedDocMetas.map(DocMetas.updated)
 
             updatedDocMetas = updateStore(updatedDocMetas);
 
@@ -518,17 +505,14 @@ export namespace AnnotationMutationCallbacks {
                           tags: ReadonlyArray<Tag>,
                           strategy: ComputeNewTagsStrategy = 'set') {
 
-            if (tags.length === 0) {
-                log.warn("No tags");
-                return;
-            }
-
             handleUpdate({selected: annotations}, (docMeta, pageMeta, mutation) => {
 
                 for (const current of mutation.selected) {
 
+                    const newTags = Tags.computeNewTags(current.original.tags, tags, strategy);
+
                     const updates = {
-                        tags: Tags.toMap(tags)
+                        tags: Tags.toMap(newTags)
                     };
 
                     AnnotationMutations.update({...current, docMeta},
@@ -537,7 +521,6 @@ export namespace AnnotationMutationCallbacks {
                 }
 
             }).catch(err => log.error(err));
-
 
         }
 
@@ -590,11 +573,6 @@ export namespace AnnotationMutationCallbacks {
         }
 
         function onDeleted(mutation: IDeleteMutation) {
-
-            // FIXME: FIXME FIXME ... verify that this isn't an issue.
-            // FIXME area highlight delete does NOT remove attachment references...
-
-            // FIXME: do I need to unify this action with doc repo store?
 
             const annotations = docMetaLookupContext.lookupAnnotations(mutation.selected);
 

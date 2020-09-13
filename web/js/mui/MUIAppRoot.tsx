@@ -12,6 +12,8 @@ import {MUIDialogController} from "./dialogs/MUIDialogController";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { BrowserTabsStoreProvider } from "../chrome_tabs/BrowserTabsStore";
+import {createMuiTheme, MuiThemeProvider} from "@material-ui/core/styles";
+import {KeyboardShortcuts} from "../keyboard_shortcuts/KeyboardShortcuts";
 
 interface IProps {
     readonly children: React.ReactNode;
@@ -38,10 +40,11 @@ export const MUIAppRoot = (props: IProps) => {
     });
 
     return (
-
-        <MuiThemeProvider theme={muiTheme}>
-            <MUIThemeTypeContext.Provider value={{theme, setTheme}}>
+        <>
+            <KeyboardShortcuts/>
+            <MuiThemeProvider theme={muiTheme}>
                 <BrowserTabsStoreProvider>
+                <MUIThemeTypeContext.Provider value={{theme, setTheme}}>
                     <>
                         <CssBaseline/>
                         <GlobalCss/>
@@ -49,18 +52,13 @@ export const MUIAppRoot = (props: IProps) => {
                         <GlobalCssSummernote/>
                         <GlobalCssMobile/>
 
-                        <ActiveHotKeyBindings/>
+                        {props.children}
 
-                        <FirestoreProvider>
-                            <UserInfoProvider>
-                                {props.children}
-                            </UserInfoProvider>
-                        </FirestoreProvider>
                     </>
+                </MUIThemeTypeContext.Provider>
                 </BrowserTabsStoreProvider>
-
-            </MUIThemeTypeContext.Provider>
-        </MuiThemeProvider>
+            </MuiThemeProvider>
+        </>
     );
 
 };

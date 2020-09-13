@@ -1,14 +1,14 @@
 import React from "react";
-import {GlobalHotKeys} from "react-hotkeys";
 import {useDocRepoCallbacks} from "./DocRepoStore2";
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 import {ReactRouters} from "../../../../web/js/react/router/ReactRouters";
-import {KeyMaps} from "../../../../web/js/hotkeys/KeyMaps";
-import {KeyHandlers} from "../../../../web/js/hotkeys/KeyHandlers";
 import useLocationWithPathOnly = ReactRouters.useLocationWithPathOnly;
-import keyMap = KeyMaps.keyMap;
+import {
+    GlobalKeyboardShortcuts,
+    keyMapWithGroup
+} from "../../../../web/js/keyboard_shortcuts/GlobalKeyboardShortcuts";
 
-const globalKeyMap = keyMap(
+const globalKeyMap = keyMapWithGroup(
     {
         group: "Documents",
         keyMap: {
@@ -20,7 +20,7 @@ const globalKeyMap = keyMap(
             DELETE: {
                 name: "Delete",
                 description: "Delete the currently selected item.",
-                sequences: ['del', 'backspace'],
+                sequences: ['Delete', 'Backspace'],
             },
             FLAG: {
                 name: "Flag",
@@ -40,7 +40,7 @@ const globalKeyMap = keyMap(
             OPEN: {
                 name: "Open",
                 description: "Open the current document in the document viewer",
-                sequences: ['return']
+                sequences: ['Enter']
             }
         }
     });
@@ -49,14 +49,14 @@ export const DocRepoGlobalHotKeys = React.memo(() => {
 
     const callbacks = useDocRepoCallbacks();
 
-    const globalKeyHandlers = KeyHandlers.withDefaultBehavior({
+    const globalKeyHandlers = {
         TAG: callbacks.onTagged,
         DELETE: callbacks.onDeleted,
         FLAG: callbacks.onFlagged,
         ARCHIVE: callbacks.onArchived,
         RENAME: callbacks.onRename,
         OPEN: callbacks.onOpen
-    });
+    };
 
     const location = useLocationWithPathOnly();
 
@@ -66,9 +66,8 @@ export const DocRepoGlobalHotKeys = React.memo(() => {
             <Switch location={location}>
 
                 <Route exact path='/'>
-                    <GlobalHotKeys allowChanges={true}
-                                   keyMap={globalKeyMap}
-                                   handlers={globalKeyHandlers}/>
+                    <GlobalKeyboardShortcuts keyMap={globalKeyMap}
+                                             handlerMap={globalKeyHandlers}/>
                 </Route>
 
             </Switch>

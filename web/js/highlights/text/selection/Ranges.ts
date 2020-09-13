@@ -1,4 +1,6 @@
 import {Preconditions} from 'polar-shared/src/Preconditions';
+import {arrayStream} from "polar-shared/src/util/ArrayStreams";
+import {Strings} from "polar-shared/src/util/Strings";
 
 export class Ranges {
 
@@ -73,26 +75,28 @@ export class Ranges {
 
     }
 
-    public static toText(range: Range) {
-
-        let result = "";
+    public static toText(range: Range): string {
 
         const docFragment = range.cloneContents();
 
-        docFragment.childNodes.forEach(childNode => {
+        function childNodeToText(childNode: ChildNode): string | null {
 
             if (childNode.nodeType === Node.TEXT_NODE) {
-                result += childNode.textContent;
+                return childNode.textContent;
             } else {
-                result += (<HTMLElement> childNode).innerText;
+                return (<HTMLElement> childNode).innerText;
             }
 
-        });
+        }
 
-        return result;
+        return arrayStream(Array.from(docFragment.childNodes))
+                .map(childNodeToText)
+                .filter(current => current !== null)
+                .map(current => current!)
+                .collect()
+                .join("");
 
     }
-
 
     /**
      * Get the text nodes for range. Optionally splitting the text if necessary

@@ -1,8 +1,74 @@
+
+
+
+# 2.0 beta 25
+
+- remove archive option from annotations since it makes no sense
+- Fixed key bindings and no longer using react-hotkeys.
+
+# 2.0 beta 24
+
+- another big performance change
+
+# 2.0 beta 23
+
+- Improved performance of the PDF doc viewer.  Not all the performance updates
+  I want though but getting better 
+
+# 2.0 beta 22
+
+- Fixed jumping to epub pagemarks
+- Updated doc viewer menu with better menu entry names
+- EPUB search next,prev works now
+- PDF document scroll page number detection works now...
+- Options (tags) are sorted in options now in the autocomplete dialog
+- No folders when tagging annotations now 
+
+# 2.0 beta 21
+
+- fixed bug with annotation repo store where it wasn't updating immediately.
+
+- tags for annotations now work
+
+- chrome extension now shows a dialog box when we're uploading a PDF
+
+- New modal progress upload widget for when the user MUST wait for the document
+  to upload when using the save to polar chrome extension.
+
+- Fix to prevent being able to create an autocompleted tag twice.
+
+# 2.0 beta 20
+
+- stale updates are now ignored in the doc repo so that we don't have races
+  in the updating of the UI
+
+- refactored code to make refreshing the UI faster
+
+- the account control can now dismiss the popper so that when you click on 
+  'pricing' it goes away.
+
+- rewrote the way we handle EPUB highlights and search hit placement to be a lot
+  more reliable.
+
+- logout now works again properly
+
+- single delete button for comments
+
 # 2.0 beta 19
 
-- Fixed EPUB jump in the doc viewer when opening up new documents
+- Fix: wrapping issues with Safari
 
-- Fixed ctrl+f on Windows
+- Fix: we can now remove documents from the archive again.
+
+- Fix: doc repo archives are much faster as we refresh the in-memory store first
+
+- Fix: PDF dark mode note enabled for light mode
+
+- Feature: Can now tag from within the doc viewer
+
+- Fix: Fixed EPUB jump in the doc viewer when opening up new documents
+
+- Fix: Fixed ctrl+f on Windows
 
 # 2.0 beta 18
 

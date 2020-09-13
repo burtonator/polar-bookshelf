@@ -5,10 +5,11 @@ import {Numbers} from "polar-shared/src/util/Numbers";
 import {DesktopContent, MobileContent} from "./PremiumCopy";
 import {Discount, Discounts} from "./Discounts";
 import {DeviceRouter} from "../../../../../../web/js/ui/DeviceRouter";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from "polar-accounts/src/Billing";
 import Button from '@material-ui/core/Button';
 import {useDialogManager} from "../../../../../../web/js/mui/dialogs/MUIDialogControllers";
 import {useLogger} from "../../../../../../web/js/mui/MUILogger";
+import {Plans} from "polar-accounts/src/Plans";
 
 const discounts = Discounts.create();
 
@@ -78,22 +79,22 @@ export const PlanIntervalButton = (props: PlanIntervalProps) => {
 
 
 interface PlanPricingProps {
-    readonly plan: accounts.Plan;
-    readonly planInterval: accounts.Interval;
+    readonly plan: Billing.Plan;
+    readonly planInterval: Billing.Interval;
 }
 const PlanPricing = (props: PlanPricingProps) => {
 
     const computeMonthlyPrice = () => {
 
-        switch (props.plan) {
+        const v2Plan = Plans.toV2(props.plan)
+
+        switch (v2Plan.level) {
 
             case "free":
                 return 0.0;
-            case "bronze":
-                return 4.99;
-            case "silver":
-                return 9.99;
-            case "gold":
+            case "plus":
+                return 6.99;
+            case "pro":
                 return 14.99;
         }
 
@@ -294,8 +295,8 @@ export class PremiumContent2 extends React.Component<IProps, IState> {
 }
 
 interface IProps {
-    readonly plan: accounts.Plan;
-    readonly interval?: accounts.Interval;
+    readonly plan: Billing.Plan;
+    readonly interval?: Billing.Interval;
 
 }
 

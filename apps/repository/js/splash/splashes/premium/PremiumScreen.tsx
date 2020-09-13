@@ -2,11 +2,11 @@ import * as React from 'react';
 import {FixedNav, FixedNavBody} from '../../../FixedNav';
 import {PremiumContent2} from './PremiumContent2';
 import {RepoFooter} from "../../../repo_footer/RepoFooter";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from "polar-accounts/src/Billing";
 import {useUserInfoContext} from "../../../../../../web/js/apps/repository/auth_handler/UserInfoProvider";
 
 export interface IProps {
-    readonly interval?: accounts.Interval;
+    readonly interval?: Billing.Interval;
 }
 
 export const PremiumScreen = (props: IProps) => {

@@ -1,6 +1,7 @@
 import * as React from "react";
 import {Callback} from "polar-shared/src/util/Functions";
 import {GlobalHotKeys} from "react-hotkeys";
+import {deepMemo} from "../../react/ReactUtils";
 
 const globalKeyMap = {
     ESCAPE: ['Escape'],
@@ -16,7 +17,7 @@ interface IProps {
  * root and a custom event listener so we abort when they type in an <input>
  * @param props @constructor
  */
-export const InputEscapeListener = (props: IProps) => {
+export const InputEscapeListener = deepMemo((props: IProps) => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
 
@@ -40,4 +41,4 @@ export const InputEscapeListener = (props: IProps) => {
         </div>
     );
 
-};
+});

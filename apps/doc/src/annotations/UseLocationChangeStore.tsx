@@ -4,7 +4,6 @@ import {
     createObservableStore,
     SetStore
 } from "../../../../web/js/react/store/ObservableStore";
-import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {IScrollTarget} from "./ScrollIntoViewUsingLocation";
 
 export type InitialScrollLoader = (scrollTarget: IScrollTarget, ref: HTMLElement | null) => void;
@@ -18,7 +17,7 @@ interface IUseLocationChangeCallbacks {
 }
 
 const initialStore: IUseLocationChangeStore = {
-    initialScrollLoader: NULL_FUNCTION
+    initialScrollLoader: () => console.warn("Using null initialScrollLoader")
 };
 
 interface Mutator {

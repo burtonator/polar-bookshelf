@@ -3,14 +3,16 @@ import {AccountUpgrades, AccountUsage} from "../../accounts/AccountUpgrades";
 import {UpgradeRequired} from "./UpgradeRequired";
 import {Arrays} from "polar-shared/src/util/Arrays";
 import {Link} from "react-router-dom";
-import {accounts} from "polar-accounts/src/accounts";
+import {Billing} from 'polar-accounts/src/Billing';
 import {Analytics} from "../../analytics/Analytics";
 import Button from "@material-ui/core/Button";
+import {deepMemo} from "../../react/ReactUtils";
+import {useAccountUpgrader} from "./AccountUpgrader";
 
 const MESSAGE = createRandomizedUpgradeMessage();
 
 interface UpgradeRequiredProps {
-    readonly planRequired?: accounts.Plan;
+    readonly planRequired?: Billing.Plan;
 }
 
 const GoPremium = (props: UpgradeRequiredProps) => {
@@ -53,47 +55,33 @@ const NullComponent = () => {
     return <div/>;
 };
 
+
+interface IProps {
+    readonly plan?: Billing.Plan;
+    readonly accountUsage?: AccountUsage;
+}
+
 /**
  * Listen to the machine datastore for this user and if their account isn't in
  * line with the machine data store then we have to force them to upgrade.
  */
-export class AccountUpgradeBarView extends React.Component<IProps, IState> {
+export const AccountUpgradeBarView = deepMemo((props: IProps) => {
 
-    constructor(props: IProps, context: any) {
-        super(props, context);
+    const {plan} = props;
+
+    const accountUpgrade = useAccountUpgrader();
+
+    if (accountUpgrade?.required) {
+        return <UpgradeRequired planRequired={accountUpgrade.toPlan}/>;
     }
 
-    public render() {
-
-        const {plan, accountUsage} = this.props;
-
-        if (plan && accountUsage) {
-
-            const planRequiredForUpgrade = AccountUpgrades.upgradeRequired(plan, accountUsage);
-
-            if (planRequiredForUpgrade) {
-                return <UpgradeRequired planRequired={planRequiredForUpgrade}/>;
-            }
-
-        }
-
-        if (! plan || plan === 'free') {
-            return <GoPremium/>;
-        } else {
-            return <NullComponent/>;
-        }
-
+    if (! plan || plan === 'free') {
+        return <GoPremium/>;
+    } else {
+        return <NullComponent/>;
     }
 
-}
-
-interface IProps {
-    readonly plan?: accounts.Plan;
-    readonly accountUsage?: AccountUsage;
-}
-
-interface IState {
-}
+});
 
 function  createRandomizedUpgradeMessage() {
 

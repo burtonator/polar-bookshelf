@@ -43,8 +43,6 @@ export namespace ReadingProgressResume {
 
         }
 
-        console.log("FIXME: active: ", active);
-
         return [active, handler];
 
     }

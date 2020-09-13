@@ -1,15 +1,15 @@
 /* eslint react/no-multi-comp: 0, react/prop-types: 0 */
 import React from 'react';
-import {AccountPlans} from "../../accounts/Account";
-import {accounts} from 'polar-accounts/src/accounts';
 import {Analytics} from "../../analytics/Analytics";
 import {useUserInfoContext} from "../../apps/repository/auth_handler/UserInfoProvider";
 import {UpgradeButton} from './UpgradeButton';
+import {Plans} from "polar-accounts/src/Plans";
+import {Billing} from 'polar-accounts/src/Billing';
 
 export type UISize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface IProps {
-    readonly required: accounts.Plan;
+    readonly required: Billing.Plan;
     readonly feature: string;
     readonly size: UISize;
     readonly children: React.ReactElement;
@@ -72,7 +72,7 @@ export const PremiumFeature = (props: IProps) => {
             return false;
         }
 
-        return AccountPlans.hasLevel(required, userInfoContext?.userInfo?.subscription.plan);
+        return Plans.hasLevel(required, userInfoContext?.userInfo?.subscription.plan);
 
     };
 
