@@ -12,7 +12,6 @@ import {MUIDialogController} from "./dialogs/MUIDialogController";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { BrowserTabsStoreProvider } from "../chrome_tabs/BrowserTabsStore";
-import {createMuiTheme, MuiThemeProvider} from "@material-ui/core/styles";
 import {KeyboardShortcuts} from "../keyboard_shortcuts/KeyboardShortcuts";
 
 interface IProps {
