@@ -8,7 +8,7 @@ import {RepoDocMetaLoader} from '../../../../apps/repository/js/RepoDocMetaLoade
 import WhatsNewScreen
     from '../../../../apps/repository/js/whats_new/WhatsNewScreen';
 import {StatsScreen} from '../../../../apps/repository/js/stats/StatsScreen';
-import {PremiumScreen} from '../../../../apps/repository/js/premium/PremiumScreen';
+import {PremiumScreen} from '../../../../apps/repository/js/splash/splashes/premium/PremiumScreen';
 import {SupportScreen} from '../../../../apps/repository/js/support/SupportScreen';
 import {AuthRequired} from "../../../../apps/repository/js/AuthRequired";
 import {
@@ -60,7 +60,6 @@ import {usePrefs} from "../../../../apps/repository/js/persistence_layer/PrefsHo
 import {PersistentPrefs} from "../../util/prefs/Prefs";
 import {SubscriptionValue} from "../../ui/data_loader/UseSnapshotSubscriber";
 import {deepMemo} from "../../react/ReactUtils";
-import { PHZMigrationScreen } from './migrations/PHZMigrationScreen';
 
 interface IProps {
     readonly app: App;
@@ -307,7 +306,7 @@ export const RepositoryApp = (props: IProps) => {
 
     const premiumScreenYear = () => {
         return (
-            <PremiumScreen/>
+            <PremiumScreen interval='year'/>
         );
     };
 
@@ -374,17 +373,15 @@ export const RepositoryApp = (props: IProps) => {
                                                 <LoginScreen/>
                                             </Route>
 
+
+                                            {/*<Route exact path={["/doc", "/doc/:id"]}>*/}
+                                            {/*    <RenderDocViewerScreen/>*/}
+                                            {/*</Route>*/}
+
                                             <Route exact path="/error">
                                                 <ErrorScreen/>
                                             </Route>
 
-<<<<<<< HEAD
-=======
-                                            <Route exact path="/migration/phz">
-                                                <PHZMigrationScreen/>
-                                            </Route>
-
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
                                             <Route>
                                                 <RepoHeader3/>
 

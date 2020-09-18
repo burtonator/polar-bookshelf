@@ -50,8 +50,7 @@ async function redirectToDocumentViewer(persistenceLayer: PersistenceLayer,
         fingerprint,
         title: docMeta.docInfo.title || 'Untitled',
         backendFileRef,
-        newWindow: false,
-        url: undefined
+        newWindow: false
     };
 
     const docLoadRequest = docLoader.create(loadDocRequest);

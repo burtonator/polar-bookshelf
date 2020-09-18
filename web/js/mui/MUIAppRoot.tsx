@@ -10,8 +10,8 @@ import {ActiveHotKeyBindings} from "../hotkeys/ActiveHotKeyBindings";
 import {UserInfoProvider} from "../apps/repository/auth_handler/UserInfoProvider";
 import {MUIDialogController} from "./dialogs/MUIDialogController";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { BrowserTabsStoreProvider } from "../chrome_tabs/BrowserTabsStore";
-import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import {KeyboardShortcuts} from "../keyboard_shortcuts/KeyboardShortcuts";
 
 interface IProps {
@@ -23,8 +23,8 @@ export const MUIAppRoot = (props: IProps) => {
     const usePersistedTheme = createPersistedState('theme');
     const [theme, setTheme] = usePersistedTheme<ThemeType>("dark");
 
-    // TODO play responsiveFontSizes in MUI...
-    const muiTheme = React.useMemo(() => createMuiTheme({
+    // TODO play responsiveFontSizes ...
+    const muiTheme = createMuiTheme({
         typography: {
             htmlFontSize: 12,
             fontSize: 12
@@ -36,12 +36,12 @@ export const MUIAppRoot = (props: IProps) => {
                 main: 'rgb(103, 84, 214)'
             }
         }
-    }), [theme]);
+    });
 
     return (
         <>
             <KeyboardShortcuts/>
-            <ThemeProvider theme={muiTheme}>
+            <MuiThemeProvider theme={muiTheme}>
                 <BrowserTabsStoreProvider>
                 <MUIThemeTypeContext.Provider value={{theme, setTheme}}>
                     <>
@@ -56,7 +56,7 @@ export const MUIAppRoot = (props: IProps) => {
                     </>
                 </MUIThemeTypeContext.Provider>
                 </BrowserTabsStoreProvider>
-            </ThemeProvider>
+            </MuiThemeProvider>
         </>
     );
 

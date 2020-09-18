@@ -31,8 +31,6 @@ export const DocRepoTableToolbar = React.memo(() => {
     };
 
     const handleCheckbox = (checked: boolean) => {
-        // TODO: this is wrong... the '-' button should remove the checks...
-        // just like gmail.
         if (checked) {
             setSelected('all')
         } else {

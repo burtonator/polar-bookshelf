@@ -30,11 +30,7 @@ export namespace AccountActions {
 
     }
 
-<<<<<<< HEAD
     export async function changePlan(plan: Billing.Plan, interval: Billing.Interval) {
-=======
-    export async function changePlan(plan: Billing.V2PlanLevel, interval: Billing.Interval) {
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
         const url = `https://us-central1-polar-cors.cloudfunctions.net/StripeChangePlan/`;
         const accountData = await createAccountData();
         const data = {plan, interval, ...accountData};

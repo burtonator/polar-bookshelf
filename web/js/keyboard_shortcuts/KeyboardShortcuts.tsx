@@ -65,30 +65,6 @@ function createPredicate2(keys: ReadonlyArray<string>): KeyboardEventHandlerPred
 
 }
 
-<<<<<<< HEAD
-=======
-function isIgnorableKeyboardEvent(event: KeyboardEvent): boolean {
-
-    // By default, all key events that originate from <input>, <select> or
-    // <textarea>, or have a isContentEditable attribute of true
-
-    if (event.target instanceof HTMLElement) {
-
-        if(['input', 'select', 'textarea'].includes(event.target.tagName.toLowerCase())) {
-            return true;
-        }
-
-        if (event.target.getAttribute('isContentEditable') === 'true') {
-            return true;
-        }
-
-    }
-
-    return false;
-
-}
-
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
 function createPredicate1(keys: ReadonlyArray<string>): KeyboardEventHandlerPredicate {
 
     return (event): boolean => {
@@ -164,13 +140,6 @@ export const KeyboardShortcuts = deepMemo(() => {
 
     const handleKeyDown = React.useCallback((event: KeyboardEvent) => {
 
-<<<<<<< HEAD
-=======
-        if (isIgnorableKeyboardEvent(event)) {
-            return;
-        }
-
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
         if (! activeRef.current) {
             // key bindings are deactivated.
             return;

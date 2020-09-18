@@ -67,6 +67,26 @@ export class Flashcards {
 
     }
 
+    /**
+     * Create a flashcard from the raw, completed, schema form data.
+     */
+    public static createFromSchemaFormData(formData: {[key: string]: string }, archetype: string, ref: Ref) {
+
+        // TODO: the markdown needs to be converted to HTML as well.  The text
+        // we get from the markdown widget is markdown. Not HTML and I confirmed
+        // this is the case.
+
+        const fields: {[key: string]: Text } = {};
+
+        // now work with the formData to create the fields.
+        Dicts.ownKeys(formData, (key, value) => {
+            fields[key] = Texts.create(value, TextType.HTML);
+        });
+
+        return Flashcards.create(FlashcardType.BASIC_FRONT_BACK, fields, archetype, ref);
+
+    }
+
     public static convertFieldsToMap(fields: {[key: string]: Text } = {}) {
 
         const result: {[name: string]: HTMLString} = {};

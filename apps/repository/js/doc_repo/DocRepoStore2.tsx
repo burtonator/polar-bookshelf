@@ -46,10 +46,6 @@ import BatchMutatorOpts = BatchMutators.BatchMutatorOpts;
 import {IAsyncTransaction} from "polar-shared/src/util/IAsyncTransaction";
 import {useRefWithUpdates} from "../../../../web/js/hooks/ReactHooks";
 import { TagFilters } from "polar-shared/src/tags/TagFilters";
-<<<<<<< HEAD
-=======
-import {LoadDocRequest} from "../../../../web/js/apps/main/doc_loaders/LoadDocRequest";
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
 
 interface IDocRepoStore {
 
@@ -530,10 +526,9 @@ function createCallbacks(storeProvider: Provider<IDocRepoStore>,
         const docInfo = repoDocInfo.docInfo;
         const backendFileRef = BackendFileRefs.toBackendFileRef(Either.ofRight(docInfo))!;
 
-        const docLoadRequest: LoadDocRequest = {
+        const docLoadRequest = {
             fingerprint,
             title: repoDocInfo.title,
-            url: repoDocInfo.url,
             backendFileRef,
             newWindow: true
         }

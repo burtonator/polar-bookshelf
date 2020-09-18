@@ -78,6 +78,36 @@ describe('Flashcards', function() {
 
     });
 
+    describe('createFromSchemaFormData', function() {
+
+        it("basic", function() {
+
+            const flashcard = Flashcards.createFromSchemaFormData(FORM_DATA, archetype, 'page:1');
+
+            const expected = {
+                "id": "18HUWUqgtV",
+                "guid": "18HUWUqgtV",
+                "created": "2012-03-02T11:38:49.321Z",
+                "lastUpdated": "2012-03-02T11:38:49.321Z",
+                "type": "BASIC_FRONT_BACK",
+                "fields": {
+                    "back": {
+                        "HTML": "This is the back"
+                    },
+                    "front": {
+                        "HTML": "This is the front"
+                    }
+                },
+                "archetype": "9d146db1-7c31-4bcf-866b-7b485c4e50ea",
+                "ref": "page:1"
+            };
+
+            assertJSON(flashcard, expected);
+
+        });
+
+    });
+
 });
 
 const FORM_DATA: {[path: string]: string } = {

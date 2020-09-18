@@ -11,7 +11,6 @@ import {
 import {FlashcardStyles} from './FlashcardStyles';
 import {Flashcard} from '../../../../metadata/Flashcard';
 
-// TODO: to functional component.
 export class FlashcardInputForFrontAndBack extends React.Component<IProps, IState> {
 
     private readonly flashcardType: FlashcardType = FlashcardType.BASIC_FRONT_BACK;

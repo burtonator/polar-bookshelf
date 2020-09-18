@@ -5,8 +5,6 @@ import {IDocLoader, IDocLoadRequest} from '../IDocLoader';
 import {ViewerURLs} from "../ViewerURLs";
 import {DocURLLoader, useDocURLLoader} from './DocURLLoader';
 import {usePersistenceLayerContext} from "../../../../../../apps/repository/js/persistence_layer/PersistenceLayerApp";
-import {useDocMigration} from "../DocMigration";
-import React from 'react';
 
 export class BrowserDocLoader implements IDocLoader {
 
@@ -41,15 +39,10 @@ export function useBrowserDocLoader() {
 
     const {persistenceLayerProvider} = usePersistenceLayerContext()
     const docURLLoader = useDocURLLoader();
-    const docMigration = useDocMigration();
 
-    return React.useCallback((loadDocRequest) => {
-
-        if (! docMigration(loadDocRequest)) {
-            const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
-            docURLLoader(viewerURL);
-        }
-
-    }, [docMigration, docURLLoader]);
+    return (loadDocRequest: LoadDocRequest) => {
+        const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
+        docURLLoader(viewerURL);
+    }
 
 }

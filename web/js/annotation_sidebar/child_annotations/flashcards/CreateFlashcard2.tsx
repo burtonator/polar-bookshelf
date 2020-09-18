@@ -12,17 +12,18 @@ import {FlashcardInputFieldsType} from "./flashcard_input/FlashcardInputs";
 import {FlashcardType} from "polar-shared/src/metadata/FlashcardType";
 import {IDocAnnotationRef} from "../../DocAnnotation";
 import {Refs} from "polar-shared/src/metadata/Refs";
-import {deepMemo} from "../../../react/ReactUtils";
 
 interface IProps {
 
     readonly id?: string;
 
+    readonly defaultValue?: string;
+
     readonly parent: IDocAnnotationRef;
 
 }
 
-export const CreateFlashcard2 = deepMemo((props: IProps) => {
+export const CreateFlashcard2 = (props: IProps) => {
 
     const annotationInputContext = useAnnotationActiveInputContext();
     const annotationMutations = useAnnotationMutationsContext();
@@ -48,8 +49,6 @@ export const CreateFlashcard2 = deepMemo((props: IProps) => {
         return null;
     }
 
-    const defaultValue = props.parent.text;
-
     const cancelButton = <CancelButton onClick={annotationInputContext.reset}/>;
 
     return (
@@ -57,12 +56,12 @@ export const CreateFlashcard2 = deepMemo((props: IProps) => {
         <ScrollIntoView>
             <FlashcardInput id={'edit-flashcard-for' + props.id}
                             onFlashcard={onFlashcard}
-                            defaultValue={defaultValue}
+                            defaultValue={props.defaultValue}
                             cancelButton={cancelButton}/>
         </ScrollIntoView>
 
     );
 
-});
+};
 
 

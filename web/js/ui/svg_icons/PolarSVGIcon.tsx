@@ -8,7 +8,6 @@ interface IProps {
     readonly height: number;
 }
 
-// TODO: if we embed how do we specify the width and height
 export const PolarSVGIcon = React.memo((props: IProps) => (
     <img src={RESOURCE}
          width={props.width}

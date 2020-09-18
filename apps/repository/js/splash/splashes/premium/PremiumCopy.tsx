@@ -1,33 +1,27 @@
-import {UserInfo} from "../../../../web/js/apps/repository/auth_handler/AuthHandler";
+import {UserInfo} from "../../../../../../web/js/apps/repository/auth_handler/AuthHandler";
 import {
-    CancelSubscriptionButton,
+    BronzePlan, CancelSubscriptionButton,
+    FindPlan,
     FreePlan,
+    GoldPlan,
     PlanInterval,
-    PlusPlan,
+    PlanIntervalButton,
     PricingOverview,
-    ProPlan,
-} from "./PremiumContent";
+    SilverPlan
+} from "./PremiumContent2";
 import {PremiumButton} from "./PremiumButton";
 import React from "react";
-<<<<<<< HEAD:apps/repository/js/splash/splashes/premium/PremiumCopy.tsx
 import {NullCollapse} from "../../../../../../web/js/ui/null_collapse/NullCollapse";
 import {Billing} from "polar-accounts/src/Billing";
 import Paper from "@material-ui/core/Paper";
-=======
-import {Billing} from "polar-accounts/src/Billing";
-import {useUserSubscriptionContext} from "../../../../web/js/apps/repository/auth_handler/UserInfoProvider";
-import {CancelPlan} from "./CancelPlan";
-import {PlanIntervalButton} from "./PlanIntervalButton";
-import { FindPlan } from "./FindPlan";
->>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5:apps/repository/js/premium/PremiumCopy.tsx
 
-export const MobileContent = () => {
-
-    return <div id="pricing" className="mt-1 pb-1">
+export const MobileContent = (props: IProps) => {
+    return <div id="pricing" className="mt-1 mb-1">
         <FindPlan/>
 
         <div className="mb-1">
-            <PlanIntervalButton/>
+            <PlanIntervalButton interval={props.interval}
+                                togglePlanInterval={() => props.togglePlanInterval()}/>
         </div>
 
         <div>
@@ -53,7 +47,29 @@ export const MobileContent = () => {
 
             <hr/>
 
-            <PlusPlan/>
+            <BronzePlan {...props}/>
+
+            <p className="font-weight-bold">
+                Adds the following features:
+            </p>
+
+            <div className="ml-3 mt-1 mb-2">
+                <div><i className="fa fa-check"/> Flashcard review on mobile, desktop, and web. </div>
+                <div><i className="fa fa-check"/> Suggestions for related tags</div>
+                <div><i className="fa fa-check"/> Reading statistics</div>
+                <div><i className="fa fa-check"/> Three (3) cloud sync devices </div>
+                <div><i className="fa fa-check"/> Up to 2GB of storage </div>
+            </div>
+
+            <PremiumButton from={props.plan} to="bronze" userInfo={props.userInfo} interval={props.interval}/>
+
+        </div>
+
+        <div className="mt-3">
+
+            <hr/>
+
+            <SilverPlan {...props}/>
 
             <p className="font-weight-bold">
                 Adds the following features:
@@ -64,14 +80,14 @@ export const MobileContent = () => {
                 <div><i className="fa fa-check"/> Up to 5GB of storage </div>
             </div>
 
-            <PremiumButton newPlan="plus" />
+            <PremiumButton from={props.plan} to="silver" userInfo={props.userInfo} interval={props.interval}/>
 
         </div>
 
         <div className="mt-3">
             <hr/>
 
-            <ProPlan/>
+            <GoldPlan {...props}/>
 
             <p className="font-weight-bold">
                 Adds the following features:
@@ -82,28 +98,34 @@ export const MobileContent = () => {
                 <div><i className="fa fa-check"/> Up to 12GB of storage </div>
             </div>
 
-            <PremiumButton newPlan="pro" />
+            <PremiumButton from={props.plan} to="gold" userInfo={props.userInfo} interval={props.interval}/>
 
         </div>
 
         <div className="ml-auto">
-            <CancelPlan/>
+
+            <NullCollapse open={props.plan !== 'free'}>
+                <hr/>
+                <p>
+                    ... and of course in the ultra-rare case that Polar didn't work out you can always cancel at any time.
+                </p>
+
+                <CancelSubscriptionButton {...props}/>
+            </NullCollapse>
         </div>
 
     </div>;
 };
 
-export const DesktopContent =  () => {
-
-    const {plan} = useUserSubscriptionContext();
-
+export const DesktopContent =  (props: IProps) => {
     return (
-        <div className={"plan-" + plan} >
+        <Paper className={"plan-" + props.plan}>
 
-            <div id="pricing" className="hidden-xs m-2">
+            <Paper id="pricing" className="hidden-xs">
 
                 <PricingOverview/>
 
+                <Paper>
                     <table className="table">
                         <thead>
                         <tr>
@@ -111,7 +133,10 @@ export const DesktopContent =  () => {
                                 <FindPlan/>
 
                                 <p className="text-center">
-                                    <PlanIntervalButton />
+
+                                    <PlanIntervalButton interval={props.interval}
+                                                        togglePlanInterval={() => props.togglePlanInterval()}/>
+
                                 </p>
 
                             </th>
@@ -119,10 +144,13 @@ export const DesktopContent =  () => {
                                 <FreePlan/>
                             </th>
                             <th className="">
-                                <PlusPlan />
+                                <BronzePlan {...props}/>
                             </th>
                             <th className="">
-                                <ProPlan />
+                                <SilverPlan {...props}/>
+                            </th>
+                            <th className="">
+                                <GoldPlan {...props}/>
                             </th>
                         </tr>
                         </thead>
@@ -133,11 +161,14 @@ export const DesktopContent =  () => {
                             </td>
                             <td>
                             </td>
+                            <td className="">
+                                <PremiumButton from={props.plan} to="bronze" userInfo={props.userInfo} interval={props.interval}/>
+                            </td>
                             <td>
-                                <PremiumButton newPlan="plus" />
+                                <PremiumButton from={props.plan} to="silver" userInfo={props.userInfo} interval={props.interval}/>
                             </td>
                             <td className="">
-                                <PremiumButton newPlan="pro" />
+                                <PremiumButton from={props.plan} to="gold" userInfo={props.userInfo} interval={props.interval}/>
                             </td>
                         </tr>
 
@@ -146,6 +177,9 @@ export const DesktopContent =  () => {
                                 Automatic Updates
                             </td>
 
+                            <td className="">
+                                <i className="fa fa-check"/>
+                            </td>
                             <td className="">
                                 <i className="fa fa-check"/>
                             </td>
@@ -171,6 +205,9 @@ export const DesktopContent =  () => {
                             <td className="">
                                 <i className="fa fa-check"/>
                             </td>
+                            <td className="">
+                                <i className="fa fa-check"/>
+                            </td>
                         </tr>
 
                         <tr>
@@ -180,6 +217,9 @@ export const DesktopContent =  () => {
 
                             <td className="text-danger">
                                 desktop only
+                            </td>
+                            <td>
+                                mobile, web, and desktop
                             </td>
                             <td>
                                 mobile, web, and desktop
@@ -202,6 +242,9 @@ export const DesktopContent =  () => {
                             <td>
                                 3
                             </td>
+                            <td>
+                                4
+                            </td>
                         </tr>
 
                         <tr>
@@ -218,6 +261,9 @@ export const DesktopContent =  () => {
                             <td className="">
                                 4
                             </td>
+                            <td className="">
+                                unlimited
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -232,6 +278,9 @@ export const DesktopContent =  () => {
                             </td>
                             <td className="">
                                 Up to 5GB
+                            </td>
+                            <td className="">
+                                Up to 12GB
                             </td>
                         </tr>
                         <tr>
@@ -248,6 +297,9 @@ export const DesktopContent =  () => {
                             <td className="">
                                 Up to 1500
                             </td>
+                            <td className="">
+                                unlimited
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -262,6 +314,9 @@ export const DesktopContent =  () => {
                             <td className="">
                                 <i className="fa fa-check"/>
                             </td>
+                            <td className="">
+                                <i className="fa fa-check"/>
+                            </td>
                         </tr>
                         <tr>
                             <td>
@@ -269,6 +324,9 @@ export const DesktopContent =  () => {
                             </td>
 
                             <td className="">
+                            </td>
+                            <td className="">
+                                <i className="fa fa-check"/>
                             </td>
                             <td className="">
                                 <i className="fa fa-check"/>
@@ -291,23 +349,28 @@ export const DesktopContent =  () => {
                             <td className="">
                                 <i className="fa fa-check"/>
                             </td>
+                            <td className="">
+                                <i className="fa fa-check"/>
+                            </td>
                         </tr>
 
                         </tbody>
                     </table>
 
-                <div className="m-2"
+                </Paper>
+
+                <div className="mt-2"
                      style={{display: 'flex'}}>
 
                     <div className="ml-auto">
-                        <CancelSubscriptionButton/>
+                        <CancelSubscriptionButton {...props}/>
                     </div>
 
                 </div>
 
-            </div>
+            </Paper>
 
-        </div>
+        </Paper>
     );
 
 };
