@@ -105,6 +105,7 @@ export const RepositoryApp = (props: IProps) => {
 
     Preconditions.assertPresent(app, 'app');
 
+    // State that indicates if tabbed browsing is enabled
     const [tabbed, setTabbed] = React.useState(undefined as undefined | boolean);
 
     // Get tabStore
@@ -118,6 +119,10 @@ export const RepositoryApp = (props: IProps) => {
       onGet: (tabbed: string) => void;
     }
 
+    // Component to retrieve if tabbed browsing is enabled
+    // Callback onGet is used to set the state of tabbed browsing
+    // This component is necessary because getDocViewers() is a function that is not a component since it returns an array
+    // Furthermore, getDocViewers() cannot be a component because it is placed inside a react-router <Switch> which will match it even if it renders nothing
     const GetTabbed = (props: GetTabbedProps) => {
       const tabbedRef = React.useRef("");
       React.useEffect(() => props.onGet(tabbedRef.current), []);
@@ -142,6 +147,7 @@ export const RepositoryApp = (props: IProps) => {
       setTabbed(tabbed === "true");
     }
 
+    // Function that returns an array of doc viewers that can be rendered
     const getDocViewers = React.useCallback(() => {
       if (tabbed === false) {
         return [(

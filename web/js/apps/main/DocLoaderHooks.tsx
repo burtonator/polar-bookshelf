@@ -63,8 +63,6 @@ function useDocLoaderElectron() {
 
 }
 
-// Tabs were implemented in a browser environment, should probably be under electron
-// Simply uncomment useBrowserDocLoader() and move to useDocLoaderElectron()
 function useDocLoaderDefault() {
     const {persistenceLayerProvider} = usePersistenceLayerContext();
     const {addTab} = useBrowserTabsCallbacks();
@@ -84,6 +82,8 @@ function useDocLoaderDefault() {
 
     }, []);
 
+    // usePrefs to get if tabbed browsing is enabled
+    // Use this to determine which doc loader to use
     const prefs = usePrefs();
 
     const browserDocLoader = useBrowserDocLoader();
