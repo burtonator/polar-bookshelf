@@ -14,6 +14,7 @@ import {Either} from "../../../util/Either";
 import LaunchIcon from '@material-ui/icons/Launch';
 import {Strings} from "polar-shared/src/util/Strings";
 import {AddContentButtons} from "../../../../../apps/repository/js/ui/AddContentButtons";
+import {LoadDocRequest} from "../../main/doc_loaders/LoadDocRequest";
 
 export namespace AddFileHooks {
 
@@ -108,9 +109,10 @@ export namespace AddFileHooks {
 
                     const backendFileRef = BackendFileRefs.toBackendFileRef(Either.ofRight(docInfo))!;
 
-                    const docLoadRequest = {
+                    const docLoadRequest: LoadDocRequest = {
                         fingerprint: docInfo.fingerprint,
                         title,
+                        url: docInfo.url,
                         backendFileRef,
                         newWindow: true
                     };

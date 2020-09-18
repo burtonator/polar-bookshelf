@@ -11,6 +11,7 @@ import {useSnapshotSubscriber} from "../../../web/js/ui/data_loader/UseSnapshotS
 import {WebExtensionPresenceClient} from "polar-web-extension-api/src/WebExtensionPresenceClient";
 import {useComponentDidMount} from "../../../web/js/hooks/ReactLifecycleHooks";
 import {isPresent} from "polar-shared/src/Preconditions";
+import {ChromeStoreURLs} from "polar-web-extension-api/src/ChromeStoreURLs";
 
 export function useWebExtensionInstalled() {
 
@@ -67,21 +68,11 @@ export const ChromeExtensionInstallButton = deepMemo(() => {
 
     function onClick(): void {
         Analytics.event({category: 'chrome-extension', action: 'manual-installation-triggered'});
-
-        function computeURL() {
-
-            if (document.location.href!.startsWith('https://beta.getpolarized.io')) {
-                return 'https://chrome.google.com/webstore/detail/save-to-polar-beta/mklidoahhflhlpcpigokeckcipaibopd?hl=en';
-            }
-
-            return "https://chrome.google.com/webstore/detail/polar-pdf-web-and-documen/jkfdkjomocoaljglgddnmhcbolldcafd";
-
-        }
-
-        linkLoader(computeURL(), {newWindow: true, focus: true});
+        const chromeStoreURL = ChromeStoreURLs.create();
+        linkLoader(chromeStoreURL, {newWindow: true, focus: true});
     }
 
-    if (webExtensionInstalled) {
+    if (webExtensionInstalled === true) {
         // it's installed so we're good to go
         return null;
     }

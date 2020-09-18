@@ -57,6 +57,16 @@ export interface ConfirmDialogProps {
     readonly autoFocus?: boolean;
 
     /**
+     * The text to use for the cancel button.
+     */
+    readonly cancelText?: string;
+
+    /**
+     * The text to use for the accept button.
+     */
+    readonly acceptText?: string;
+
+    /**
      * When true, do not show the cancel button.
      */
     readonly noCancel?: boolean
@@ -129,7 +139,7 @@ export const ConfirmDialog = React.memo((props: ConfirmDialogProps) => {
                             <Button className={classes.cancelButton}
                                     onClick={handleCancel}
                                     size="large">
-                                Cancel
+                                {props.cancelText || 'Cancel'}
                             </Button>}
 
                             <Button className={palette}
@@ -137,7 +147,7 @@ export const ConfirmDialog = React.memo((props: ConfirmDialogProps) => {
                                     size="large"
                                     variant="contained"
                                     autoFocus={props.autoFocus}>
-                                Accept
+                                {props.acceptText || 'Accept'}
                             </Button>
 
                         </DialogActions>

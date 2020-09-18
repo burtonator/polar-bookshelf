@@ -2,12 +2,11 @@ import {remote} from 'electron';
 import {RemoteDatastore} from './RemoteDatastore';
 import {DiskDatastore} from './DiskDatastore';
 
-export class RemoteDatastores {
+export namespace RemoteDatastores {
 
-    public static create() {
-
+    export function create() {
         const datastore: DiskDatastore = remote.getGlobal("datastore" );
         return new RemoteDatastore(datastore);
-
     }
+
 }

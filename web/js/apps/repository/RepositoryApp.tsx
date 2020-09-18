@@ -8,7 +8,7 @@ import {RepoDocMetaLoader} from '../../../../apps/repository/js/RepoDocMetaLoade
 import WhatsNewScreen
     from '../../../../apps/repository/js/whats_new/WhatsNewScreen';
 import {StatsScreen} from '../../../../apps/repository/js/stats/StatsScreen';
-import {PremiumScreen} from '../../../../apps/repository/js/splash/splashes/premium/PremiumScreen';
+import {PremiumScreen} from '../../../../apps/repository/js/premium/PremiumScreen';
 import {SupportScreen} from '../../../../apps/repository/js/support/SupportScreen';
 import {AuthRequired} from "../../../../apps/repository/js/AuthRequired";
 import {
@@ -60,6 +60,7 @@ import {usePrefs} from "../../../../apps/repository/js/persistence_layer/PrefsHo
 import {PersistentPrefs} from "../../util/prefs/Prefs";
 import {SubscriptionValue} from "../../ui/data_loader/UseSnapshotSubscriber";
 import {deepMemo} from "../../react/ReactUtils";
+import { PHZMigrationScreen } from './migrations/PHZMigrationScreen';
 
 interface IProps {
     readonly app: App;
@@ -179,23 +180,23 @@ export const RepositoryApp = (props: IProps) => {
     const docViewers = getDocViewers();
 
     const RenderDocRepoScreen = React.memo(() => (
-        <AuthRequired>
-            <PersistenceLayerApp tagsType="documents"
-                                 repoDocMetaManager={repoDocMetaManager}
-                                 repoDocMetaLoader={repoDocMetaLoader}
-                                 persistenceLayerManager={persistenceLayerManager}
-                                 render={(docRepo) =>
-                                     <DocRepoStore2>
-                                         <DocRepoSidebarTagStore>
-                                             <>
-                                                 <AnkiSyncController/>
-                                                 <DocRepoScreen2/>
-                                             </>
-                                         </DocRepoSidebarTagStore>
-                                     </DocRepoStore2>
-                                 }/>
-        </AuthRequired>
-    ));
+            <AuthRequired>
+                <PersistenceLayerApp tagsType="documents"
+                                     repoDocMetaManager={repoDocMetaManager}
+                                     repoDocMetaLoader={repoDocMetaLoader}
+                                     persistenceLayerManager={persistenceLayerManager}
+                                     render={(docRepo) =>
+                                         <DocRepoStore2>
+                                             <DocRepoSidebarTagStore>
+                                                 <>
+                                                     <AnkiSyncController/>
+                                                     <DocRepoScreen2/>
+                                                 </>
+                                             </DocRepoSidebarTagStore>
+                                         </DocRepoStore2>
+                                     }/>
+            </AuthRequired>
+        ));
 
     const RenderAnnotationRepoScreen = React.memo(() => {
         return (
@@ -306,7 +307,7 @@ export const RepositoryApp = (props: IProps) => {
 
     const premiumScreenYear = () => {
         return (
-            <PremiumScreen interval='year'/>
+            <PremiumScreen/>
         );
     };
 
@@ -341,6 +342,7 @@ export const RepositoryApp = (props: IProps) => {
     const renderInvite = () => {
         return <InviteScreen/>;
     };
+
 
     return (
         <MUIRepositoryRoot>
@@ -380,6 +382,10 @@ export const RepositoryApp = (props: IProps) => {
 
                                             <Route exact path="/error">
                                                 <ErrorScreen/>
+                                            </Route>
+
+                                            <Route exact path="/migration/phz">
+                                                <PHZMigrationScreen/>
                                             </Route>
 
                                             <Route>
@@ -444,9 +450,10 @@ export const RepositoryApp = (props: IProps) => {
                                         </Switch>
                                     </MUIDialogController>
                                 </UseLocationChangeRoot>
-                            </BrowserRouter>
+                         </BrowserRouter>
                         </UseLocationChangeStoreProvider>
                     </>
+
                 </div>
             </RepositoryRoot>
         </MUIRepositoryRoot>

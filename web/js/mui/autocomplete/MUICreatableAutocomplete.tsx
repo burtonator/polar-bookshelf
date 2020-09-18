@@ -107,7 +107,7 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
     const [open, setOpen] = useState<boolean>(false);
 
     const openRef = React.useRef(false);
-    const inputValue = React.useRef("");
+    const [inputValue, setInputValue] = React.useState("");
 
     const highlighted = useRef<ValueAutocompleteOption<T> | undefined>(undefined);
 
@@ -274,6 +274,7 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
                 multiple
                 getOptionSelected={isEqual}
                 // freeSolo
+                inputValue={inputValue}
                 onKeyDown={handleKeyDown}
                 value={[...state.values]}
                 // renderInput={props => renderInput(props)}
@@ -287,19 +288,28 @@ export default function MUICreatableAutocomplete<T>(props: MUICreatableAutocompl
                 // solution might have something to do with freeSolo
                 // onOpen={() => setOpen(true)}
                 getOptionLabel={(option) => option.label}
+                clearOnBlur={false}
                 onInputChange={(event, nextInputValue, reason) => {
-                    inputValue.current = nextInputValue;
+
+                    if (reason !== 'reset') {
+                        // console.log(`nextInputValue: '${nextInputValue}' reason=${reason}`);
+                        setInputValue(nextInputValue);
+                    }
+
                 }}
-                onChange={(event, value, reason, details) => handleChange(value)}
+                onChange={(event, value, reason, details) => {
+                    handleChange(value);
+                    setInputValue('');
+                }}
                 filterSelectedOptions
                 filterOptions={(options, params) => {
 
                     const filtered = filter(options, params);
 
-                    if (inputValue.current !== '' && ! hasExistingOption(inputValue.current)) {
+                    if (inputValue !== '' && ! hasExistingOption(inputValue)) {
 
                         const createOption = {
-                            ...props.createOption(inputValue.current),
+                            ...props.createOption(inputValue),
                             // label: `Create: "${params.inputValue}"`
                             // TODO: I think we should prefix this with 'Create'
                             // but that means it has to be localized and whether

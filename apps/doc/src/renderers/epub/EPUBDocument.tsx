@@ -401,7 +401,9 @@ function useEPUBResizer() {
 
         function adjustEpubView(dimensions: IDimensions) {
             const element = docViewer.querySelector(".epub-view") as HTMLElement;
-            setWidth(element, dimensions);
+            if (element){
+                setWidth(element, dimensions);
+            }
         }
 
         function adjustIframe(dimensions: IDimensions) {

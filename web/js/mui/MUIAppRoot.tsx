@@ -4,11 +4,7 @@ import {GlobalCss} from "./css/GlobalCss";
 import * as React from "react";
 import {GlobalCssSummernote} from "./css/GlobalCssSummernote";
 import {GlobalCSSBootstrap} from "./css/GlobalCSSBootstrap";
-import {FirestoreProvider} from "../../../apps/repository/js/FirestoreProvider";
 import {GlobalCssMobile} from "./css/GlobalCssMobile";
-import {ActiveHotKeyBindings} from "../hotkeys/ActiveHotKeyBindings";
-import {UserInfoProvider} from "../apps/repository/auth_handler/UserInfoProvider";
-import {MUIDialogController} from "./dialogs/MUIDialogController";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { BrowserTabsStoreProvider } from "../chrome_tabs/BrowserTabsStore";
@@ -23,8 +19,8 @@ export const MUIAppRoot = (props: IProps) => {
     const usePersistedTheme = createPersistedState('theme');
     const [theme, setTheme] = usePersistedTheme<ThemeType>("dark");
 
-    // TODO play responsiveFontSizes ...
-    const muiTheme = createMuiTheme({
+    // TODO play responsiveFontSizes in MUI...
+    const muiTheme = React.useMemo(() => createMuiTheme({
         typography: {
             htmlFontSize: 12,
             fontSize: 12
@@ -36,12 +32,12 @@ export const MUIAppRoot = (props: IProps) => {
                 main: 'rgb(103, 84, 214)'
             }
         }
-    });
+    }), [theme]);
 
     return (
         <>
             <KeyboardShortcuts/>
-            <MuiThemeProvider theme={muiTheme}>
+            <ThemeProvider theme={muiTheme}>
                 <BrowserTabsStoreProvider>
                 <MUIThemeTypeContext.Provider value={{theme, setTheme}}>
                     <>
@@ -56,7 +52,7 @@ export const MUIAppRoot = (props: IProps) => {
                     </>
                 </MUIThemeTypeContext.Provider>
                 </BrowserTabsStoreProvider>
-            </MuiThemeProvider>
+            </ThemeProvider>
         </>
     );
 
