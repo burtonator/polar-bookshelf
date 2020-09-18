@@ -11,6 +11,7 @@ import {useSnapshotSubscriber} from "../../../web/js/ui/data_loader/UseSnapshotS
 import {WebExtensionPresenceClient} from "polar-web-extension-api/src/WebExtensionPresenceClient";
 import {useComponentDidMount} from "../../../web/js/hooks/ReactLifecycleHooks";
 import {isPresent} from "polar-shared/src/Preconditions";
+import {ChromeStoreURLs} from "polar-web-extension-api/src/ChromeStoreURLs";
 
 export function useWebExtensionInstalled() {
 
@@ -53,6 +54,7 @@ export function useWebExtensionInstalledSnapshots() {
     } else {
         setInstalled(false);
     }
+<<<<<<< HEAD
 
     return installed;
 
@@ -82,6 +84,27 @@ export const ChromeExtensionInstallButton = deepMemo(() => {
     }
 
     if (webExtensionInstalled) {
+=======
+
+    return installed;
+
+}
+
+export const ChromeExtensionInstallButton = deepMemo(() => {
+
+    const isChrome = ['chrome', 'chromium'].includes(Browsers.get()?.id || '');
+    const hidden = AppRuntime.isElectron() || ! Platforms.isDesktop() || ! isChrome;
+    const linkLoader = useNav();
+    const webExtensionInstalled = useWebExtensionInstalled();
+
+    function onClick(): void {
+        Analytics.event({category: 'chrome-extension', action: 'manual-installation-triggered'});
+        const chromeStoreURL = ChromeStoreURLs.create();
+        linkLoader(chromeStoreURL, {newWindow: true, focus: true});
+    }
+
+    if (webExtensionInstalled === true) {
+>>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5
         // it's installed so we're good to go
         return null;
     }

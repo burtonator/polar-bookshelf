@@ -1,32 +1,18 @@
-import {PlanInterval} from "./PremiumContent2";
+import {PlanInterval} from "./PremiumContent";
 import {Billing} from "polar-accounts/src/Billing";
 
 export interface Discount {
     readonly interval: Billing.Interval;
+<<<<<<< HEAD:apps/repository/js/splash/splashes/premium/Discounts.ts
     readonly plan: Billing.Plan;
+=======
+    readonly plan: Billing.V2PlanLevel;
+>>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5:apps/repository/js/premium/Discounts.ts
     readonly before: number;
     readonly after: number;
 }
 
 const XMAS_2019: ReadonlyArray<Discount> = [
-    {
-        interval: 'year',
-        plan: 'bronze',
-        before: 4.99 * 12,
-        after: 19.95
-    },
-    {
-        interval: 'year',
-        plan: 'silver',
-        before: 9.99 * 12,
-        after: 24.95
-    },
-    {
-        interval: 'year',
-        plan: 'gold',
-        before: 14.99 * 12,
-        after: 29.95
-    }
 
 ];
 
@@ -42,12 +28,20 @@ export class Discounts {
 
     }
 
+<<<<<<< HEAD:apps/repository/js/splash/splashes/premium/Discounts.ts
     public get(interval: PlanInterval, plan: Billing.Plan): Discount | undefined {
+=======
+    public get(interval: PlanInterval, plan: Billing.V2PlanLevel): Discount | undefined {
+>>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5:apps/repository/js/premium/Discounts.ts
         const key = Discounts.key(interval, plan);
         return this.delegate[key] || undefined;
     }
 
+<<<<<<< HEAD:apps/repository/js/splash/splashes/premium/Discounts.ts
     private static key(interval: PlanInterval, plan: Billing.Plan) {
+=======
+    private static key(interval: PlanInterval, plan: Billing.V2PlanLevel) {
+>>>>>>> 373f4a844cb6f5f4fb4e0d18c58b58729b9cb9b5:apps/repository/js/premium/Discounts.ts
         return `${interval}:${plan}`;
     }
 

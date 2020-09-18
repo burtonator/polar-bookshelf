@@ -9,6 +9,9 @@ import {
 } from "polar-shared/src/util/Snapshots";
 import {Account} from "../../../accounts/Account";
 import {useSnapshotSubscriber} from "../../../ui/data_loader/UseSnapshotSubscriber";
+import { Billing } from 'polar-accounts/src/Billing';
+import V2PlanFree = Billing.V2PlanFree;
+import {Plans} from "polar-accounts/src/Plans";
 
 interface IUserInfoContext {
 
@@ -26,6 +29,23 @@ const UserInfoContext = React.createContext<IUserInfoContext | undefined>(undefi
 
 export function useUserInfoContext() {
     return React.useContext(UserInfoContext);
+}
+
+export function useUserSubscriptionContext(): Billing.V2Subscription {
+   const userInfoContext = useUserInfoContext();
+   const subscription = userInfoContext?.userInfo?.subscription;
+
+   if (subscription) {
+       return {
+           plan: Plans.toV2(subscription.plan),
+           interval: subscription.interval
+       };
+   } else {
+       return {
+           plan: V2PlanFree,
+           interval: 'month'
+       };
+   }
 }
 
 interface IProps {

@@ -106,6 +106,10 @@ const SVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.
 </svg>
 `;
 
+// TODO:
+//
+// I tried to get this to work with SvgIcon from MUI but it won't work when
+// replacing <svg> with <SvgIcon>.  It just doesn't render at all.
 export const ChromeSVGIcon = () => {
     return <span dangerouslySetInnerHTML={{__html: SVG}} />;
 };

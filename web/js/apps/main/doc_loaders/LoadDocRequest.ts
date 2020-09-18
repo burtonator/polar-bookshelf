@@ -6,6 +6,11 @@ export interface LoadDocRequest {
 
     readonly fingerprint: string;
 
+    /**
+     * The URL for this document.  Used for migration purposes.
+     */
+    readonly url: string | undefined;
+
     readonly backendFileRef: BackendFileRef;
 
     /**

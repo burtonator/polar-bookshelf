@@ -156,6 +156,10 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
         // GetOptions.  This gets us data quickly and then we start listening to
         // snapshots after this which can come from the network async
 
+        // TODO: we should ALSO snapshot the DOC_META table too and try to get
+        // them BOTH at the same time ... this way the performance is much much
+        // better.
+
         const query = this.firestore!
             .collection(DatastoreCollection.DOC_INFO)
             .where('uid', '==', uid);

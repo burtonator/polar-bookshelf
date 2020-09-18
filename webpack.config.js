@@ -302,6 +302,7 @@ module.exports = {
         hot: true,
         watchContentBase: false,
         writeToDisk: true,
+        disableHostCheck: true,
         historyApiFallback: {
             rewrites: [
                 // TODO: load DefaultRewrites here and convert them...

@@ -7,6 +7,7 @@ import {Account} from "../../../accounts/Account";
 import {Accounts} from "../../../accounts/Accounts";
 import {SignInSuccessURLs} from "../../../../../apps/repository/js/login/SignInSuccessURLs";
 
+// TODO: I don't like this so we're going to have to find a solution long term.
 const POLAR_APP_SITES = [
     'http://localhost:8050',
     'http://127.0.0.1:8050',
@@ -17,7 +18,8 @@ const POLAR_APP_SITES = [
     'http://localhost:9500',
     'http://127.0.0.1:9500',
     'https://app.getpolarized.io',
-    'https://beta.getpolarized.io'
+    'https://beta.getpolarized.io',
+    'http://dev.getpolarized.io:8050'
 ];
 
 export interface AuthHandler {
@@ -40,6 +42,7 @@ export interface AuthHandler {
 
 function computeBaseURL() {
 
+    // TODO: this could use origin...
     const base = URLs.toBase(document.location!.href);
 
     if (! POLAR_APP_SITES.includes(base)) {
