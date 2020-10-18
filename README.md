@@ -55,7 +55,7 @@ research which is often stored as PDF.
 
 # [Downloads](https://getpolarized.io/download.html)
 
-Packages for Windows, MacOS, and Linux are available on the [downloads](https://getpolarized.io/download.html) page.
+Packages for Windows, MacOS, and Linux are available on the [downloads](https://getpolarized.io/download) page.
 
 We also have a [CHANGELOG](./docs/CHANGELOG.md) available if you're interested into what went into each release.
 
