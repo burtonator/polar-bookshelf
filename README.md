@@ -53,7 +53,7 @@ research which is often stored as PDF.
 
 - **Portable** Run across any platform. ```Linux```, ```MacOS```, and ```Windows``` supported. 
 
-# [Downloads](https://getpolarized.io/download.html)
+# [Downloads](https://getpolarized.io/download/)
 
 Packages for Windows, MacOS, and Linux are available on the [downloads](https://getpolarized.io/download.html) page.
 
