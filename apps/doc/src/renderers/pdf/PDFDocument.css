@@ -19,3 +19,11 @@
 /*    -moz-box-sizing: content-box;*/
 /*    box-sizing: content-box;*/
 /*}*/
+
+.pdfViewer .textLayer {
+    opacity: 1.0 !important;
+}
+
+.pdfViewer .textLayer ::selection {
+    background-color: rgba(0, 0, 255, 0.2) !important;;
+}

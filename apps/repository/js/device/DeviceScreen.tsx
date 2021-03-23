@@ -21,31 +21,33 @@ const LogsButton = () => {
 
 }
 
-export const DeviceScreen = React.memo(() => (
+export const DeviceScreen = React.memo(function DeviceScreen() {
+    return (
 
-    <DefaultPageLayout>
+        <DefaultPageLayout>
 
-        <div className=" text-lg">
+            <div className=" text-lg">
 
-            <div className="">
-                <h2>Device</h2>
+                <div className="">
+                    <h2>Device</h2>
 
-                <p>
-                    Information about the user's current device.
-                </p>
+                    <p>
+                        Information about the user's current device.
+                    </p>
 
-                <div className="mt-1">
-                    <ExtendedDeviceInfo/>
-                </div>
+                    <div className="mt-1">
+                        <ExtendedDeviceInfo/>
+                    </div>
 
-                <div>
-                    <LogsButton/>
+                    <div>
+                        <LogsButton/>
+                    </div>
+
                 </div>
 
             </div>
 
-        </div>
+        </DefaultPageLayout>
 
-    </DefaultPageLayout>
-
-));
+    );
+});
