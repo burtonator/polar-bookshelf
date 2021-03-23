@@ -21,19 +21,9 @@ export function useJumpToAnnotationHandler() {
     const doJump = React.useCallback((ptr: IAnnotationPtr) => {
 
         if (nonceRef.current !== ptr.n) {
-
-            if (isDocViewerContext) {
                 const url = AnnotationLinks.createRelativeURL(ptr);
                 console.log("Jumping to annotation via history and doc viewer context: " + url);
                 history.push(url);
-            } else {
-                const url = AnnotationLinks.createURL(ptr);
-                console.log("Loading doc via URL: " + url);
-                docURLLoader(url);
-            }
-
-        } else {
-            console.warn("Wrong nonceRef");
         }
 
         nonceRef.current = ptr.n;

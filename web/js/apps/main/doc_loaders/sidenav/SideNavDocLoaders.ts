@@ -4,6 +4,7 @@ import React from "react";
 import {ViewerURLs} from "../ViewerURLs";
 import {TabContentType, useSideNavCallbacks} from "../../../../sidenav/SideNavStore";
 import {LoadDocRequest} from "../LoadDocRequest";
+import {AnnotationLinks} from "../../../../annotation_sidebar/AnnotationLinks";
 
 function computeTabContentType(loadDocRequest: LoadDocRequest): TabContentType {
 
@@ -38,12 +39,16 @@ export function useSideNavDocLoader() {
             const url = viewerURL.replace("http://localhost:8050", "")
                                  .replace("https://app.getpolarized.io", "");
 
+            const { annotationPtr } = loadDocRequest;
+            const hash = annotationPtr && AnnotationLinks.createHash(annotationPtr);
+
             addTab({
                 id: loadDocRequest.fingerprint,
                 url,
                 title: loadDocRequest.title,
-                type
-            })
+                type,
+                hash
+            });
 
         }
 

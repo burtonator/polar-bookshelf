@@ -70,7 +70,7 @@ const Main = React.memo(function Main() {
 
 const DocMain = React.memo(() => {
 
-    const {docURL, docMeta} = useDocViewerStore(['docURL', 'docMeta']);
+    const {docURL} = useDocViewerStore(['docURL', 'docMeta']);
 
     if (! docURL) {
         return null;
@@ -78,10 +78,6 @@ const DocMain = React.memo(() => {
 
     return (
         <>
-            <Helmet>
-                <title>{docMeta?.docInfo.title || ''}</title>
-            </Helmet>
-
             <DocRenderer>
                 <>
                     <TextHighlightsView />

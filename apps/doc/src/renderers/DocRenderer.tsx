@@ -1,5 +1,5 @@
 import {PDFViewerContainer} from "./pdf/PDFViewerContainer";
-import {PDFDocument} from "./pdf/PDFDocument";
+import PDFDocument from "./pdf/PDFDocument";
 import * as React from "react";
 import {useDocViewerStore} from "../DocViewerStore";
 import {URLStr} from "polar-shared/src/util/Strings";

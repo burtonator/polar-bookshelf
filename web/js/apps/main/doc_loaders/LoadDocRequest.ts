@@ -1,4 +1,5 @@
 import {BackendFileRef} from "polar-shared/src/datastore/BackendFileRef";
+import {IAnnotationPtr} from "../../../annotation_sidebar/AnnotationPtrs";
 
 export interface LoadDocRequest {
 
@@ -18,6 +19,8 @@ export interface LoadDocRequest {
      */
     readonly newWindow: boolean;
 
-    // TODO: extend with page and annotation parameters.
-
+    /**
+     * An annotation pointer. Used to scroll to an annotation after the document has loaded
+     */
+    readonly annotationPtr?: IAnnotationPtr;
 }

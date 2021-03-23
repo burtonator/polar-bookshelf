@@ -40,8 +40,6 @@ import {ExtendPagemark} from "polar-pagemarks-auto/src/AutoPagemarker";
 import {useLogger} from "../../../../../web/js/mui/MUILogger";
 import {KnownPrefs} from "../../../../../web/js/util/prefs/KnownPrefs";
 import {useAnnotationBar} from "../../AnnotationBarHooks";
-import {DocumentInit} from "../DocumentInitHook";
-import {useDocViewerPageJumpListener} from '../../DocViewerAnnotationHook';
 import {deepMemo} from "../../../../../web/js/react/ReactUtils";
 import {IOutlineItem} from "../../outline/IOutlineItem";
 import Outline = _pdfjs.Outline;
@@ -51,8 +49,9 @@ import Destination = _pdfjs.Destination;
 import {Nonces} from "polar-shared/src/util/Nonces";
 import {useStateRef} from "../../../../../web/js/hooks/ReactHooks";
 import {usePrefsContext} from "../../../../repository/js/persistence_layer/PrefsContext2";
-import { usePDFUpgrader } from './PDFUpgrader';
+import {usePDFUpgrader} from './PDFUpgrader';
 import {ViewerElements} from "../ViewerElements";
+import DocumentInit from '../DocumentInitHook';
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -124,13 +123,12 @@ export type OnFinderCallback = Callback1<Finder>;
 interface IProps {
     readonly docURL: URLStr;
     readonly docMeta: IDocMeta;
-    readonly children: React.ReactNode;
 }
 
-export const PDFDocument = deepMemo((props: IProps) => {
-
+export default deepMemo<React.FC<IProps>>(function PDFDocument(props) {
     const {docURL} = props;
     const [active, setActive, activeRef] = useStateRef(false);
+    const [rendered, setRendered, renderedRef] = useStateRef(false);
 
     const docViewerRef = React.useRef<DocViewer | undefined>(undefined);
     const scaleRef = React.useRef<ScaleLevelTuple>(ScaleLevelTuples[1]);
@@ -149,7 +147,6 @@ export const PDFDocument = deepMemo((props: IProps) => {
     const prefs = usePrefsContext();
     const annotationBarInjector = useAnnotationBar();
 
-    useDocViewerPageJumpListener();
 
     const hasPagesInitRef = React.useRef(false);
     const hasLoadRef = React.useRef(false);
@@ -259,14 +256,16 @@ export const PDFDocument = deepMemo((props: IProps) => {
 
         docRef.current = await loadingTask.promise;
 
-        const page = await docRef.current.getPage(1);
-
         docViewer.viewer.setDocument(docRef.current);
         docViewer.linkService.setDocument(docRef.current, null);
 
         const finder = PDFFindControllers.createFinder(docViewer.eventBus,
             docViewer.findController);
         setFinder(finder);
+
+        docViewer.eventBus.on('pagerendered', () => {
+            if (!renderedRef.current) setRendered(true);
+        });
 
         docViewer.eventBus.on('pagesinit', () => {
 
@@ -449,12 +448,11 @@ export const PDFDocument = deepMemo((props: IProps) => {
 
     }, [doLoad, log, props.docMeta.docInfo.fingerprint]);
 
-    return active && (
+    return active ? (
         <>
-            <DocumentInit/>
+            { rendered && <DocumentInit docMeta={props.docMeta} /> }
             {props.children}
         </>
-    ) || null;
-
+    ) : null;
 });
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import {useLocation} from 'react-router-dom';
 import {SIDE_NAV_ENABLED, TabDescriptor, useSideNavStore} from "./SideNavStore"
 import {DocViewerAppURLs} from "../../../apps/doc/src/DocViewerAppURLs";
 import {useRepoDocMetaManager} from "../../../apps/repository/js/persistence_layer/PersistenceLayerApp";
@@ -7,15 +8,15 @@ import {BackendFileRefs} from "../datastore/BackendFileRefs";
 import {Either} from "../util/Either";
 import {LoadDocRequest} from "../apps/main/doc_loaders/LoadDocRequest";
 import {IDStr} from "polar-shared/src/util/Strings";
+import {AnnotationPtrs, IAnnotationPtr} from '../annotation_sidebar/AnnotationPtrs';
+import {AnnotationLinks} from '../annotation_sidebar/AnnotationLinks';
 
 export function useSideNavInitializer() {
 
     const {tabs} = useSideNavStore(['tabs']);
     const docLoader = useDocLoader();
     const repoDocMetaManager = useRepoDocMetaManager();
-
-    // the initial location of the app...
-    const location = React.useMemo(() => document.location, []);
+    const location = useLocation();
 
     // the first docViewerURL based on the initial location.
     const docViewerURL = DocViewerAppURLs.parse(location.pathname)
@@ -35,18 +36,27 @@ export function useSideNavInitializer() {
             const docInfo = repoDocInfo.docInfo;
             const backendFileRef = BackendFileRefs.toBackendFileRef(Either.ofRight(docInfo))!;
 
+            const parsedHash = AnnotationLinks.parse(location.hash);
+
+            const annotationPtr: IAnnotationPtr | undefined = parsedHash && AnnotationPtrs.create({
+                pageNum: parsedHash.page,
+                target: parsedHash.target,
+                docID: fingerprint
+            });
+
             const docLoadRequest: LoadDocRequest = {
                 fingerprint,
                 title: repoDocInfo.title,
                 url: repoDocInfo.url,
                 backendFileRef,
-                newWindow: true
-            }
+                newWindow: true,
+                annotationPtr: annotationPtr,
+            };
 
             docLoader(docLoadRequest);
         }
 
-    }, [docLoader, repoDocMetaManager.repoDocInfoIndex])
+    }, [location, docLoader, repoDocMetaManager.repoDocInfoIndex])
 
     React.useEffect(() => {
 
@@ -65,7 +75,7 @@ export function useSideNavInitializer() {
 
 }
 
-export const SideNavInitializer = React.memo(() => {
+export default React.memo(function SideNavInitializer() {
     useSideNavInitializer();
     return null;
 });

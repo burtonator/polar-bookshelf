@@ -1,12 +1,14 @@
 import React from 'react';
-import {
-    useDocViewerJumpToPageLoader,
-    useDocViewerPageJumpListener
-} from "../DocViewerAnnotationHook";
+import {Helmet} from 'react-helmet';
+import {useLocation} from 'react-router-dom';
+import {useDocViewerJumpToPageLoader, useDocViewerPageJumpListener} from "../DocViewerAnnotationHook";
 import {ReadingProgressResume} from "../../../../web/js/view/ReadingProgressResume";
 import {useDocViewerStore} from "../DocViewerStore";
 import {useComponentDidMount} from "../../../../web/js/hooks/ReactLifecycleHooks";
 import useReadingProgressResume = ReadingProgressResume.useReadingProgressResume;
+import {AnnotationLinks} from '../../../../web/js/annotation_sidebar/AnnotationLinks';
+import {useDocRoute} from '../../../../web/js/apps/repository/PersistentRoute';
+import {IDocMeta} from 'polar-shared/src/metadata/IDocMeta';
 
 /**
  * Uses all the requirements we need including pagemark resume, jump via anchor
@@ -14,11 +16,17 @@ import useReadingProgressResume = ReadingProgressResume.useReadingProgressResume
  */
 export function useDocumentInit() {
 
+    const location = useLocation();
     const {pageNavigator, docMeta} = useDocViewerStore(['pageNavigator', 'docMeta']);
     const jumpToPageLoader = useDocViewerJumpToPageLoader();
     const [resumeProgressActive, resumeProgressHandler] = useReadingProgressResume();
 
     const doInit = React.useCallback(() => {
+        const hash = AnnotationLinks.parse(location.hash);
+
+        if (hash && hash.page) {
+            throw new Error("Annotation hash already exists");
+        }
 
         if (! pageNavigator) {
             throw new Error("No pageNavigator");
@@ -55,8 +63,17 @@ export function useDocumentInit() {
 
 }
 
-export const DocumentInit = React.memo(function DocumentInit() {
-    useDocViewerPageJumpListener();
+interface IProps {
+    docMeta: IDocMeta
+}
+
+export default React.memo<IProps>(function DocumentInit({ docMeta }) {
+    const {active: routeActive} = useDocRoute();
+    useDocViewerPageJumpListener(routeActive);
     useDocumentInit();
-    return null;
+    return routeActive ? (
+        <Helmet>
+            <title>Polar: { docMeta.docInfo.title || '' }</title>
+        </Helmet>
+    ) : null;
 });

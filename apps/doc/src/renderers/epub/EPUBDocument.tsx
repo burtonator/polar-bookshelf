@@ -13,7 +13,7 @@ import {IFrameEventForwarder} from "./IFrameEventForwarder";
 import {SCALE_VALUE_PAGE_WIDTH} from '../../ScaleLevels';
 import {useAnnotationBar} from '../../AnnotationBarHooks';
 import './EPUBDocument.css';
-import {DocumentInit} from "../DocumentInitHook";
+import DocumentInit from "../DocumentInitHook";
 import {DOMTextIndexProvider} from "../../annotations/DOMTextIndexContext";
 import {
     useEPUBDocumentCallbacks,
@@ -439,7 +439,7 @@ export const EPUBDocument = React.memo(function EPUBDocument(props: IProps) {
 
     return renderIter && (
         <DOMTextIndexProvider>
-            <DocumentInit/>
+            <DocumentInit docMeta={props.docMeta} />
             <EPUBFindRenderer/>
             <EPUBContextMenuRoot/>
             {props.children}

@@ -1,4 +1,5 @@
 import {useLocation} from "react-router-dom";
+import {parse, stringify} from 'querystring';
 import {useDocViewerCallbacks} from "./DocViewerStore";
 import {AnnotationLinks} from "../../../web/js/annotation_sidebar/AnnotationLinks";
 import {ILocation} from "../../../web/js/react/router/ReactRouters";
@@ -28,8 +29,11 @@ export function useDocViewerJumpToPageLoader(): (location: ILocation, cause: Doc
 
                         console.log(`Jumping to page ${annotationLink.page} due to '${cause}'`);
                         onPageJump(annotationLink.page);
+                        
+                        // Force the browser to jump to the target after rendering the page
+                        if (annotationLink.target)
+                            window.location.hash = stringify({ ...annotationLink, n: Date.now() });
                         return true;
-
                     }
 
                 } finally {
@@ -66,8 +70,11 @@ function useCurrentDocumentLocationPredicate() {
 
 }
 
-export function useDocViewerPageJumpListener() {
+export function useDocViewerPageJumpListener(active: boolean = true) {
     const location = useLocation();
     const docViewerJumpToPageLoader = useDocViewerJumpToPageLoader();
-    docViewerJumpToPageLoader(location, 'history');
+    React.useEffect(() => {
+        if (active)
+            docViewerJumpToPageLoader(location, 'history');
+    }, [location, active]);
 }

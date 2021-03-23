@@ -108,6 +108,22 @@ interface IProps {
     readonly strategy: Strategy;
 }
 
+interface DocRouteContext {
+    readonly active: boolean;
+}
+
+export const DocRouteContext = React.createContext<DocRouteContext | null>(null);
+
+export const useDocRoute = (): DocRouteContext => {
+    const context = React.useContext(DocRouteContext);
+    if (!context) {
+        throw new Error("useDocRoute must be used within a component\
+            that's rendered within the DocRouteProvider");
+    }
+
+    return context;
+};
+
 export const PersistentRoute = deepMemo((props: IProps) => {
 
     const displayClasses = useDisplayStyles();
@@ -132,7 +148,7 @@ export const PersistentRoute = deepMemo((props: IProps) => {
 
     return (
 
-        <>
+        <DocRouteContext.Provider value={{ active }}>
             <Switch>
 
                 <Route path="/">
@@ -148,8 +164,7 @@ export const PersistentRoute = deepMemo((props: IProps) => {
                     <MountListener onMounted={setActive}/>
                 </Route>
             </Switch>
-
-       </>
+       </DocRouteContext.Provider>
     );
 
 });
