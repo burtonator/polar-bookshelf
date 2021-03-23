@@ -55,7 +55,7 @@ export function useDocumentInit() {
 
         return undefined;
 
-    }, [docMeta, jumpToPageLoader, pageNavigator, resumeProgressActive, resumeProgressHandler]);
+    }, [location.hash, docMeta, jumpToPageLoader, pageNavigator, resumeProgressActive, resumeProgressHandler]);
 
     useComponentDidMount(() => {
         setTimeout(doInit, 1);

@@ -430,7 +430,7 @@ export default deepMemo<React.FC<IProps>>(function PDFDocument(props) {
     }, [annotationBarInjector, dispatchPDFDocMeta, docMetaProvider, docURL, log, onLoaded,
         onPagesInit, pdfUpgrader, persistenceLayerProvider, prefs, resize, scaleLeveler,
         setDocScale, setFinder, setOutline, setOutlineNavigator, setPageNavigator,
-        setResizer, setScaleLeveler]);
+        setResizer, setScaleLeveler, setRendered, renderedRef]);
 
     React.useEffect(() => {
 

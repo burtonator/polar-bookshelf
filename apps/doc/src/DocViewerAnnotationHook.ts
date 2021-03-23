@@ -76,5 +76,5 @@ export function useDocViewerPageJumpListener(active: boolean = true) {
     React.useEffect(() => {
         if (active)
             docViewerJumpToPageLoader(location, 'history');
-    }, [location, active]);
+    }, [location, active, docViewerJumpToPageLoader]);
 }

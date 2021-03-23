@@ -1,8 +1,6 @@
 import * as React from 'react';
-import {useDocURLLoader} from "../apps/main/doc_loaders/browser/DocURLLoader";
 import {AnnotationLinks} from "./AnnotationLinks";
 import {useSideNavHistory} from "../sidenav/SideNavStore";
-import {useIsDocViewerContext} from "../../../apps/doc/src/renderers/DocRenderer";
 import {IAnnotationPtr} from "./AnnotationPtrs";
 
 /**
@@ -12,9 +10,6 @@ import {IAnnotationPtr} from "./AnnotationPtrs";
 export function useJumpToAnnotationHandler() {
 
     const history = useSideNavHistory();
-    const docURLLoader = useDocURLLoader();
-
-    const isDocViewerContext = useIsDocViewerContext();
 
     const nonceRef = React.useRef<string | undefined>(undefined);
 
@@ -28,7 +23,7 @@ export function useJumpToAnnotationHandler() {
 
         nonceRef.current = ptr.n;
 
-    }, [docURLLoader, history, isDocViewerContext]);
+    }, [history]);
 
     return React.useCallback((ptr: IAnnotationPtr) => {
 
