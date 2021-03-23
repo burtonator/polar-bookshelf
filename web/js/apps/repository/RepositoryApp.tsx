@@ -60,7 +60,7 @@ import {WelcomeScreen} from "./WelcomeScreen";
 import {useSideNavStore} from '../../sidenav/SideNavStore';
 import {SideNav} from "../../sidenav/SideNav";
 import Divider from '@material-ui/core/Divider';
-import {SideNavInitializer} from "../../sidenav/SideNavInitializer";
+import SideNavInitializer from "../../sidenav/SideNavInitializer";
 import {AccountDialogScreen} from "../../ui/cloud_auth/AccountDialogScreen";
 import {CreateAccountScreen} from "../../../../apps/repository/js/login/CreateAccountScreen";
 import {SignInScreen} from "../../../../apps/repository/js/login/SignInScreen";
