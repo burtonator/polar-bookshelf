@@ -133,8 +133,6 @@ export function useAnnotationBar(opts: AnnotationBarOpts = {}): AnnotationBarEve
         const onHighlighted: OnHighlightedCallback = (highlightCreatedEvent: HighlightCreatedEvent) => {
             console.log("onHighlighted: ", highlightCreatedEvent);
 
-            // FIXME: highlightCreatedEvent has the pageNum here...
-
             const {selection} = highlightCreatedEvent.activeSelection;
 
             const selectedContent = SelectedContents.computeFromSelection(selection, {noRectTexts, fileType});

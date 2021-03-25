@@ -114,7 +114,6 @@ export namespace SelectedContents {
     }
 
     export function toText(ranges: ReadonlyArray<Range>) {
-        console.log("FIXME: working with N ragnes: " + ranges.length);
         return ranges.map(range => Ranges.toText(range)).join("");
     }
 

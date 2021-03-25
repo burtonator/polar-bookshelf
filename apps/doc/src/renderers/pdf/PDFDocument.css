@@ -27,3 +27,7 @@
 .pdfViewer .textLayer ::selection {
     background-color: rgba(0, 0, 255, 0.2) !important;;
 }
+
+.pdfViewer .textLayer .highlight {
+    background-color: rgba(255, 255, 0, 0.5) !important;;
+}

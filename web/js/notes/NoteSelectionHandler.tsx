@@ -26,16 +26,18 @@ export const NoteSelectionHandler = observer(function NoteSelectionHandler(props
 
     }, [selected, store]);
 
-    const onKeyDown = React.useCallback((event: KeyboardEvent) => {
+    const onKeyDown = React.useCallback((event: React.KeyboardEvent) => {
 
         switch (event.key) {
 
             case 'Backspace':
             case 'Delete':
+
                 if (handleDelete()) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
+
                 break;
 
             case 'ArrowUp':
@@ -54,18 +56,8 @@ export const NoteSelectionHandler = observer(function NoteSelectionHandler(props
 
     }, [handleDelete, store]);
 
-    React.useEffect(() => {
-
-        window.addEventListener('keydown', onKeyDown, {capture: true})
-
-        return () => {
-            window.removeEventListener('keydown', onKeyDown, {capture: true})
-        }
-
-    }, [onKeyDown])
-
     return (
-        <div style={props.style}>
+        <div style={props.style} onKeyDown={onKeyDown}>
             {props.children}
         </div>
     );
