@@ -28,30 +28,28 @@ export function ZenModeDeactivateButton() {
 
     return (
         <ZenModeInactiveContainer>
-            <DeviceRouters.Desktop>
-                <>
-                    <Tooltip open={tooltipActive && ! open}
-                             placement="right"
-                             title="Exit Zen Mode">
-                        <Fab ref={anchorRef}
-                             style={{
-                                 zIndex: 1000
-                             }}
-                             aria-label="Exit Zen Mode"
-                             onClick={toggleZenMode}
-                             onMouseEnter={() => setTooltipActive(true)}
-                             onMouseLeave={() => setTooltipActive(false)}
-                             className={classes.root}>
+            <>
+                <Tooltip open={tooltipActive && ! open}
+                         placement="right"
+                         title="Exit Zen Mode">
+                    <Fab ref={anchorRef}
+                         style={{
+                             zIndex: 1000
+                         }}
+                         aria-label="Exit Zen Mode"
+                         onClick={toggleZenMode}
+                         onMouseEnter={() => setTooltipActive(true)}
+                         onMouseLeave={() => setTooltipActive(false)}
+                         className={classes.root}>
 
-                            <ZoomOutMapIcon style={{fontSize: '30px'}}/>
+                        <ZoomOutMapIcon style={{fontSize: '30px'}}/>
 
-                            {/*Exit Zen Mode*/}
+                        {/*Exit Zen Mode*/}
 
-                        </Fab>
-                    </Tooltip>
+                    </Fab>
+                </Tooltip>
 
-                </>
-            </DeviceRouters.Desktop>
+            </>
         </ZenModeInactiveContainer>
     );
 }

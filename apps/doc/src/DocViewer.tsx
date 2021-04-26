@@ -32,33 +32,52 @@ import {useStateRef, useRefValue} from "../../../web/js/hooks/ReactHooks";
 import {NoDocument} from "./NoDocument";
 import {DockLayout2} from "../../../web/js/ui/doc_layout/DockLayout2";
 import {Outliner} from "./outline/Outliner";
-import {useDocViewerSnapshot} from "./UseDocViewerSnapshot";
 import {useZenModeResizer} from "./ZenModeResizer";
 import {useDocumentViewerVisible} from "./renderers/UseSidenavDocumentChangeCallbackHook";
+import {Box, createStyles, Divider, makeStyles, SwipeableDrawer} from "@material-ui/core";
+import {MUIIconButton} from "../../../web/js/mui/icon_buttons/MUIIconButton";
+import {DocViewerToolbarOverflowButton} from "./DocViewerToolbarOverflowButton";
+import {ZenModeButton} from "./toolbar/ZenModeButton";
+import {FullScreenButton} from "./toolbar/FullScreenButton";
+import {MUIPaperToolbar} from "../../../web/js/mui/MUIPaperToolbar";
+import {useDocViewerSnapshot} from "./UseDocViewerSnapshot";
+import {DockPanel} from "../../../web/js/ui/doc_layout/DockLayout";
+import {ZenModeActiveContainer} from "../../../web/js/mui/ZenModeActiveContainer";
+import {useZenModeStore} from "../../../web/js/mui/ZenModeStore";
+
+const useStyles = makeStyles((theme) =>
+    createStyles({
+        flex: {
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
+            minHeight: 0,
+        },
+        docMain: {
+            background: theme.palette.background.default,
+        },
+        phoneDrawerPaper: {
+            width: "100vw",
+        },
+    }),
+);
+
 
 const Main = React.memo(function Main() {
+    const classes = useStyles();
 
     return (
 
-        <div className="DocViewer.Main"
-             style={{
-                 flexGrow: 1,
-                 minHeight: 0,
-                 display: 'flex',
-                 flexDirection: 'column'
-             }}>
+    <div className={clsx("DocViewer.Main", classes.flex)}>
 
             <PagemarkProgressBar/>
             <DocViewerGlobalHotKeys/>
             <DocFindBar/>
 
-            <div className="DocViewer.Main.Body"
-                 style={{
-                     minHeight: 0,
-                     overflow: 'auto',
-                     flexGrow: 1,
-                     position: 'relative'
-                 }}>
+            <div
+                className={clsx("DocViewer.Main.Body", classes.flex, classes.docMain)}
+                style={{ position: "relative" }}
+            >
 
                 <DocViewerContextMenu>
                     <DocMain/>
@@ -101,92 +120,183 @@ const DocMain = React.memo(function DocMain() {
 
 const DocViewerContextMenu = createContextMenu<IDocViewerContextMenuOrigin>(DocViewerMenu, {computeOrigin: computeDocViewerContextMenuOrigin});
 
-namespace Device {
+const LEFT_DOCK_WIDTH = 400;
+const RIGHT_DOCK_WIDTH = 400;
 
-    interface HandheldToolbarProps {
-        readonly toggleRightDrawer: () => void;
-    }
-
-    const HandheldToolbar = React.memo(function HandheldToolbar(props: HandheldToolbarProps) {
-
-        return (
-            <MUIPaperToolbar borderBottom>
-            <div style={{
-                     display: 'flex',
-                     alignItems: 'center'
-                 }}
-                 className="p-1">
-
-                <div style={{
-                         display: 'flex',
-                         flexGrow: 1,
-                         flexBasis: 0,
-                         alignItems: 'center'
-                     }}
-                     className="">
-
-                    <DocFindButton className="mr-1"/>
-                </div>
-
-                <div style={{alignItems: 'center'}}>
-                    <IconButton onClick={props.toggleRightDrawer}>
-                        <MenuIcon/>
-                    </IconButton>
-                </div>
-
-            </div>
-            </MUIPaperToolbar>
-        )
-    });
-
-    export const Handheld = React.memo(function Handheld() {
-
-        const [open, setOpen] = React.useState(false);
-
-        return (
-            <>
-
-                {/*<SwipeableDrawer*/}
-                {/*    anchor='left'*/}
-                {/*    open={open}*/}
-                {/*    onClose={() => setOpen(false)}*/}
-                {/*    onOpen={() => setOpen(true)}>*/}
+const useTabletLayoutStyles = makeStyles(() =>
+    createStyles({
+        drawer: {
+            position: "absolute",
+            top: 0,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            "& > *": { flexGrow: 1 },
+        },
+        drawerLeft: {
+            width: LEFT_DOCK_WIDTH,
+            left: 0,
+        },
+        drawerRight: {
+            width: RIGHT_DOCK_WIDTH,
+            right: 0,
+        },
+        root: {
+            transition: "left 225ms cubic-bezier(0, 0, 0.2, 1)",
+            zIndex: 10,
+            position: "relative",
+            left: 0,
+            top: 0,
+            bottom: 0,
+        },
+        shiftRight: {
+            left: LEFT_DOCK_WIDTH,
+        },
+        shiftLeft: {
+            left: -RIGHT_DOCK_WIDTH,
+        },
+    }),
+);
 
                 {/*    <Outliner />*/}
 
-                {/*</SwipeableDrawer>*/}
+namespace Device {
+    export const Phone = React.memo(function Phone() {
+        const [outlinerOpen, setOutlinerOpen] = React.useState(false);
+        const [annotationSidebarOpen, setAnnotationSidebarOpen] = React.useState(false);
+        const classes = useStyles();
 
                 <SwipeableDrawer
-                    anchor='right'
-                    open={open}
-                    onClose={() => setOpen(false)}
-                    onOpen={() => setOpen(true)}>
-
+                    anchor="right"
+                    open={annotationSidebarOpen}
+                    onClose={() => setAnnotationSidebarOpen(false)}
+                    onOpen={() => setAnnotationSidebarOpen(true)}
+                    classes={{ paper: classes.phoneDrawerPaper }}>
                     <AnnotationSidebar2 />
-
                 </SwipeableDrawer>
 
-                <div className="DocViewer.Handheld"
-                     style={{
-                         display: 'flex',
-                         flexDirection: 'column',
-                         flexGrow: 1,
-                         minHeight: 0
-                     }}>
+                <SwipeableDrawer
+                    anchor="left"
+                    open={outlinerOpen}
+                    onClose={() => setOutlinerOpen(false)}
+                    onOpen={() => setOutlinerOpen(true)}
+                    classes={{ paper: classes.phoneDrawerPaper }}>
+                    <Outliner />
+                </SwipeableDrawer>
 
-                    <HandheldToolbar toggleRightDrawer={() => setOpen(!open)}/>
+                <div className={clsx("DocViewer.Phone", classes.flex)}>
+                    <MUIPaperToolbar borderBottom>
+                        <Box justifyContent="space-between"
+                             alignItems="center"
+                             display="flex"
+                             className="p-1">
+                            <div>
+                                <MUIIconButton onClick={() => setOutlinerOpen(!outlinerOpen)}>
+                                    <MenuIcon/>
+                                </MUIIconButton>
+                                <DocFindButton className="ml-1"/>
+                            </div>
+                            <div>
+                                <MUIIconButton onClick={() => setAnnotationSidebarOpen(!annotationSidebarOpen)}>
+                                    <MenuIcon/>
+                                </MUIIconButton>
+                            </div>
+                        </Box>
+                    </MUIPaperToolbar>
 
-                    {/* <DocToolbar/> */}
-
-                    <Main/>
-
+                    <div className={clsx("DocViewer.Phone.Body", classes.flex)}>
+                        <Main/>
+                    </div>
                 </div>
             </>
         );
     }, isEqual);
 
-    export const Desktop = React.memo(function Desktop() {
+    export const Tablet = React.memo(function Tablet() {
+        const {docMeta} = useDocViewerStore(["docMeta"]);
+        const {zenMode} = useZenModeStore(['zenMode']);
+        const classes = useStyles();
+        const tabletClasses = useTabletLayoutStyles();
+        const [outlinerOpen, setOutlinerOpen] = React.useState(false);
+        const [annotationSidebarOpen, setAnnotationSidebarOpen] = React.useState(false);
 
+        // TODO: disable interacting with the docks until the document is fully loaded.
+
+        const toggleAnnotationSidebar = () => {
+            setAnnotationSidebarOpen(!annotationSidebarOpen);
+            setOutlinerOpen(false);
+        };
+
+        const toggleOutliner = () => {
+            setOutlinerOpen(!outlinerOpen);
+            setAnnotationSidebarOpen(false);
+        };
+
+        React.useEffect(() => {
+            if (zenMode) {
+                setOutlinerOpen(false);
+                setAnnotationSidebarOpen(false);
+            }
+        }, [zenMode]);
+
+        return (
+            <div className={classes.flex} style={{ position: "relative" }}>
+                <div
+                    className={clsx(
+                        tabletClasses.drawer,
+                        tabletClasses.drawerLeft,
+                    )}>
+                    <Outliner />
+                </div>
+                <div
+                    className={clsx(
+                        tabletClasses.drawer,
+                        tabletClasses.drawerRight,
+                    )}>
+                    <AnnotationSidebar2 />
+                </div>
+                <div className={clsx("DocViewer.Tablet", classes.flex, tabletClasses.root, {
+                    [tabletClasses.shiftRight]: outlinerOpen,
+                    [tabletClasses.shiftLeft]: annotationSidebarOpen,
+                })}>
+                    <ZenModeActiveContainer>
+                        <MUIPaperToolbar borderBottom>
+                            <Box justifyContent="space-between"
+                                 alignItems="center"
+                                 display="flex"
+                                 className="p-1">
+                                <div>
+                                    <MUIIconButton onClick={toggleOutliner}>
+                                        <MenuIcon/>
+                                    </MUIIconButton>
+                                    <DocFindButton className="mr-1"/>
+                                </div>
+
+                                <Box display="flex" alignItems="center" className="gap-box">
+                                    <DocActions />
+                                    <Divider orientation="vertical" flexItem={true} />
+                                    <ZenModeButton/>
+                                    <FullScreenButton/>
+                                    <DocViewerToolbarOverflowButton docInfo={docMeta?.docInfo}/>
+                                    <MUIIconButton onClick={toggleAnnotationSidebar}>
+                                        <MenuIcon/>
+                                    </MUIIconButton>
+                                </Box>
+                            </Box>
+                        </MUIPaperToolbar>
+                    </ZenModeActiveContainer>
+
+                    <div className={clsx("DocViewer.Tablet.Body", classes.flex)}>
+                        <Main/>
+                    </div>
+
+                </div>
+            </div>
+        );
+    }, isEqual);
+
+    export const Desktop: React.FC = React.memo(function Desktop() {
+        const classes = useStyles();
         const {resizer, docMeta} = useDocViewerStore(['resizer', 'docMeta']);
 
         const resizerRef = useRefValue(resizer);
@@ -201,79 +311,54 @@ namespace Device {
 
         }, [resizerRef]);
 
-        return (
+        const layout: Partial<DockPanel> = {
+            width: 410,
+            style: {
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+                flexGrow: 1,
+            },
+        };
 
+        return (
             <DockLayout2.Root
                 onResize={onDockLayoutResize}
                 dockPanels={[
                     {
-                        id: "doc-panel-outline",
-                        type: 'fixed',
-                        side: 'left',
+                        ...layout,
+                        component: <Outliner/>,
                         collapsed: true,
-                        style: {
-                            display: 'flex',
-                            flexDirection: 'column',
-                            minHeight: 0,
-                            flexGrow: 1
-                        },
-                        component: (
-                            <Outliner/>
-                        ),
-                        width: 410,
+                        id: "doc-panel-outline",
+                        type: "fixed",
+                        side: "left",
                     },
                     {
                         id: "dock-panel-viewer",
-                        type: 'grow',
-                        style: {
-                            display: 'flex'
-                        },
+                        type: "grow",
+                        style: { display: "flex" },
                         component: <Main/>
                     },
                     {
+                        ...layout,
+                        component: docMeta ? <AnnotationSidebar2 /> : null,
+                        collapsed: false,
                         id: "doc-panel-sidebar",
-                        type: 'fixed',
-                        side: 'right',
-                        style: {
-                            display: 'flex',
-                            flexDirection: 'column',
-                            minHeight: 0,
-                            flexGrow: 1
-                        },
-                        component:
-                            <>
-                                {docMeta &&
-                                <AnnotationSidebar2 />}
-                            </>,
-                        width: 410,
+                        type: "fixed",
+                        side: "right",
                     }
                 ]}>
-                <>
-                    <div className="DocViewer.Desktop"
-                         style={{
-                             display: 'flex',
-                             flexDirection: 'column',
-                             flexGrow: 1,
-                             minHeight: 0
-                         }}>
+                <div className={clsx("DocViewer.Desktop", classes.flex)}>
 
-                        <DocViewerToolbar/>
+                    <DocViewerToolbar />
 
-                        <div className="DocViewer.Desktop.Body"
-                             style={{
-                                 display: 'flex',
-                                 flexDirection: 'column',
-                                 flexGrow: 1,
-                                 minHeight: 0
-                             }}>
+                    <div className={clsx("DocViewer.Desktop.Body", classes.flex)}>
 
-                            <DockLayout2.Main/>
-                        </div>
-
+                        <DockLayout2.Main/>
                     </div>
-                </>
-            </DockLayout2.Root>
 
+                </div>
+            </DockLayout2.Root>
         );
     });
 
@@ -284,8 +369,9 @@ const DocViewerMain = deepMemo(function DocViewerMain() {
     useZenModeResizer();
 
     return (
-        <DeviceRouter handheld={<Device.Handheld/>}
-                      desktop={<Device.Desktop/>}/>
+        <DeviceRouter desktop={<Device.Desktop />}
+                      tablet={<Device.Tablet />}
+                      phone={<Device.Phone />}/>
     );
 
 });
@@ -298,9 +384,9 @@ interface DocViewerParentProps {
 const DocViewerParent = deepMemo((props: DocViewerParentProps) => (
     <div data-doc-viewer-id={props.docID}
          style={{
-             display: 'flex',
+             display: "flex",
              minHeight: 0,
-             overflow: 'auto',
+             overflow: "hidden",
              flexGrow: 1,
          }}>
         {props.children}
