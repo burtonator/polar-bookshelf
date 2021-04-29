@@ -39,9 +39,8 @@ import {
 import {ExtendPagemark} from "polar-pagemarks-auto/src/AutoPagemarker";
 import {useLogger} from "../../../../../web/js/mui/MUILogger";
 import {KnownPrefs} from "../../../../../web/js/util/prefs/KnownPrefs";
-import {useAnnotationBar} from "../../AnnotationBarHooks";
+import {TextHighlightHandler} from "../../TextHighlightHandler";
 import {DocumentInit} from "../DocumentInitHook";
-import {useDocViewerPageJumpListener} from '../../DocViewerAnnotationHook';
 import {deepMemo} from "../../../../../web/js/react/ReactUtils";
 import {IOutlineItem} from "../../outline/IOutlineItem";
 import Outline = _pdfjs.Outline;
@@ -54,6 +53,7 @@ import {usePrefsContext} from "../../../../repository/js/persistence_layer/Prefs
 import { usePDFUpgrader } from './PDFUpgrader';
 import {ViewerElements} from "../ViewerElements";
 import {useDocumentViewerVisibleElemFocus} from '../UseSidenavDocumentChangeCallbackHook';
+import {AnnotationPopup} from '../../annotations/annotation_popup/AnnotationPopup';
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -148,8 +148,6 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
     const {setFinder} = useDocFindCallbacks();
     const {persistenceLayerProvider} = usePersistenceLayerContext();
     const prefs = usePrefsContext();
-    const annotationBarInjector = useAnnotationBar();
-
     const hasPagesInitRef = React.useRef(false);
     const hasLoadRef = React.useRef(false);
 
@@ -271,7 +269,6 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
         docViewer.eventBus.on('pagesinit', () => {
 
             // PageContextMenus.start()
-            annotationBarInjector();
 
             onPagesInit();
 
@@ -428,7 +425,7 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
 
         onLoaded()
 
-    }, [annotationBarInjector, dispatchPDFDocMeta, docMetaProvider, docURL, log, onLoaded,
+    }, [dispatchPDFDocMeta, docMetaProvider, docURL, log, onLoaded,
         onPagesInit, pdfUpgrader, persistenceLayerProvider, prefs, resize, scaleLeveler,
         setDocScale, setFinder, setOutline, setOutlineNavigator, setPageNavigator,
         setResizer, setScaleLeveler]);
@@ -457,6 +454,8 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
     return active && (
         <>
             <DocumentInit/>
+            <TextHighlightHandler/>
+            <AnnotationPopup/>
             {props.children}
         </>
     ) || null;

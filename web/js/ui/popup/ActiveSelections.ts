@@ -60,10 +60,12 @@ export class ActiveSelections {
                         log.warn("No target element: ", event.target);
                         return;
                     }
+                    /*
 
                     if (activeSelection) {
                         handleDestroyedSelection();
                     }
+                    */
 
                     if (hasActiveTextSelection) {
 

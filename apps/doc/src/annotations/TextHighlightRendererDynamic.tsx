@@ -7,10 +7,12 @@ import {Texts} from 'polar-shared/src/metadata/Texts';
 import {DOMHighlight} from "../../../../web/js/dom_highlighter/DOMHighlight";
 import {HighlightColors} from "polar-shared/src/metadata/HighlightColor";
 import {PageAnnotation} from "./PageAnnotations";
+import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
 
 interface IProps {
     readonly pageAnnotation: PageAnnotation<ITextHighlight>;
     readonly container: HTMLElement,
+    readonly onClick?: React.EventHandler<React.MouseEvent>;
 }
 
 /**
@@ -19,7 +21,7 @@ interface IProps {
  */
 export const TextHighlightRendererDynamic = deepMemo(function TextHighlightRendererDynamic(props: IProps) {
 
-    const {pageAnnotation, container} = props;
+    const {pageAnnotation, container, onClick = NULL_FUNCTION} = props;
     const {annotation} = pageAnnotation;
     const domTextIndexContext = useDOMTextIndexContext();
     const text = Texts.toText(annotation.text);
@@ -68,6 +70,7 @@ export const TextHighlightRendererDynamic = deepMemo(function TextHighlightRende
                                                data-annotation-doc-fingerprint={fingerprint}
                                                data-annotation-color={color}
                                                className={className}
+                                               onClick={onClick}
                                                id={annotation.id}/>, container);
 
 });

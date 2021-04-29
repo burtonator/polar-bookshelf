@@ -6,6 +6,8 @@ import {memoForwardRef} from "../../../../web/js/react/ReactUtils";
 import {TextHighlightRendererStatic} from "./TextHighlightRendererStatic";
 import {TextHighlightRendererDynamic} from "./TextHighlightRendererDynamic";
 import {PageAnnotation} from "./PageAnnotations";
+import {useDocViewerCallbacks} from "../DocViewerStore";
+import {AnnotationType} from "polar-shared/src/metadata/AnnotationType";
 
 interface IProps {
     readonly fingerprint: IDStr;
@@ -17,16 +19,25 @@ interface IProps {
 export const TextHighlightRenderer = memoForwardRef((props: IProps) => {
 
     const {fileType} = useDocViewerContext();
+    const {setHighlightBar} = useDocViewerCallbacks();
+
+    const handleClick: React.EventHandler<React.MouseEvent> = () => {
+        setHighlightBar({
+            highlightID: props.pageAnnotation.annotation.id,
+            pageNum: props.pageNum,
+            type: AnnotationType.TEXT_HIGHLIGHT,
+        });
+    };
 
     switch (fileType) {
 
         case "pdf":
             return (
-                <TextHighlightRendererStatic {...props}/>
+                <TextHighlightRendererStatic onClick={handleClick} {...props}/>
             );
         case "epub":
             return (
-                <TextHighlightRendererDynamic {...props}/>
+                <TextHighlightRendererDynamic onClick={handleClick} {...props}/>
             );
 
     }

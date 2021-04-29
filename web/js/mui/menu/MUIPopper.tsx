@@ -94,7 +94,7 @@ export const MUIPopper = deepMemo(function MUIPopper(props: IProps) {
         size: props.size,
         variant: props.variant || 'contained',
         ref: anchorRef,
-        style: {color: theme.palette.text.secondary}
+        style: {color: theme.palette.text.secondary, ...props.style}
     };
 
     const placement = props.placement || 'bottom';

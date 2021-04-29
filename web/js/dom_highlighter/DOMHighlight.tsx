@@ -12,10 +12,12 @@ import withAnimationFrame = AnimationFrameDebouncers.withAnimationFrame;
 import IHighlightViewportPosition = Highlights.IHighlightViewportPosition;
 import {NodeTextRegion} from "polar-dom-text-search/src/NodeTextRegion";
 import {Dictionaries} from "polar-shared/src/util/Dictionaries";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 
 interface IProps extends DOMTextHit {
     readonly color?: string;
     readonly className?: string;
+    readonly onClick?: React.EventHandler<React.MouseEvent>;
 }
 
 function toHighlightViewportPositions(regions: ReadonlyArray<NodeTextRegion>) {
@@ -34,7 +36,7 @@ function toHighlightViewportPositions(regions: ReadonlyArray<NodeTextRegion>) {
  */
 export const DOMHighlight = deepMemo(function DOMHighlight(props: IProps) {
 
-    const {regions} = props;
+    const {regions, onClick = NULL_FUNCTION} = props;
 
     const [highlightViewportPositions, setHighlightViewportPositions] = React.useState(toHighlightViewportPositions(regions))
 
@@ -73,6 +75,7 @@ export const DOMHighlight = deepMemo(function DOMHighlight(props: IProps) {
         return <DOMHighlightRow {...highlightViewportPosition}
                                 {...dataAttributes}
                                 color={props.color}
+                                onClick={onClick}
                                 className={props.className}
                                 id={id}
                                 key={key}/>

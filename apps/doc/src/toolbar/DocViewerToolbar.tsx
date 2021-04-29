@@ -15,6 +15,7 @@ import Divider from "@material-ui/core/Divider";
 import {DeviceRouters} from "../../../../web/js/ui/DeviceRouter";
 import {useDocFindStore} from "../DocFindStore";
 import {DocumentWriteStatus} from "../../../../web/js/apps/repository/connectivity/DocumentWriteStatus";
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import {MUIDocFlagButton} from "../../../repository/js/doc_repo/buttons/MUIDocFlagButton";
 import {MUIDocArchiveButton} from "../../../repository/js/doc_repo/buttons/MUIDocArchiveButton";
 import {DocViewerToolbarOverflowButton} from "../DocViewerToolbarOverflowButton";
@@ -28,6 +29,13 @@ import {deepMemo} from "../../../../web/js/react/ReactUtils";
 import {DockLayoutToggleButton} from "../../../../web/js/ui/doc_layout/DockLayoutToggleButton";
 import {ZenModeActiveContainer} from "../../../../web/js/mui/ZenModeActiveContainer";
 import {ZenModeButton} from "./ZenModeButton";
+import {MUIPopper, usePopperController} from "../../../../web/js/mui/menu/MUIPopper";
+import PaletteIcon from '@material-ui/icons/Palette';
+import {Button, ButtonGroup, ClickAwayListener, Grow, Paper, Popper, useTheme} from "@material-ui/core";
+import {ResetableColorSelectorBox} from "../../../../web/js/ui/colors/ResetableColorSelectorBox";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {ColorSelectorBox, ColorStr} from "../../../../web/js/ui/colors/ColorSelectorBox";
+import {ColorMenu, MAIN_HIGHLIGHT_COLORS} from "../../../../web/js/ui/ColorMenu";
 
 const getScaleLevelTuple = (scale: ScaleLevel) => (
     arrayStream(ScaleLevelTuples)
@@ -161,6 +169,7 @@ export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
 
                             <MUIButtonBar>
 
+                                <TextHighlightTrigger />
 
                                 {/* TODO: implement keyboard shortcuts for these. */}
                                 <MUIDocTagButton size="small"
@@ -201,3 +210,102 @@ export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
     );
 });
 
+interface IProps {
+
+    readonly className?: string;
+
+    readonly style?: React.CSSProperties;
+
+    readonly size?: string;
+
+    readonly color?: 'primary' | 'secondary';
+
+    readonly onSelected?: (selected?: ColorStr) => void;
+
+    readonly selected?: ColorStr;
+
+}
+
+const TextHighlightTrigger: React.FC = () => {
+    const theme = useTheme();
+
+    const {textHighlightColor} = useDocViewerStore(['textHighlightColor']);
+    const {setTextHighlightColor} = useDocViewerCallbacks();
+    const anchorRef = React.useRef<HTMLDivElement>(null);
+    const [open, setOpen] = React.useState(false);
+    const [selectedColor, setSelectedColor] = React.useState<ColorStr>(MAIN_HIGHLIGHT_COLORS[0]);
+    const active = textHighlightColor;
+
+
+    const handleColorChange = (color: ColorStr) => {
+        setOpen(false);
+        setTextHighlightColor(color);
+        setSelectedColor(color);
+    };
+
+    const handleClick = () => {
+        if (active) {
+            setTextHighlightColor(null);
+        } else {
+            setTextHighlightColor(selectedColor);
+        }
+    };
+
+    const handleToggle = () => {
+        setOpen((prevOpen) => !prevOpen);
+    };
+
+    const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
+        const anchor = anchorRef.current;
+        if (anchor && anchor.contains(event.target as HTMLElement)) {
+          return;
+        }
+
+        setOpen(false);
+    };
+
+
+    return (
+        <div>
+            <ButtonGroup
+                variant={active ? "contained" : "outlined" }
+                color={active ? "primary" : undefined}
+                ref={anchorRef}
+                disableElevation
+            >
+                <Button onClick={handleClick}>
+                    <PaletteIcon style={{ fill: selectedColor }} />
+                </Button>
+                <Button
+                  color="primary"
+                  size="small"
+                  onClick={handleToggle}
+                >
+                    <ArrowDropDownIcon />
+                </Button>
+            </ButtonGroup>
+            <Popper
+                open={open}
+                anchorEl={anchorRef.current}
+                role={undefined}
+                placement="top-end"
+                style={{ zIndex: theme.zIndex.modal }}
+                transition
+                disablePortal
+            >
+                {({ TransitionProps }) => (
+                    <Grow
+                        {...TransitionProps}
+                        style={{ transformOrigin: "center top" }}
+                    >
+                        <Paper style={{ background: theme.palette.background.paper }}>
+                            <ClickAwayListener onClickAway={handleClose}>
+                                <ColorMenu onChange={handleColorChange} selected={selectedColor} />
+                            </ClickAwayListener>
+                        </Paper>
+                    </Grow>
+                )}
+            </Popper>
+        </div>
+    );
+};

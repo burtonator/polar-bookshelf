@@ -15,6 +15,11 @@ const caret: React.CSSProperties = {
 
 };
 
-export const MUIDropdownCaret = () => (
-    <span style={caret}/>
+type IMUIDropdownCaretProps = {
+    className?: string;
+    style?: React.CSSProperties;
+}
+
+export const MUIDropdownCaret: React.FC<IMUIDropdownCaretProps> = ({ className = "", style = {} }) => (
+    <span style={{ ...caret, ...style }} className={className} />
 );

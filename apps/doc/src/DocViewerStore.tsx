@@ -57,6 +57,8 @@ import {UUIDs} from "../../../web/js/metadata/UUIDs";
 import { IOutline } from './outline/IOutline';
 import {OutlineNavigator} from "./outline/IOutlineItem";
 import {Analytics} from '../../../web/js/analytics/Analytics';
+import {ColorStr} from "../../../web/js/ui/colors/ColorSelectorBox";
+import {HighlightBarData} from './annotations/annotation_popup/AnnotationPopup';
 
 /**
  * Lightweight metadata describing the currently loaded document.
@@ -135,6 +137,9 @@ export interface IDocViewerStore {
 
     readonly outlineNavigator?: OutlineNavigator;
 
+    readonly textHighlightColor: ColorStr | null;
+
+    readonly highlightBar: HighlightBarData | null;
 }
 
 export interface IPagemarkCoverage {
@@ -306,12 +311,16 @@ export interface IDocViewerCallbacks {
 
     readonly setColumnLayout: (columLayout: number) => void;
 
+    readonly setTextHighlightColor: (color: ColorStr | null) => void;
+    readonly setHighlightBar: (data: HighlightBarData | null) => void;
 }
 
 const initialStore: IDocViewerStore = {
     page: 1,
     docLoaded: false,
     pendingWrites: 0,
+    highlightBar: null,
+    textHighlightColor: null,
     fluidPagemarkFactory: new NullFluidPagemarkFactory()
 }
 
@@ -471,6 +480,16 @@ function useCallbacksFactory(storeProvider: Provider<IDocViewerStore>,
         function setDocScale(docScale: IDocScale) {
             const store = storeProvider();
             setStore({...store, docScale});
+        }
+
+        function setTextHighlightColor(color: ColorStr | null) {
+            const store = storeProvider();
+            setStore({...store, textHighlightColor: color});
+        }
+
+        function setHighlightBar(highlightBar: HighlightBarData | null) {
+            const store = storeProvider();
+            setStore({...store, highlightBar});
         }
 
         function setDocLoaded(docLoaded: boolean) {
@@ -1025,7 +1044,9 @@ function useCallbacksFactory(storeProvider: Provider<IDocViewerStore>,
             setOutline,
             setOutlineNavigator,
             docMetaProvider,
-            setColumnLayout
+            setColumnLayout,
+            setTextHighlightColor,
+            setHighlightBar,
         };
     }, [log, docMetaContext, persistenceLayerContext, annotationSidebarCallbacks,
         dialogs, annotationMutationCallbacksFactory, setStore, storeProvider]);

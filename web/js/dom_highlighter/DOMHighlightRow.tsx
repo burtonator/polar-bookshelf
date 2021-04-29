@@ -13,6 +13,7 @@ interface IProps extends IHighlightViewportPosition {
     readonly id: string;
     readonly color?: string;
     readonly className?: string;
+    readonly onClick: React.EventHandler<React.MouseEvent>;
 }
 
 function useSideNavDocChangeActivated() {
@@ -67,7 +68,7 @@ export const DOMHighlightRow = deepMemo(function DOMHighlightRow(props: IProps) 
                  style={{
                      backgroundColor: `${backgroundColor}`,
                      position: 'absolute',
-                     pointerEvents: 'none',
+                     zIndex: 1,
                      mixBlendMode: theme.palette.type === 'light' ? 'multiply' : 'screen',
                      ...absolutePosition
                  }}>

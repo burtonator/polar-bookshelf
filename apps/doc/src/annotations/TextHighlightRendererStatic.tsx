@@ -11,17 +11,20 @@ import {deepMemo, memoForwardRefDiv} from "../../../../web/js/react/ReactUtils";
 import {useScrollIntoViewUsingLocation} from "./ScrollIntoViewUsingLocation";
 import {PageAnnotation} from "./PageAnnotations";
 import {TextHighlightMerger} from "../text_highlighter/TextHighlightMerger";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 
 interface IProps {
     readonly fingerprint: IDStr;
     readonly pageNum: number;
     readonly pageAnnotation: PageAnnotation<ITextHighlight>;
     readonly container: HTMLElement,
+    readonly onClick?: React.EventHandler<React.MouseEvent>;
 }
 
 export const TextHighlightRendererStatic = deepMemo(function TextHighlightRendererStatic(props: IProps) {
 
     const {pageAnnotation, container} = props;
+    const {onClick = NULL_FUNCTION, ...restProps} = props;
     const {annotation} = pageAnnotation;
     const {docScale} = useDocViewerStore(['docScale']);
 
@@ -38,7 +41,8 @@ export const TextHighlightRendererStatic = deepMemo(function TextHighlightRender
         return ReactDOM.createPortal(
             <HighlightDelegate idx={idx}
                                rawTextHighlightRect={rawTextHighlightRect}
-                               {...props}/>,
+                               onClick={onClick}
+                               {...restProps}/>,
             container);
 
     }, [props]);
@@ -71,11 +75,12 @@ export const TextHighlightRendererStatic = deepMemo(function TextHighlightRender
 interface HighlightDelegateProps extends IProps {
     readonly idx: number;
     readonly rawTextHighlightRect: IRect;
+    readonly onClick?: React.EventHandler<React.MouseEvent>;
 }
 
 export const HighlightDelegate = memoForwardRefDiv((props: HighlightDelegateProps) => {
 
-    const {idx, rawTextHighlightRect} = props;
+    const {idx, rawTextHighlightRect, onClick = NULL_FUNCTION} = props;
     const {pageAnnotation, fingerprint, pageNum} = props;
     const {annotation} = pageAnnotation;
     const {docScale} = useDocViewerStore(['docScale']);
@@ -136,6 +141,7 @@ export const HighlightDelegate = memoForwardRefDiv((props: HighlightDelegateProp
              data-annotation-doc-fingerprint={fingerprint}
              data-annotation-color={color}
              className={className}
+             onClick={onClick}
              style={{
                  position: 'absolute',
                  backgroundColor,
@@ -144,7 +150,7 @@ export const HighlightDelegate = memoForwardRefDiv((props: HighlightDelegateProp
                  width: `${textHighlightRect.width}px`,
                  height: `${textHighlightRect.height}px`,
                  mixBlendMode: 'multiply',
-                 pointerEvents: 'none',
+                 zIndex: 1,
              }}/>
     );
 
