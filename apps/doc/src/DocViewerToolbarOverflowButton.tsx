@@ -103,7 +103,7 @@ export const DocViewerToolbarOverflowButton = deepMemo(function DocViewerToolbar
                              disabled={! props.docInfo?.url}
                              onClick={() => Clipboards.writeText(url)}/>
 
-                <MUIMenuItem text="Set Document Layout (Number of Columns)"
+                <MUIMenuItem text="Set number of columns"
                              icon={<ViewWeekIcon/>}
                              onClick={setColumnLayoutCallback}/>
 

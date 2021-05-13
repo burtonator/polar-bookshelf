@@ -14,7 +14,7 @@ import {ActiveKeyboardShortcutsTable2} from "./ActiveKeyboardShortcutsTable2";
 const keyMap = {
     SHOW_ALL_HOTKEYS: {
         name: 'Show Keyboard Shortcuts',
-        description: "Show the currently active keyboard shortcuts",
+        description: "Show active keyboard shortcuts",
         sequences: ["shift+?", '/'],
         priority: -1
     }

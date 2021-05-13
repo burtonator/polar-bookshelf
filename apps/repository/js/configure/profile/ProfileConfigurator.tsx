@@ -183,7 +183,7 @@ export const ProfileConfigurator = (props: IProps) => {
                      }}>
 
                     <h2>
-                        Reading, learning, and remembering made easy.
+                        Read. Learn. Remember.
                     </h2>
 
                 </Box>

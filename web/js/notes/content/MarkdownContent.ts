@@ -26,12 +26,20 @@ export class MarkdownContent implements IMarkdownContent, IBaseBlockContent {
     }
 
     public update(content: IBlockContent) {
+
         if (content.type === 'markdown') {
             this._data = content.data;
         } else {
             throw new Error("Invalid type: " +  content.type)
         }
 
+    }
+
+    public toJSON(): IMarkdownContent {
+        return {
+            type: this._type,
+            data: this._data
+        }
     }
 
 }

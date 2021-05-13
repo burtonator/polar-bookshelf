@@ -8,6 +8,9 @@ import {BlocksStoreProvider, useBlocksStore} from '../../../web/js/notes/store/B
 import {MockBlocks} from "./MockBlocks";
 import { observer } from "mobx-react-lite"
 import {BlockStoreContextProvider} from "../../../web/js/notes/store/BlockStoreContextProvider";
+import {UndoQueueProvider2} from "../../../web/js/undo/UndoQueueProvider2";
+import {KeyboardShortcuts} from "../../../web/js/keyboard_shortcuts/KeyboardShortcuts";
+import {ActiveKeyboardShortcuts} from "../../../web/js/hotkeys/ActiveKeyboardShortcuts";
 
 const notes = MockBlocks.create();
 
@@ -118,20 +121,41 @@ const FixedWidthContainer = React.memo(function FixedWidthContainer(props: Fixed
 
 });
 
+
+const NotesStory1 = () => {
+
+    return (
+        <>
+            <ActiveKeyboardShortcuts/>
+            <UndoQueueProvider2>
+                <>
+                    <FixedWidthContainer>
+                        <BlockStoreContextProvider uid='1234'>
+                            <BlocksStoreProvider>
+                                <BasicNotesDataSet>
+                                    <>
+                                        <NotesStoryInner/>
+                                    </>
+                                </BasicNotesDataSet>
+                            </BlocksStoreProvider>
+                        </BlockStoreContextProvider>
+                    </FixedWidthContainer>
+                </>
+            </UndoQueueProvider2>
+        </>
+    );
+
+}
+
+
+
 export const NotesStory = () => {
 
     return (
-        <FixedWidthContainer>
-            <BlockStoreContextProvider uid='1234'>
-                <BlocksStoreProvider>
-                    <BasicNotesDataSet>
-                        <>
-                            <NotesStoryInner/>
-                        </>
-                    </BasicNotesDataSet>
-                </BlocksStoreProvider>
-            </BlockStoreContextProvider>
-        </FixedWidthContainer>
+        <>
+            <KeyboardShortcuts/>
+            <NotesStory1/>
+        </>
     );
 
 }

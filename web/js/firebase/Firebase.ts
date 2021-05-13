@@ -87,14 +87,23 @@ export class Firebase {
      *
      */
     private static startListeningForUser() {
+
         const auth = firebase.auth();
-        auth.onAuthStateChanged(user => {
-            console.log("New firebase user: ", user);
+
+        const onNext = (user: firebase.User | null) => {
+
+            console.log("firebase: auth state next: ", user);
             this.userLatch.resolve(true);
             return this.user = user;
-        }, err => {
-            console.error(err);
-        });
+
+        }
+
+        const onError = (err: firebase.auth.Error) => {
+            console.error("firebase: auth state error", err);
+        }
+
+        auth.onAuthStateChanged(onNext, onError);
+
     }
 
     public static async currentUserAsync(): Promise<firebase.User | undefined> {

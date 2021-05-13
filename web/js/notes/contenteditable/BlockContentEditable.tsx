@@ -7,7 +7,7 @@ import {ContentEditables} from "../ContentEditables";
 import {createActionsProvider} from "../../mui/action_menu/ActionStore";
 import {NoteFormatPopper} from "../NoteFormatPopper";
 import {BlockContentCanonicalizer} from "./BlockContentCanonicalizer";
-import {NoteAction} from "./NoteAction";
+import {BlockAction} from "./BlockAction";
 import { useHistory } from 'react-router-dom';
 import { autorun } from 'mobx'
 import {CursorPositions} from "./CursorPositions";
@@ -43,7 +43,7 @@ interface IProps {
 
 const NoteContentEditableElementContext = React.createContext<React.RefObject<HTMLElement | null>>({current: null});
 
-export function useNoteContentEditableElement() {
+export function useBlockContentEditableElement() {
     return React.useContext(NoteContentEditableElementContext);
 }
 
@@ -181,7 +181,7 @@ export const BlockContentEditable = observer((props: IProps) => {
             divRef.current!.innerHTML = props.content;
 
             if (divRef.current && blocksStore.active) {
-                updateCursorPosition(divRef.current, blocksStore.active, true);
+                updateCursorPosition(divRef.current, {...blocksStore.active, pos: 'end'}, true);
             }
 
         }
@@ -352,7 +352,12 @@ export const BlockContentEditable = observer((props: IProps) => {
 
                 if (blocksStore.hasSelected()) {
                     abortEvent();
-                    blocksStore.deleteBlocks([]);
+
+                    const selected = blocksStore.selectedIDs();
+
+                    if (selected.length > 0) {
+                        blocksStore.deleteBlocks(selected);
+                    }
                     break;
                 }
 
@@ -405,11 +410,11 @@ export const BlockContentEditable = observer((props: IProps) => {
             <div onKeyDown={handleKeyDown}
                  onKeyUp={handleKeyUp}>
 
-                <NoteAction id={props.id}
-                            trigger="[["
-                            actionsProvider={createNoteActionsProvider}
-                            onAction={(id) => ({
-                                type: 'note-link',
+                <BlockAction id={props.id}
+                             trigger="[["
+                             actionsProvider={createNoteActionsProvider}
+                             onAction={(id) => ({
+                                type: 'link-to-block',
                                 target: id
                             })}>
 
@@ -427,7 +432,7 @@ export const BlockContentEditable = observer((props: IProps) => {
                              dangerouslySetInnerHTML={{__html: content}}/>
                     </NoteFormatPopper>
 
-                </NoteAction>
+                </BlockAction>
 
             </div>
 
@@ -481,7 +486,7 @@ function doUpdateCursorPosition(editor: HTMLDivElement, pos: 'start' | 'end' | n
 
         }
 
-        console.log("Updating cursor position to: ", pos);
+        // console.log("Updating cursor position to: ", pos);
 
         editor.focus();
 

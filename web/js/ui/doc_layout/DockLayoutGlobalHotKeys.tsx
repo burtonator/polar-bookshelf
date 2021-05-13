@@ -10,15 +10,15 @@ const globalKeyMap = keyMapWithGroup({
 
         TOGGLE_LEFT: {
             icon: <MenuIcon/>,
-            name: "Toggle Left Sidebar Visibility",
-            description: "Hide/show the left sidebar",
+            name: "Toggle outline",
+            description: "Hide/show outline",
             sequences: ['[']
         },
 
         TOGGLE_RIGHT: {
             icon: <MenuIcon/>,
-            name: "Toggle Right Sidebar Visibility",
-            description: "Hide/show the right sidebar",
+            name: "Toggle annotations sidebar",
+            description: "Hide/show annotations sidebar",
             sequences: [']']
         },
 

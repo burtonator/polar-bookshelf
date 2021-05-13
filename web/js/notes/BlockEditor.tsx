@@ -93,15 +93,14 @@ const NoteEditorInner = observer(function BlockEditorInner(props: IProps) {
 
     const handleChange = React.useCallback((content: HTMLStr) => {
 
-        if (block) {
-            const markdown = escaper.unescape(content);
-            block.setContent(new MarkdownContent({
-                type: 'markdown',
-                data: markdown
-            }));
-        }
+        const markdown = escaper.unescape(content);
 
-    }, [escaper, block]);
+        blocksStore.setBlockContent(id, new MarkdownContent({
+            type: 'markdown',
+            data: markdown
+        }))
+
+    }, [escaper, blocksStore, id]);
 
     const content = React.useMemo(() => {
         return data !== undefined ? escaper.escape(data) : '';

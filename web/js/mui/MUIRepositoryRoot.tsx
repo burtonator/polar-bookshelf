@@ -5,8 +5,6 @@ import {UserInfoProvider} from "../apps/repository/auth_handler/UserInfoProvider
 import {BrowserTabsStoreProvider} from "../browser_tabs/BrowserTabsStore";
 import {MUIAppRoot} from "./MUIAppRoot";
 import {SideNavStoreProvider} from "../sidenav/SideNavStore";
-import {UserTagsDataLoader} from "../../../apps/repository/js/persistence_layer/UserTagsDataLoader";
-import {PrefsContext2} from "../../../apps/repository/js/persistence_layer/PrefsContext2";
 
 interface IProps {
     readonly children: React.ReactNode;
@@ -22,15 +20,11 @@ export const MUIRepositoryRoot = React.memo(function MUIRepositoryRoot(props: IP
                         <ActiveKeyboardShortcuts/>
 
                         <FirestoreProvider>
-                            <PrefsContext2>
-                                <UserTagsDataLoader>
-                                    <UserInfoProvider>
-                                        <>
-                                            {props.children}
-                                        </>
-                                    </UserInfoProvider>
-                                </UserTagsDataLoader>
-                            </PrefsContext2>
+                            <UserInfoProvider>
+                                <>
+                                    {props.children}
+                                </>
+                            </UserInfoProvider>
                         </FirestoreProvider>
                     </>
                 </BrowserTabsStoreProvider>

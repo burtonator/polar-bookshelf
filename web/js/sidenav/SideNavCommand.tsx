@@ -30,7 +30,7 @@ const globalKeyMap = keyMapWithGroup(
         keyMap: {
             ACTIVATE: {
                 name: "Jump to Open Document",
-                description: "Filter and jump to an open document",
+                description: "Jump to open doc",
                 sequences: ['shift+command+e', 'shift+ctrl+E'],
             },
         }

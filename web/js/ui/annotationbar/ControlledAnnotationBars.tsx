@@ -135,7 +135,7 @@ export namespace ControlledAnnotationBars {
 
     }
 
-    function computeTargets(fileType: FileType, docViewerElementProvider: () => HTMLElement): ReadonlyArray<HTMLElement> {
+    export function computeTargets(fileType: FileType, docViewerElementProvider: () => HTMLElement): ReadonlyArray<HTMLElement> {
 
         const docViewerElement = docViewerElementProvider();
 

@@ -6,6 +6,7 @@ import {Rects} from '../Rects';
 import {IDimensions} from "../util/IDimensions";
 import {IPoint} from "../Point";
 import {ILTRect} from "polar-shared/src/util/rects/ILTRect";
+import {IRect} from 'polar-shared/src/util/rects/IRect';
 
 export namespace AnnotationRects {
 
@@ -47,13 +48,13 @@ export namespace AnnotationRects {
 
     }
 
-    export function createFromPointWithinPageElement(pageNum: number, pointWithinPageElement: IPoint, docViewerElem: HTMLElement) {
+    export function createFromPointWithinPageElement(pageNum: number, rect: ILTRect, docViewerElem: HTMLElement) {
 
         const pageElement = getPageElement(pageNum, docViewerElem);
 
         if (pageElement) {
             const containerDimensions = computeContainerDimensions(pageElement);
-            return createFromPointWithinPageAndContainer(pointWithinPageElement, containerDimensions)
+            return createFromRectWithinPageAndContainer(rect, containerDimensions)
         }
 
         throw new Error("No page found at point");
@@ -76,14 +77,9 @@ export namespace AnnotationRects {
     /**
      * Create from clientX and clientY point
      */
-    export function createFromPointWithinPageAndContainer(pointWithinPageElement: IPoint, containerDimensions: IDimensions) {
+    export function createFromRectWithinPageAndContainer(rect: ILTRect, containerDimensions: IDimensions) {
 
-        const boxRect = Rects.createFromBasicRect({
-            left: pointWithinPageElement.x,
-            top: pointWithinPageElement.y,
-            width: 150,
-            height: 150
-        });
+        const boxRect = Rects.createFromBasicRect(rect);
 
         return createFromOverlayRectWithinPageAndContainer(boxRect, containerDimensions);
 

@@ -66,6 +66,11 @@ import {CreateAccountScreen} from "../../../../apps/repository/js/login/CreateAc
 import {SignInScreen} from "../../../../apps/repository/js/login/SignInScreen";
 import {ZenModeGlobalHotKeys} from "../../mui/ZenModeGlobalHotKeys";
 import {ZenModeDeactivateButton} from "../../mui/ZenModeDeactivateButton";
+import {UserTagsDataLoader} from "../../../../apps/repository/js/persistence_layer/UserTagsDataLoader";
+import {NotesRouter} from "../../notes/NotesRouter";
+import {NotesContainer} from "../../notes/NotesContainer";
+import {BlocksStoreProvider} from "../../notes/store/BlocksStore";
+import {BlockStoreDefaultContextProvider} from "../../notes/store/BlockStoreContextProvider";
 
 interface IProps {
     readonly app: App;
@@ -244,6 +249,15 @@ export const RepositoryApp = React.memo(function RepositoryApp(props: IProps) {
         return null;
     }
 
+    const NotesScreen = () => {
+
+        return (
+            <NotesContainer>
+                <NotesRouter/>
+            </NotesContainer>
+        );
+    }
+
     return (
         <RepoDocMetaManagerContext.Provider value={repoDocMetaManager}>
             <MUIRepositoryRoot>
@@ -297,103 +311,116 @@ export const RepositoryApp = React.memo(function RepositoryApp(props: IProps) {
 
                                                             <Route>
                                                                 <AuthRequired>
-                                                                    <PersistenceLayerApp tagsType="documents"
-                                                                                         repoDocMetaManager={repoDocMetaManager}
-                                                                                         repoDocMetaLoader={repoDocMetaLoader}
-                                                                                         persistenceLayerManager={persistenceLayerManager}>
-                                                                        <DocRepoStore2>
-                                                                            <>
-                                                                                <div style={{
-                                                                                         display: 'flex',
-                                                                                         minWidth: 0,
-                                                                                         minHeight: 0,
-                                                                                         flexGrow: 1
-                                                                                     }}>
+                                                                    <PrefsContext2>
+                                                                        <UserTagsDataLoader>
+                                                                            <BlockStoreDefaultContextProvider>
+                                                                                <BlocksStoreProvider>
+                                                                                    <PersistenceLayerApp tagsType="documents"
+                                                                                                         repoDocMetaManager={repoDocMetaManager}
+                                                                                                         repoDocMetaLoader={repoDocMetaLoader}
+                                                                                                         persistenceLayerManager={persistenceLayerManager}>
+                                                                                        <DocRepoStore2>
+                                                                                            <>
+                                                                                                <div style={{
+                                                                                                         display: 'flex',
+                                                                                                         minWidth: 0,
+                                                                                                         minHeight: 0,
+                                                                                                         flexGrow: 1
+                                                                                                     }}>
 
-                                                                                    <>
-                                                                                        <ZenModeGlobalHotKeys/>
-                                                                                        <ZenModeDeactivateButton/>
-                                                                                        <SideNav/>
-                                                                                        <Divider orientation="vertical"/>
-                                                                                    </>
+                                                                                                    <>
+                                                                                                        <ZenModeGlobalHotKeys/>
+                                                                                                        <ZenModeDeactivateButton/>
+                                                                                                        <SideNav/>
+                                                                                                        <Divider orientation="vertical"/>
+                                                                                                    </>
 
-                                                                                    <div style={{
-                                                                                             display: 'flex',
-                                                                                             minWidth: 0,
-                                                                                             minHeight: 0,
-                                                                                             flexDirection: 'column',
-                                                                                             flexGrow: 1
-                                                                                         }}>
+                                                                                                    <div style={{
+                                                                                                             display: 'flex',
+                                                                                                             minWidth: 0,
+                                                                                                             minHeight: 0,
+                                                                                                             flexDirection: 'column',
+                                                                                                             flexGrow: 1
+                                                                                                         }}>
 
-                                                                                        <PersistentRoute strategy="display" exact path="/">
-                                                                                            <RenderDefaultScreen/>
-                                                                                        </PersistentRoute>
+                                                                                                        <PersistentRoute strategy="display" exact path="/">
+                                                                                                            <RenderDefaultScreen/>
+                                                                                                        </PersistentRoute>
 
-                                                                                        <PersistentRoute strategy="display" exact path="/annotations">
-                                                                                            <RenderAnnotationRepoScreen/>
-                                                                                        </PersistentRoute>
+                                                                                                        <PersistentRoute strategy="display" exact path="/annotations">
+                                                                                                            <RenderAnnotationRepoScreen/>
+                                                                                                        </PersistentRoute>
 
-                                                                                        <SideNavDocuments persistenceLayerProvider={app.persistenceLayerProvider}
-                                                                                                          repoDocMetaManager={props.repoDocMetaManager}
-                                                                                                          repoDocMetaLoader={props.repoDocMetaLoader}
-                                                                                                          persistenceLayerManager={props.persistenceLayerManager}/>
+                                                                                                        <SideNavDocuments persistenceLayerProvider={app.persistenceLayerProvider}
+                                                                                                                          repoDocMetaManager={props.repoDocMetaManager}
+                                                                                                                          repoDocMetaLoader={props.repoDocMetaLoader}
+                                                                                                                          persistenceLayerManager={props.persistenceLayerManager}/>
 
-                                                                                        <Switch location={ReactRouters.createLocationWithPathOnly()}>
+                                                                                                        <Switch location={ReactRouters.createLocationWithPathOnly()}>
 
-                                                                                            <Route exact path='/whats-new'
-                                                                                                   render={renderWhatsNewScreen}/>
+                                                                                                            <Route exact path='/whats-new'
+                                                                                                                   render={renderWhatsNewScreen}/>
 
-                                                                                            <Route exact path='/invite' render={renderInvite}/>
+                                                                                                            <Route exact path='/invite' render={renderInvite}/>
 
-                                                                                            <Route exact path='/plans' render={premiumScreen}/>
+                                                                                                            <Route exact path='/plans' render={premiumScreen}/>
 
-                                                                                            <Route exact path='/premium' render={premiumScreen}/>
+                                                                                                            <Route exact path='/premium' render={premiumScreen}/>
 
-                                                                                            <Route exact path='/support' render={supportScreen}/>
+                                                                                                            <Route exact path='/support' render={supportScreen}/>
 
-                                                                                            <Route exact path='/stats'
-                                                                                                   component={renderStatsScreen}/>
+                                                                                                            <Route exact path='/stats'
+                                                                                                                   component={renderStatsScreen}/>
 
-                                                                                            <Route exact path="/settings"
-                                                                                                   component={RenderSettingsScreen}/>
+                                                                                                            <Route exact path="/settings"
+                                                                                                                   component={RenderSettingsScreen}/>
 
-                                                                                            <Route exact path="/logs"
-                                                                                                   component={LogsScreen}/>
+                                                                                                            <Route exact path="/logs"
+                                                                                                                   component={LogsScreen}/>
 
-                                                                                            <Route exact path="/device"
-                                                                                                   component={renderDeviceScreen}/>
+                                                                                                            <Route exact path="/device"
+                                                                                                                   component={renderDeviceScreen}/>
 
-                                                                                            <Route exact path="/feature-requests"
-                                                                                                   component={FeatureRequestsScreen}/>
+                                                                                                            <Route exact path="/feature-requests"
+                                                                                                                   component={FeatureRequestsScreen}/>
 
-                                                                                        </Switch>
+                                                                                                            <Route path="/notes"
+                                                                                                                   component={NotesScreen}/>
 
-                                                                                    </div>
-                                                                                </div>
+                                                                                                        </Switch>
 
-                                                                                {/* the following are small popup screens that can exist anywhere */}
-                                                                                <Switch location={ReactRouters.createLocationWithHashOnly()}>
+                                                                                                        <RepoFooter/>
 
-                                                                                    <Route path='#welcome'
-                                                                                           component={() =>
-                                                                                               <WelcomeScreen/>
-                                                                                           }/>
+                                                                                                    </div>
+                                                                                                </div>
 
-                                                                                    <Route path='#account'
-                                                                                           component={() =>
-                                                                                               <AccountDialogScreen/>
-                                                                                           }/>
+                                                                                                {/* the following are small popup screens that can exist anywhere */}
+                                                                                                <Switch location={ReactRouters.createLocationWithHashOnly()}>
 
-                                                                                    <Route path='#add'>
-                                                                                        <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
-                                                                                            <AddFileDropzoneScreen/>
-                                                                                        </PersistenceLayerContext.Provider>
-                                                                                    </Route>
+                                                                                                    <Route path='#welcome'
+                                                                                                           component={() =>
+                                                                                                               <WelcomeScreen/>
+                                                                                                           }/>
 
-                                                                                </Switch>
-                                                                            </>
-                                                                        </DocRepoStore2>
-                                                                    </PersistenceLayerApp>
+                                                                                                    <Route path='#account'
+                                                                                                           component={() =>
+                                                                                                               <AccountDialogScreen/>
+                                                                                                           }/>
+
+                                                                                                    <Route path='#add'>
+                                                                                                        <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
+                                                                                                            <AddFileDropzoneScreen/>
+                                                                                                        </PersistenceLayerContext.Provider>
+                                                                                                    </Route>
+
+                                                                                                </Switch>
+                                                                                            </>
+                                                                                        </DocRepoStore2>
+                                                                                    </PersistenceLayerApp>
+                                                                                </BlocksStoreProvider>
+                                                                            </BlockStoreDefaultContextProvider>
+                                                                        </UserTagsDataLoader>
+                                                                    </PrefsContext2>
                                                                 </AuthRequired>
                                                             </Route>
 

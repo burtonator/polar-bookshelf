@@ -31,7 +31,10 @@ export const GlobalCssDarkForInvertStyles = withStyles((theme) => {
         '@global': {
 
             ".page canvas": {
-                filter: "invert(0.85)"
+                // filter: "invert(0.85)"
+                // filter: "invert(64%) contrast(228%) brightness(80%) hue-rotate(180deg)"
+                // filter: "invert(64%) contrast(228%) brightness(100%) hue-rotate(180deg)"
+                filter: "invert(64%) contrast(228%) brightness(100%) hue-rotate(180deg)"
             },
 
 

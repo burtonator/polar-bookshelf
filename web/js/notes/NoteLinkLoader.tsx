@@ -12,7 +12,7 @@ export function useNoteLinkLoader() {
 
     return React.useCallback((target: BlockTargetStr) => {
 
-        const newURL = '/apps/stories/notes/' + target;
+        const newURL = '/notes/' + target;
         historyRef.current.push(newURL);
 
     }, [historyRef]);
@@ -20,5 +20,5 @@ export function useNoteLinkLoader() {
 }
 
 export function createNoteLink(target: BlockTargetStr) {
-    return '/apps/stories/notes/' + target
+    return '/notes/' + target
 }

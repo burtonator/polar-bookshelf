@@ -15,37 +15,37 @@ const globalKeyMap = keyMapWithGroup(
         keyMap: {
             TAG: {
                 name: "Tag",
-                description: "Tag the currently selected document.",
+                description: "Tag selected doc",
                 sequences: ['t'],
             },
             DELETE: {
                 name: "Delete",
-                description: "Delete the currently selected item.",
+                description: "Delete selected doc",
                 sequences: ['Delete', 'Backspace'],
             },
             FLAG: {
                 name: "Flag",
-                description: "Flag the currently selected document",
+                description: "Flag selected doc",
                 sequences: ['f']
             },
             ARCHIVE: {
                 name: "Archive",
-                description: "Archive the currently selected document.  Once archived the item is not visible by default.",
+                description: "Archive selected doc",
                 sequences: ['a']
             },
             RENAME: {
                 name: "Rename",
-                description: "Rename the current document and assign it a new title.",
+                description: "Rename selected doc",
                 sequences: ['r']
             },
             OPEN: {
                 name: "Open",
-                description: "Open the current document in the document viewer",
+                description: "Open selected doc in doc viewer",
                 sequences: ['Enter']
             },
             UPDATE_METADATA: {
                 name: "Update Document Metadata",
-                description: "Update document metadata and additional fields like authors, abstract, etc.",
+                description: "Update doc metadata",
                 sequences: ['m']
             },
 

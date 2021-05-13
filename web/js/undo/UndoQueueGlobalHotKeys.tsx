@@ -2,6 +2,7 @@ import * as React from 'react';
 import { keyMapWithGroup, GlobalKeyboardShortcuts } from '../keyboard_shortcuts/GlobalKeyboardShortcuts';
 import { useUndoCallbacks } from './UndoStore';
 import {useLogger} from "../mui/MUILogger";
+import {useUndoQueue} from "./UndoQueueProvider2";
 
 const globalKeyMap = keyMapWithGroup({
     group: "Undo",
@@ -25,13 +26,13 @@ const globalKeyMap = keyMapWithGroup({
 
 export const UndoQueueGlobalHotKeys = React.memo(function UndoQueueGlobalHotKeys() {
 
-    const {undo, redo} = useUndoCallbacks();
+    const {undo, redo} = useUndoQueue();
 
     const log = useLogger();
 
     const handleUndo = React.useCallback(async () => {
         try {
-            await undo();
+            undo();
         } catch (e) {
             log.error("Could not handle undo: ", e);
         }
@@ -39,7 +40,7 @@ export const UndoQueueGlobalHotKeys = React.memo(function UndoQueueGlobalHotKeys
 
     const handleRedo = React.useCallback(async () => {
         try {
-            await redo();
+            redo();
         } catch (e) {
             log.error("Could not handle redo: ", e);
         }
@@ -50,9 +51,8 @@ export const UndoQueueGlobalHotKeys = React.memo(function UndoQueueGlobalHotKeys
         REDO: handleRedo,
     };
     return (
-        <GlobalKeyboardShortcuts
-            keyMap={globalKeyMap}
-            handlerMap={globalKeyHandlers}/>
+        <GlobalKeyboardShortcuts keyMap={globalKeyMap}
+                                 handlerMap={globalKeyHandlers}/>
     );
 
 });

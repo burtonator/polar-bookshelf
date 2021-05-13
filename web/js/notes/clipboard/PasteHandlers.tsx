@@ -111,6 +111,8 @@ export function usePasteHandler(opts: IPasteHandlerOpts) {
                             const ab = await Blobs.toArrayBuffer(file)
                             const dataURL = DataURLs.encode(ab, pasteItem.type);
 
+                            // const resolution = await ImageResolutions.compute(file);
+
                             const dimensions = await Images.getDimensions(dataURL);
 
                             const image: IPasteImageData = {

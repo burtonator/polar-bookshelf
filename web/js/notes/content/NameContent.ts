@@ -1,6 +1,6 @@
 import {makeObservable, observable, computed} from "mobx"
 import {INameContent} from "./INameContent";
-import {BlockContent, IBlockContent} from "../store/BlocksStore";
+import {IBlockContent} from "../store/BlocksStore";
 import {IBaseBlockContent} from "./IBaseBlockContent";
 
 export class NameContent implements INameContent, IBaseBlockContent {
@@ -32,6 +32,13 @@ export class NameContent implements INameContent, IBaseBlockContent {
             throw new Error("Invalid type: " +  content.type)
         }
 
+    }
+
+    public toJSON(): INameContent {
+        return {
+            type: this._type,
+            data: this._data
+        }
     }
 
 }

@@ -22,7 +22,8 @@ import {
 import {
     IDocDescriptor,
     IDocScale,
-    useDocViewerCallbacks
+    useDocViewerCallbacks,
+    useDocViewerStore
 } from "../../DocViewerStore";
 import {useDocFindCallbacks} from "../../DocFindStore";
 import {PageNavigator} from "../../PageNavigator";
@@ -41,7 +42,6 @@ import {useLogger} from "../../../../../web/js/mui/MUILogger";
 import {KnownPrefs} from "../../../../../web/js/util/prefs/KnownPrefs";
 import {useAnnotationBar} from "../../AnnotationBarHooks";
 import {DocumentInit} from "../DocumentInitHook";
-import {useDocViewerPageJumpListener} from '../../DocViewerAnnotationHook';
 import {deepMemo} from "../../../../../web/js/react/ReactUtils";
 import {IOutlineItem} from "../../outline/IOutlineItem";
 import Outline = _pdfjs.Outline;
@@ -54,6 +54,7 @@ import {usePrefsContext} from "../../../../repository/js/persistence_layer/Prefs
 import { usePDFUpgrader } from './PDFUpgrader';
 import {ViewerElements} from "../ViewerElements";
 import {useDocumentViewerVisibleElemFocus} from '../UseSidenavDocumentChangeCallbackHook';
+import {AreaHighlightCreator} from '../../annotations/AreaHighlightDrawer';
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -142,7 +143,7 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
     const log = useLogger();
 
     const {setDocDescriptor, setPageNavigator, setResizer, setScaleLeveler,
-           setDocScale, setPage, setOutline, setOutlineNavigator, docMetaProvider}
+           setDocScale, setPage, setOutline, setOutlineNavigator, docMetaProvider, setScale: setStoreScale}
         = useDocViewerCallbacks();
 
     const {setFinder} = useDocFindCallbacks();
@@ -224,6 +225,7 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
 
         if (['page-width', 'page-fit'].includes(scaleRef.current.value)) {
             setScale(scaleRef.current);
+            setStoreScale(scaleRef.current);
         }
 
         if (docViewerRef.current) {
@@ -232,7 +234,7 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
             throw new Error("No viewer");
         }
 
-    }, [setScale]);
+    }, [setScale, setStoreScale]);
 
     const doLoad = React.useCallback(async (docViewer: DocViewer) => {
 
@@ -455,6 +457,7 @@ export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
 
     return active && (
         <>
+            <AreaHighlightCreator />
             <DocumentInit/>
             {props.children}
         </>

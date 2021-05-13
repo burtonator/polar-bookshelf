@@ -9,6 +9,8 @@ import { observer } from "mobx-react-lite"
 import {NoteSelectionHandler} from "./NoteSelectionHandler";
 import {ActionMenuPopup} from "../mui/action_menu/ActionMenuPopup";
 import { ActionMenuStoreProvider } from "../mui/action_menu/ActionStore";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import { autorun } from "mobx";
 
 interface IProps {
     readonly target: BlockIDStr;
@@ -25,20 +27,27 @@ export const NoteRoot = observer((props: IProps) => {
     const block = blocksStore.getBlockByTarget(target)
 
     React.useEffect(() => {
-        // TODO: do this with one init() operation so it mutates the store just once.
 
-        if (block) {
-            blocksStore.setRoot(block.id);
-            blocksStore.setActive(block.id);
-        } else {
-            console.warn("No note for target: ", target);
-        }
+        // autorun(() => {
+
+            if (block) {
+                blocksStore.setRoot(block.id);
+                blocksStore.setActive(block.id);
+            }
+        //
+        // });
 
     }, [block, blocksStore, target])
 
+    if (! blocksStore.hasSnapshot) {
+        return (
+            <LinearProgress />
+        );
+    }
+
     if (! block) {
         return (
-            <div>No note for target: {props.target}</div>
+            <div>No note for: '{props.target}'</div>
         );
     }
 

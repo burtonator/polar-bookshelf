@@ -16,7 +16,7 @@ const isDevServer = process.argv.includes('serve');
 const mode = process.env.NODE_ENV || (isDevServer ? 'development' : 'production');
 const isDev = mode === 'development';
 const target = process.env.WEBPACK_TARGET || 'web';
-const devtool = isDev ? (process.env.WEBPACK_DEVTOOL || "eval") : "source-map";
+const devtool = isDev ? (process.env.WEBPACK_DEVTOOL || "inline-source-map") : "source-map";
 const useWorkbox = ! isDevServer;
 const bundle = determineBundle();
 const port = determinePort(bundle);

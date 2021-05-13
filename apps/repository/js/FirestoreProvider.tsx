@@ -5,7 +5,7 @@ import {Firebase} from "../../../web/js/firebase/Firebase";
 import {deepMemo} from "../../../web/js/react/ReactUtils";
 import {useAsyncWithError} from "../../../web/js/hooks/ReactLifecycleHooks";
 import firebase from 'firebase/app'
-import {IFirestore} from "polar-snapshot-cache/src/store/IFirestore";
+import { IFirestore } from 'polar-snapshot-cache/src/store/IFirestore';
 
 export interface IFirestoreContext {
     readonly uid: string | undefined;

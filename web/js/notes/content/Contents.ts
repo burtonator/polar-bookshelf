@@ -5,6 +5,8 @@ import {ImageContent} from "./ImageContent";
 import { IMarkdownContent } from "./IMarkdownContent";
 import {INameContent} from "./INameContent";
 import {IImageContent} from "./IImageContent";
+import {IDateContent} from "./IDateContent";
+import {DateContent} from "./DateContent";
 
 export namespace Contents {
 
@@ -17,6 +19,9 @@ export namespace Contents {
                 return new NameContent(opts as INameContent) as C;
             case "image":
                 return new ImageContent(opts as IImageContent) as C;
+            case "date":
+                return new DateContent(opts as IDateContent) as C;
+
 
         }
 

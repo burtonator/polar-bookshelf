@@ -7,7 +7,7 @@ import {GlobalCssMobile} from "./css/GlobalCssMobile";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import {KeyboardShortcuts} from "../keyboard_shortcuts/KeyboardShortcuts";
-import {UndoQueueProvider} from "../undo/UndoQueueProvider";
+import {UndoQueueProvider2} from "../undo/UndoQueueProvider2";
 import useLocalStorageState from 'use-local-storage-state'
 import {MUIErrorBoundary} from "./MUIErrorBoundary";
 import {Dictionaries} from "polar-shared/src/util/Dictionaries";
@@ -59,13 +59,13 @@ export const MUIAppRoot = React.memo(function MUIAppRoot(props: IProps) {
                         <GlobalCssSummernote/>
                         <GlobalCssMobile/>
 
-                        <UndoQueueProvider>
+                        <UndoQueueProvider2>
                             <MUIErrorBoundary>
                                 <>
                                     {props.children}
                                 </>
                             </MUIErrorBoundary>
-                        </UndoQueueProvider>
+                        </UndoQueueProvider2>
 
                     </>
                 </MUIThemeTypeContext.Provider>

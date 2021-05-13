@@ -43,6 +43,7 @@ export namespace Firestore {
     export async function getInstance(): Promise<IFirestore> {
         await init();
 
+        // return instance!;
         return await StoreCaches.create().build(instance! as any)
 
     }

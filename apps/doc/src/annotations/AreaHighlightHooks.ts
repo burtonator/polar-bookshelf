@@ -17,7 +17,7 @@ import {useDocViewerContext} from "../renderers/DocRenderer";
 import {useDocViewerElementsContext} from "../renderers/DocViewerElementsContext";
 
 export interface AreaHighlightCreatedOpts {
-    readonly pointWithinPageElement: IPoint;
+    readonly rectWithinPageElement: ILTRect;
     readonly pageNum: number;
 }
 
@@ -45,7 +45,7 @@ export function useAreaHighlightHooks(): IAreaHighlightHooks {
 
     const onAreaHighlightCreatedAsync = React.useCallback(async (opts: AreaHighlightCreatedOpts) => {
 
-        const {pageNum, pointWithinPageElement} = opts;
+        const {pageNum, rectWithinPageElement} = opts;
 
         if (docScale && docMeta) {
 
@@ -53,7 +53,7 @@ export function useAreaHighlightHooks(): IAreaHighlightHooks {
 
             const capturedAreaHighlight =
                 await createAreaHighlightFromEvent(pageNum,
-                                                   pointWithinPageElement,
+                                                   rectWithinPageElement,
                                                    docScale,
                                                    fileType,
                                                    docViewerElement);

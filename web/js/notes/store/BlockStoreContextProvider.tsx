@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {UIDStr} from "./IBlock";
+import {useUserInfoContext} from "../../apps/repository/auth_handler/UserInfoProvider";
 
 export interface IBlockStoreContext {
     readonly uid: UIDStr;
@@ -22,4 +23,24 @@ export const BlockStoreContextProvider = (props: IProps) => {
             {props.children}
         </BlockStoreContext.Provider>
     );
+}
+
+export const BlockStoreDefaultContextProvider = (props: {children: JSX.Element}) => {
+
+    const userInfoContext = useUserInfoContext();
+
+    if (! userInfoContext) {
+        return null;
+    }
+
+    if (! userInfoContext.userInfo) {
+        return null;
+    }
+
+    return (
+        <BlockStoreContextProvider uid={userInfoContext.userInfo?.uid}>
+            {props.children}
+        </BlockStoreContextProvider>
+    )
+
 }

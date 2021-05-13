@@ -2,14 +2,14 @@ import * as React from "react";
 import {useContextMenu} from "../../../../repository/js/doc_repo/MUIContextMenu";
 import {Elements} from "../../../../../web/js/util/Elements";
 import {GlobalPDFCss} from "./GlobalPDFCss";
-import {useDocViewerCallbacks, useDocViewerStore} from "../../DocViewerStore";
-import {FakePinchToZoom} from "../../PinchHooks";
+import {usePDFPinchToZoom} from "./PinchToZoomHooks";
 
 let iter: number = 0;
 
 interface IProps {
     readonly children: React.ReactNode;
 }
+
 
 export const PDFViewerContainer = React.memo(function PDFViewerContainer(props: IProps) {
 
@@ -29,31 +29,14 @@ export const PDFViewerContainer = React.memo(function PDFViewerContainer(props: 
     }, [contextMenu]);
 
     const viewerRef = React.useRef<HTMLDivElement>(null);
+    const wrapperRef = React.useRef<HTMLDivElement>(null);
     
-    const {docScale} = useDocViewerStore(['docScale']);
-    const {setScale} = useDocViewerCallbacks()
-
-    const shouldUpdateScale = React.useCallback((zoom: number): boolean => {
-        const min = 0.1, max = 4;
-        const scale = docScale!.scaleValue * zoom;
-        return scale >= min && scale <= max;
-    }, [docScale]);
-
-    const handleZoom = React.useCallback((zoom: number): void => {
-        setScale({ label: `${zoom * 100}%`, value: `${zoom * docScale!.scaleValue}` });
-    }, [docScale, setScale]);
+    usePDFPinchToZoom({ containerRef: viewerRef, wrapperRef: wrapperRef });
 
     ++iter;
 
     return (
         <>
-            {docScale !== undefined && (
-                <FakePinchToZoom
-                    elemRef={viewerRef}
-                    shouldUpdate={shouldUpdateScale}
-                    onZoom={handleZoom}
-                />
-            )}
             <GlobalPDFCss/>
             <div onContextMenu={onContextMenu}
                   id="viewerContainer"
@@ -65,6 +48,7 @@ export const PDFViewerContainer = React.memo(function PDFViewerContainer(props: 
                       height: '100%',
                   }}
                   tabIndex={0}
+                  ref={wrapperRef}
                   className="viewerContainer"
                   itemProp= "mainContentOfPage"
                   data-iter={iter}>

@@ -27,7 +27,7 @@ const keyMap = {
     SHOW_ALL_HOTKEYS: {
         group: 'Help',
         name: 'Show Keyboard Shortcuts',
-        description: "Show the currently active keyboard shortcuts",
+        description: "Show active keyboard shortcuts",
         sequences: ["shift+?", '/'],
         priority: -1
     }

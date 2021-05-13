@@ -9,6 +9,7 @@ import {ICapturedScreenshot} from "../../../../web/js/screenshots/Screenshot";
 import {Position} from "polar-shared/src/metadata/IBaseHighlight";
 import {FileType} from "../../../../web/js/apps/main/file_loaders/FileType";
 import {Preconditions} from "polar-shared/src/Preconditions";
+import {IRect} from "polar-shared/src/util/rects/IRect";
 
 export namespace AreaHighlightRenderers {
 
@@ -21,14 +22,14 @@ export namespace AreaHighlightRenderers {
     }
 
     export async function createAreaHighlightFromEvent(pageNum: number,
-                                                       pointWithinPageElement: IPoint,
+                                                       areaHighlightRect: ILTRect,
                                                        docScale: IDocScale,
                                                        fileType: FileType,
                                                        docViewerElement: HTMLElement): Promise<ICapturedAreaHighlight> {
 
         Preconditions.assertPresent(fileType, 'fileType');
 
-        const rect = AnnotationRects.createFromPointWithinPageElement(pageNum, pointWithinPageElement, docViewerElement);
+        const rect = AnnotationRects.createFromPointWithinPageElement(pageNum, areaHighlightRect, docViewerElement);
 
         const pageDimensions = getPageElementDimensions(pageNum, docViewerElement);
 

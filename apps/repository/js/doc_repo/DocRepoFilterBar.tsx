@@ -38,14 +38,14 @@ export const DocRepoFilterBar = deepMemo(function DocRepoFilterBar(props: IProps
         <MUIButtonBar>
 
             <MUIToggleButton id="toggle-flagged"
-                             tooltip="Show only flagged documents."
+                             tooltip="Show only flagged docs"
                              size="medium"
                              label="flagged"
                              icon={<FlagIcon/>}
                              initialValue={filters.flagged}
                              onChange={value => setFilters({...filters, flagged: value})}/>
             <MUIToggleButton id="toggle-archived"
-                             tooltip="Toggle showing archived documents"
+                             tooltip="Toggle archived docs"
                              size="medium"
                              label="archived"
                              initialValue={filters.archived}

@@ -15,6 +15,7 @@ import clsx from "clsx";
 import { BlockDragIndicator } from "./BlockDragIndicator";
 import {BlockImageContent} from "./blocks/BlockImageContent";
 import {BlockPredicates} from "./store/BlockPredicates";
+import {useUndoQueue} from "../undo/UndoQueueProvider2";
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -42,6 +43,7 @@ export const BlockInner = observer((props: IProps) => {
 
     const blocksStore = useBlocksStore();
     const classes = useStyles();
+    const undoQueue = useUndoQueue();
 
     const theme = useTheme();
     const contextMenuHandlers = useBlockContextMenu();
@@ -140,10 +142,22 @@ export const BlockInner = observer((props: IProps) => {
         const op = computeUndoOperation();
 
         if (op !== undefined) {
+
+            switch (op) {
+
+                case "undo":
+                    undoQueue.undo();
+                    break;
+                case "redo":
+                    undoQueue.redo();
+                    break;
+
+            }
+
             abortEvent();
         }
 
-    }, []);
+    }, [undoQueue]);
 
     const handleDragStart = React.useCallback((event: React.DragEvent) => {
         blocksStore.setDropSource(props.id);
@@ -219,7 +233,7 @@ export const BlockInner = observer((props: IProps) => {
 
     }, []);
 
-    const items = blocksStore.lookup(block.items || []);
+    const items = blocksStore.lookup(block.itemsAsArray || []);
 
     const hasItems = items.length > 0;
 

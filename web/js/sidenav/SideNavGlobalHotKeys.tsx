@@ -6,18 +6,18 @@ const globalKeyMap = keyMapWithGroup({
     group: "Side Navigation",
     keyMap: {
         CLOSE_CURRENT_TAB: {
-            name: "Close Current Document",
-            description: "Close the Current Document Tab",
+            name: "Close doc",
+            description: "Close doc",
             sequences: ['shift+ctrl+L', 'shift+command+l']
         },
         PREV_TAB: {
-            name: "Jump to Previous Document",
-            description: "Jump to Previous Document",
+            name: "Jump to previous doc",
+            description: "Jump to previous doc",
             sequences: ['shift+command+ArrowUp', 'shift+ctrl+ArrowUp']
         },
         NEXT_TAB: {
-            name: "Jump to Next Document",
-            description: "Jump to Next Document",
+            name: "Jump to next doc",
+            description: "Jump to next doc",
             sequences: ['shift+command+ArrowDown', 'shift+ctrl+ArrowDown']
         }
     }

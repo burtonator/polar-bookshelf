@@ -1,8 +1,7 @@
 import {makeObservable, observable, computed} from "mobx"
 import {DataURLStr, IImageContent} from "./IImageContent";
-import {INameContent} from "./INameContent";
 import {IBaseBlockContent} from "./IBaseBlockContent";
-import {BlockContent, IBlockContent} from "../store/BlocksStore";
+import {IBlockContent} from "../store/BlocksStore";
 
 export class ImageContent implements IImageContent, IBaseBlockContent {
 
@@ -65,6 +64,20 @@ export class ImageContent implements IImageContent, IBaseBlockContent {
         }
 
     }
+
+    public toJSON(): IImageContent {
+
+        return {
+            type: this._type,
+            src: this._src,
+            width: this._width,
+            height: this._height,
+            naturalWidth: this._naturalWidth,
+            naturalHeight: this._naturalHeight,
+        };
+
+    }
+
 
 }
 

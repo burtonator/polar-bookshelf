@@ -28,6 +28,7 @@ import {ZenModeActiveContainer} from "../../../../web/js/mui/ZenModeActiveContai
 import {ZenModeButton} from "./ZenModeButton";
 import {createStyles, makeStyles} from "@material-ui/core";
 import {MUIIconButton} from "../../../../web/js/mui/icon_buttons/MUIIconButton";
+import {MUIDocAreaHighlightModeToggle} from "../../../repository/js/doc_repo/buttons/MUIDocAreaHighlightModeToggle";
 
 const getScaleLevelTuple = (scale: ScaleLevel) => (
     arrayStream(ScaleLevelTuples)
@@ -66,10 +67,10 @@ export const DocActions = () => {
 
 export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
 
-    const {docScale, pageNavigator, scaleLeveler, docMeta}
-        = useDocViewerStore(['docScale', 'pageNavigator', 'scaleLeveler', 'docMeta']);
+    const {docScale, pageNavigator, scaleLeveler, docMeta, areaHighlightMode}
+        = useDocViewerStore(['docScale', 'pageNavigator', 'scaleLeveler', 'docMeta', 'areaHighlightMode']);
     const {finder} = useDocFindStore(['finder']);
-    const {setScale, doZoom} = useDocViewerCallbacks();
+    const {setScale, doZoom, toggleAreaHighlightMode} = useDocViewerCallbacks();
     const classes = useDocViewerToolbarStyles();
     const handleScaleChange = React.useCallback((scale: ScaleLevel) => {
 
@@ -197,8 +198,12 @@ export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
 
                                 {/* TODO: implement keyboard shortcuts for these. */}
                                 <DocActions />
+                                <MUIDocAreaHighlightModeToggle
+                                    onClick={toggleAreaHighlightMode}
+                                    active={areaHighlightMode}
+                                />
 
-                                <Divider orientation="vertical" flexItem={true}/>
+                                <Divider orientation="vertical" flexItem/>
 
                                 {/*
                                 <div className="ml-3 mr-2" style={{display: 'flex'}}>

@@ -17,5 +17,3 @@ export const UndoQueueProvider = deepMemo(function UndoQueueProvider(props: IPro
         </UndoStoreProviderDelegate>
     );
 });
-
-UndoQueueProvider.displayName='UndoQueueProvider';

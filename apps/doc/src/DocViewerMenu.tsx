@@ -437,7 +437,15 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
     const onCreateAreaHighlight = React.useCallback(() => {
         const {pageNum, pointWithinPageElement} = origin;
 
-        onAreaHighlightCreated({pageNum, pointWithinPageElement});
+        onAreaHighlightCreated({
+            pageNum,
+            rectWithinPageElement: {
+                left: pointWithinPageElement.x,
+                top: pointWithinPageElement.y,
+                width: 150,
+                height: 150,
+            },
+        });
 
     }, [onAreaHighlightCreated, origin]);
 

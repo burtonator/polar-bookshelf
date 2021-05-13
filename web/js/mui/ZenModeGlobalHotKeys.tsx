@@ -12,7 +12,7 @@ const globalKeyMap = keyMapWithGroup({
         TOGGLE_ZEN_MODE: {
             icon: <MenuIcon/>,
             name: "Toggle Zen Mode",
-            description: "Toggle 'zen' mode by hiding extra navigation items like toolbars, side navigation, etc.",
+            description: "Toggle 'zen' mode",
             sequences: ['F9']
         },
         TOGGLE_FULL_SCREEN: {

@@ -1,23 +1,29 @@
 import React from "react";
 
-interface IGestureZoomProps {
-    elemRef: React.RefObject<HTMLDivElement>;
+interface IUseFakePinchToZoomArgs {
+    elemRef: React.RefObject<HTMLElement>;
+    wrapperRef: React.RefObject<HTMLElement>;
     onZoom: (scale: number) => void;
     shouldUpdate: (scale: number) => boolean;
+    enabled?: boolean;
+    transformOriginOffset?: [number, number];
 }
 
 export type UsePinchMoveHandler = (arg: { delta: number, initial: [number, number] }) => void;
 
-export const FakePinchToZoom: React.FC<IGestureZoomProps> = ({
+export const useFakePinchToZoom = ({
     elemRef,
+    wrapperRef,
     shouldUpdate,
     onZoom,
-}) => {
+    enabled = true,
+}: IUseFakePinchToZoomArgs) => {
     const pinchingRef = React.useRef<boolean>(false);
-    const zoomRef = React.useRef(1);
+    const zoomRef     = React.useRef(1);
 
-    const onMove: UsePinchMoveHandler = ({ delta }) => {
+    const onMove: UsePinchMoveHandler = React.useCallback(({ delta }) => {
         const elem = elemRef.current!;
+        const wrapper = wrapperRef.current!;
         const newScale = zoomRef.current + (delta / window.innerWidth);
         if (!shouldUpdate(newScale)) {
             return;
@@ -25,35 +31,43 @@ export const FakePinchToZoom: React.FC<IGestureZoomProps> = ({
         zoomRef.current = newScale;
 
         if (!pinchingRef.current) {
-            const { top } = elem.getBoundingClientRect();
-            elem.style.transformOrigin = `50% ${top * -1}px`;
+            const elemRect = elem.getBoundingClientRect();
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const x = -elemRect.left + wrapperRect.left, y = -elemRect.top + wrapperRect.top;
+            elem.style.transformOrigin = `${x}px ${y}px`;
+            elem.style.willChange = "transform";
             pinchingRef.current = true;
         }
         elem.style.transform = `scale(${newScale})`;
-    };
-    const onFinish = () => {
+    }, [zoomRef, pinchingRef, shouldUpdate, elemRef, wrapperRef]);
+
+    const onFinish = React.useCallback(() => {
         const elem = elemRef.current!;
         pinchingRef.current = false;
         elem.removeAttribute('style');
         onZoom(zoomRef.current);
         zoomRef.current = 1;
-    };
+    }, [zoomRef, onZoom, elemRef]);
 
-    usePinch({ elem: elemRef.current, onMove, onFinish });
-
-    return null;
+    usePinch({
+        elemRef,
+        onMove,
+        onFinish,
+        enabled: enabled && !!elemRef.current && !!wrapperRef.current,
+    });
 };
 
 type UsePinchConfig = {
-    elem: HTMLElement | null;
+    elemRef: React.RefObject<HTMLElement>;
     onMove: UsePinchMoveHandler;
     onFinish: () => void;
+    enabled?: boolean;
 };
 
-export const usePinch = ({ elem, onMove, onFinish }: UsePinchConfig) => {
+export const usePinch = ({ elemRef, onMove, onFinish, enabled = true }: UsePinchConfig) => {
 
     React.useEffect(() => {
-        if (!elem) {
+        if (!elemRef.current || !enabled) {
             return;
         }
         let startX = 0, startY = 0;
@@ -82,7 +96,9 @@ export const usePinch = ({ elem, onMove, onFinish }: UsePinchConfig) => {
             if (initialDelta <= 0 || e.touches.length < 2) {
                 return;
             }
-            e.preventDefault();
+            if (e.cancelable) {
+                e.preventDefault();
+            }
 
             const delta = Math.hypot(
                 (e.touches[1].pageX - e.touches[0].pageX),
@@ -101,15 +117,18 @@ export const usePinch = ({ elem, onMove, onFinish }: UsePinchConfig) => {
             onFinish();
             reset();
         };
+        const elem = elemRef.current;
 
         elem.addEventListener("touchstart", onTouchStart);
         elem.addEventListener("touchmove", onTouchMove, { passive: false });
         elem.addEventListener("touchend", onTouchEnd);
+        elem.addEventListener("touchcancel", onTouchEnd);
 
         return () => {
             elem.removeEventListener("touchstart", onTouchStart);
             elem.removeEventListener("touchmove", onTouchMove);
             elem.removeEventListener("touchend", onTouchEnd);
+            elem.removeEventListener("touchcancel", onTouchEnd);
         };
-    }, [elem, onFinish, onMove]);
+    }, [onFinish, onMove, enabled, elemRef]);
 }

@@ -34,6 +34,24 @@ export const AreaHighlightRenderer = deepMemo(function AreaHighlightRenderer(pro
 
     const pageElement = docViewerElementsContext.getPageElementForPage(pageNum);
 
+    const [draggable, setDraggable] = React.useState(false);
+
+    React.useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                setDraggable(true);
+            } else {
+                setDraggable(false);
+            }
+        };
+        window.addEventListener('keydown', handleKey, {passive: true});
+        window.addEventListener('keyup', handleKey, {passive: true});
+        return () => {
+            window.removeEventListener('keydown', handleKey);
+            window.removeEventListener('keyup', handleKey);
+        };
+    }, [setDraggable]);
+
     const toOverlayRect = React.useCallback((areaHighlightRect: AreaHighlightRect): ILTRect | undefined => {
 
         if (! pageElement) {
@@ -106,6 +124,7 @@ export const AreaHighlightRenderer = deepMemo(function AreaHighlightRenderer(pro
             <ResizeBox
                  id={id}
                  data-type="area-highlight"
+                 draggable={draggable}
                  data-doc-fingerprint={fingerprint}
                  data-area-highlight-id={areaHighlight.id}
                  data-annotation-id={areaHighlight.id}
@@ -130,7 +149,7 @@ export const AreaHighlightRenderer = deepMemo(function AreaHighlightRenderer(pro
             container,
             id);
 
-    }, [areaHighlight, createID, fingerprint, handleRegionResize, pageNum, toOverlayRect]);
+    }, [areaHighlight, createID, fingerprint, handleRegionResize, pageNum, toOverlayRect, draggable]);
 
     // const rect = Arrays.first(Object.values(areaHighlight.rects));
     //
