@@ -9,19 +9,18 @@ interface IProps<T> {
 }
 
 export function MUIRelatedOptions<T>(props: IProps<T>) {
+    return (
+        <Box mt={2} style={{ minHeight: 50 }}>
 
-    if (props.relatedOptions.length === 0) {
-        return null;
-    }
+            {props.relatedOptions.length > 0 && (
+                <>
+                    <Box mb={1} color="text.secondary">
+                        <strong>Related tags: </strong>
+                    </Box>
 
-    return <Box mt={1}>
-
-        <Box mb={1} color="text.secondary">
-            <strong>Related tags: </strong>
+                    <MUIRelatedOptionsChips {...props}/>
+                </>
+            )}
         </Box>
-
-        <MUIRelatedOptionsChips {...props}/>
-
-    </Box>;
-
+    );
 };
