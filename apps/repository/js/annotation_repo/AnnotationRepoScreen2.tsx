@@ -236,7 +236,6 @@ namespace screen {
             <AnnotationRepoRoutedComponents/>
             <Desktop.Main />
 
-            <RepoFooter/>
 
         </FixedNav>
 

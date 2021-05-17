@@ -26,6 +26,8 @@ import {DateContents} from "../notes/content/DateContents";
 import {useBlocksStore} from "../notes/store/BlocksStore";
 import { observer } from "mobx-react-lite"
 import { autorun } from 'mobx'
+import {Devices} from 'polar-shared/src/util/Devices';
+import {Box} from '@material-ui/core';
 
 export const SIDENAV_WIDTH = 56;
 export const SIDENAV_BUTTON_SIZE = SIDENAV_WIDTH - 10;
@@ -294,38 +296,49 @@ export const SideNav = React.memo(function SideNav() {
             <Intercom/>
 
             <ZenModeActiveContainer>
-                <div className={classes.root}>
+                <Box
+                    display="flex"
+                    style={
+                        ~["phone", "tablet"].indexOf(Devices.get())
+                            ? { position: "fixed", height: "100%" }
+                            : {}
+                    }
+                >
+                    <div className={classes.root}>
 
-                    <PolarButton/>
+                        <PolarButton/>
 
-                    <SideNavDividerTop/>
+                        <SideNavDividerTop/>
 
-                    <HomeButton/>
-                    <AnnotationsButton/>
+                        <HomeButton/>
+                        <AnnotationsButton/>
 
-                    {notesEnabled && (
-                        <NotesButton/>
-                    )}
+                        {notesEnabled && (
+                            <NotesButton/>
+                        )}
 
-                    <StatsButton/>
+                        <StatsButton/>
 
-                    {tabs.length > 0 && (
-                        <SideNavDivider/>
-                    )}
+                        {tabs.length > 0 && (
+                            <SideNavDivider/>
+                        )}
 
-                    <VerticalDynamicScroller className={classes.buttons}>
-                        {tabs.map(tab => <SideNavButton key={tab.id} tab={tab}/>)}
-                    </VerticalDynamicScroller>
+                        <VerticalDynamicScroller className={classes.buttons}>
+                            {tabs.map(tab => <SideNavButton key={tab.id} tab={tab}/>)}
+                        </VerticalDynamicScroller>
 
-                    <div style={{marginBottom: '5px'}}>
-                        <SideNavDivider/>
-                        <SyncButton/>
-                        <AccountButton/>
-                        <SideNavQuestionButton/>
-                        <SettingsButton/>
+                        <div style={{marginBottom: '5px'}}>
+                            <SideNavDivider/>
+                            <SyncButton/>
+                            <AccountButton/>
+                            <SideNavQuestionButton/>
+                            <SettingsButton/>
+                        </div>
+
                     </div>
-
-                </div>
+                    <div id="sidenav-sidecar">
+                    </div>
+                </Box>
             </ZenModeActiveContainer>
         </>
     );

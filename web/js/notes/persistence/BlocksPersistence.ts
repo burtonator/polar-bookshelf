@@ -6,6 +6,7 @@ import {BlockIDStr, IBlockContent} from "../store/BlocksStore";
 import {arrayStream} from "polar-shared/src/util/ArrayStreams";
 import firebase from 'firebase';
 import {IBlock} from "../store/IBlock";
+import {Asserts} from "polar-shared/src/Asserts";
 
 export type BlocksPersistenceWriter = (mutations: ReadonlyArray<IBlocksStoreMutation>) => void;
 
@@ -73,10 +74,21 @@ export function useFirestoreBlocksPersistenceWriter(): BlocksPersistenceWriter {
                     batch.delete(doc)
                     break;
 
-                case "update-path":
-                    batch.update(doc, firestoreMutation.path, firestoreMutation.value !== undefined ? firestoreMutation.value : null);
+                case "update-path-number":
+                    Asserts.assertNumber(firestoreMutation.value);
+                    batch.update(doc, firestoreMutation.path, firestoreMutation.value);
                     break;
-
+                case "update-path-string":
+                    Asserts.assertString(firestoreMutation.value);
+                    batch.update(doc, firestoreMutation.path, firestoreMutation.value);
+                    break;
+                case "update-path-object":
+                    Asserts.assertObject(firestoreMutation.value);
+                    batch.update(doc, firestoreMutation.path, firestoreMutation.value);
+                    break;
+                case "update-path-string-array":
+                    batch.update(doc, firestoreMutation.path, firestoreMutation.value);
+                    break;
                 case "update-delete-field-value":
                     batch.update(doc, firestoreMutation.path, firebase.firestore.FieldValue.delete())
                     break;
@@ -115,6 +127,34 @@ export namespace BlocksPersistence {
         readonly value: any;
     }
 
+    export interface IFirestoreMutationUpdatePathNumber {
+        readonly id: BlockIDStr;
+        readonly type: 'update-path-number';
+        readonly path: string;
+        readonly value: number;
+    }
+
+    export interface IFirestoreMutationUpdatePathString {
+        readonly id: BlockIDStr;
+        readonly type: 'update-path-string';
+        readonly path: string;
+        readonly value: string;
+    }
+
+    export interface IFirestoreMutationUpdatePathObject {
+        readonly id: BlockIDStr;
+        readonly type: 'update-path-object';
+        readonly path: string;
+        readonly value: object;
+    }
+
+    export interface IFirestoreMutationUpdatePathStringArray {
+        readonly id: BlockIDStr;
+        readonly type: 'update-path-string-array';
+        readonly path: string;
+        readonly value: ReadonlyArray<string>;
+    }
+
     // https://stackoverflow.com/questions/48145962/firestore-delete-a-field-inside-an-object
     export interface IFirestoreMutationUpdateFieldValueDelete {
         readonly id: BlockIDStr;
@@ -125,7 +165,10 @@ export namespace BlocksPersistence {
     export type IFirestoreMutation =
         IFirestoreMutationSetDoc |
         IFirestoreMutationDeleteDoc |
-        IFirestoreMutationUpdatePath |
+        IFirestoreMutationUpdatePathNumber |
+        IFirestoreMutationUpdatePathString |
+        IFirestoreMutationUpdatePathObject |
+        IFirestoreMutationUpdatePathStringArray |
         IFirestoreMutationUpdateFieldValueDelete;
 
     /**
@@ -163,13 +206,13 @@ export namespace BlocksPersistence {
                         return [
                             {
                                 id: mutation.id,
-                                type: 'update-path',
+                                type: 'update-path-string',
                                 path: 'update',
                                 value: mutation.after.updated
                             },
                             {
                                 id: mutation.id,
-                                type: 'update-path',
+                                type: 'update-path-number',
                                 path: 'mutation',
                                 value: mutation.after.mutation
                             }
@@ -196,7 +239,7 @@ export namespace BlocksPersistence {
                                         case "insert":
                                             return {
                                                 id: mutation.id,
-                                                type: 'update-path',
+                                                type: 'update-path-string',
                                                 path: `items.${patch.key}`,
                                                 value: patch.id
                                             }
@@ -214,26 +257,39 @@ export namespace BlocksPersistence {
                                 return [
                                     {
                                         id: mutation.id,
-                                        type: 'update-path',
+                                        type: 'update-path-object',
                                         path: 'content',
                                         value: mutation.after.content
                                     }
                                 ];
                             case "parent":
-                                return [
-                                    {
-                                        id: mutation.id,
-                                        type: 'update-path',
-                                        path: 'parent',
-                                        value: mutation.after.parent
-                                    }
-                                ];
+
+                                if (mutation.after.parent !== undefined) {
+                                    return [
+                                        {
+                                            id: mutation.id,
+                                            type: 'update-path-string',
+                                            path: 'parent',
+                                            value: mutation.after.parent
+                                        }
+                                    ];
+
+                                } else {
+                                    return [
+                                        {
+                                            id: mutation.id,
+                                            type: 'update-delete-field-value',
+                                            path: 'parent',
+                                        }
+                                    ];
+                                }
+
 
                             case "parents":
                                 return [
                                     {
                                         id: mutation.id,
-                                        type: 'update-path',
+                                        type: 'update-path-string-array',
                                         path: 'parents',
                                         value: mutation.after.parents
                                     }

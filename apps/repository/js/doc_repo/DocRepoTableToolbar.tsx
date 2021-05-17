@@ -13,6 +13,8 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import createStyles from "@material-ui/core/styles/createStyles";
 import {MUICheckboxIconButton} from "../../../../web/js/mui/MUICheckboxIconButton";
 import {ChromeExtensionInstallBar} from "../ChromeExtensionInstallBar";
+import {MUIIconButton} from "../../../../web/js/mui/icon_buttons/MUIIconButton";
+import MenuIcon from '@material-ui/icons/Menu';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -50,6 +52,8 @@ export const DocRepoTableToolbar = React.memo(function DocRepoTableToolbar() {
 
     const callbacks = useDocRepoCallbacks();
     const classes = useStyles();
+    const {setLeftDockOpen} = useDocRepoCallbacks();
+    const {isLeftDockOpen} = useDocRepoStore(['isLeftDockOpen']);
 
     const {setSelected} = callbacks;
 
@@ -63,6 +67,10 @@ export const DocRepoTableToolbar = React.memo(function DocRepoTableToolbar() {
         }
     }, [setSelected]);
 
+    const toggleLeftDock = () => {
+        setLeftDockOpen(!isLeftDockOpen);
+    };
+
     return (
         <Paper square
                className={classes.root}>
@@ -73,6 +81,10 @@ export const DocRepoTableToolbar = React.memo(function DocRepoTableToolbar() {
                      }}>
 
                     <div>
+
+                        <MUIIconButton onClick={toggleLeftDock}>
+                            <MenuIcon/>
+                        </MUIIconButton>
                         <MUICheckboxIconButton
                             indeterminate={selected.length > 0 && selected.length < view.length}
                             checked={selected.length === view.length && view.length !== 0}

@@ -83,6 +83,8 @@ interface IDocRepoStore {
      */
     readonly _refresh: number;
 
+    readonly isLeftDockOpen: boolean;
+
 }
 
 interface IDocRepoCallbacks {
@@ -142,6 +144,7 @@ interface IDocRepoCallbacks {
      */
     readonly onTagSelected: (tags: ReadonlyArray<Tag>) => void;
 
+    readonly setLeftDockOpen: (state: boolean) => void;
 }
 
 // the default state of the store...
@@ -154,7 +157,8 @@ const initialStore: IDocRepoStore = {
     order: 'desc',
 
     filters: {},
-    _refresh: 0
+    _refresh: 0,
+    isLeftDockOpen: false,
 }
 
 interface Mutator {
@@ -734,12 +738,17 @@ function useCreateCallbacks(storeProvider: Provider<IDocRepoStore>,
         callback();
     }
 
+    function setLeftDockOpen(state: boolean) {
+        const store = storeProvider();
+        setStore({...store, isLeftDockOpen: state});
+    }
+
     // I don't know of a better way to return / organize the callbacks here
     // and think this is a bit ugly but I can't think of a better way to handle
     // this.
 
     return {
-
+        setLeftDockOpen,
         selectedProvider,
 
         selectRow,

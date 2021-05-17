@@ -1,4 +1,5 @@
 import {DocActions, DocViewerToolbar} from "./toolbar/DocViewerToolbar";
+import ReactDOM from "react-dom";
 import * as React from "react";
 import clsx from "clsx";
 import {DocViewerAppURLs} from "./DocViewerAppURLs";
@@ -42,6 +43,8 @@ import {useDocViewerSnapshot} from "./UseDocViewerSnapshot";
 import {DockPanel} from "../../../web/js/ui/doc_layout/DockLayout";
 import {ZenModeActiveContainer} from "../../../web/js/mui/ZenModeActiveContainer";
 import {useZenModeStore} from "../../../web/js/mui/ZenModeStore";
+import {useDocRepoCallbacks, useDocRepoStore} from "../../repository/js/doc_repo/DocRepoStore2";
+import {usePersistentRouteContext} from "../../../web/js/apps/repository/PersistentRoute";
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -129,11 +132,12 @@ const useTabletLayoutStyles = makeStyles(() =>
             height: "100%",
             display: "flex",
             flexDirection: "column",
+            overflowY: "auto",
             "& > *": { flexGrow: 1 },
         },
         drawerLeft: {
             width: LEFT_DOCK_WIDTH,
-            left: 0,
+            position: "static",
         },
         drawerRight: {
             width: RIGHT_DOCK_WIDTH,
@@ -147,11 +151,10 @@ const useTabletLayoutStyles = makeStyles(() =>
             top: 0,
             bottom: 0,
         },
-        shiftRight: {
-            left: LEFT_DOCK_WIDTH,
-        },
-        shiftLeft: {
-            left: -RIGHT_DOCK_WIDTH,
+        rightOpen: {
+            "& .docviewer-inner": {
+                left: -RIGHT_DOCK_WIDTH,
+            },
         },
     }),
 );
@@ -216,37 +219,56 @@ namespace Device {
         const {zenMode} = useZenModeStore(['zenMode']);
         const classes = useStyles();
         const tabletClasses = useTabletLayoutStyles();
-        const [outlinerOpen, setOutlinerOpen] = React.useState(false);
         const [annotationSidebarOpen, setAnnotationSidebarOpen] = React.useState(false);
+        const sidecarElem = React.useMemo(() => document.querySelector<HTMLDivElement>("#sidenav-sidecar"), []);
+        const {active} = usePersistentRouteContext();
+        const {setLeftDockOpen} = useDocRepoCallbacks();
+        const {isLeftDockOpen} = useDocRepoStore(['isLeftDockOpen']);
 
         // TODO: disable interacting with the docks until the document is fully loaded.
+        //
+
+        const toggleOutliner = () => {
+            setLeftDockOpen(!isLeftDockOpen);
+            setAnnotationSidebarOpen(false);
+        };
 
         const toggleAnnotationSidebar = () => {
             setAnnotationSidebarOpen(!annotationSidebarOpen);
-            setOutlinerOpen(false);
-        };
-
-        const toggleOutliner = () => {
-            setOutlinerOpen(!outlinerOpen);
-            setAnnotationSidebarOpen(false);
+            setLeftDockOpen(false);
         };
 
         React.useEffect(() => {
             if (zenMode) {
-                setOutlinerOpen(false);
+                setLeftDockOpen(false);
                 setAnnotationSidebarOpen(false);
             }
         }, [zenMode]);
 
+        if (!sidecarElem) {
+            return null;
+        }
+
         return (
-            <div className={classes.flex} style={{ position: "relative" }}>
-                <div
-                    className={clsx(
-                        tabletClasses.drawer,
-                        tabletClasses.drawerLeft,
-                    )}>
-                    <Outliner />
-                </div>
+            <div
+                className={clsx(
+                    classes.flex,
+                    {
+                        [tabletClasses.rightOpen]: annotationSidebarOpen,
+                    },
+                )}
+                style={{ position: "relative" }}
+            >
+                {active && ReactDOM.createPortal(
+                    <div
+                        className={clsx(
+                            tabletClasses.drawer,
+                            tabletClasses.drawerLeft,
+                        )}>
+                        <Outliner />
+                    </div>,
+                    sidecarElem,
+                )}
                 <div
                     className={clsx(
                         tabletClasses.drawer,
@@ -254,10 +276,7 @@ namespace Device {
                     )}>
                     <AnnotationSidebar2 />
                 </div>
-                <div className={clsx("DocViewer.Tablet", classes.flex, tabletClasses.root, {
-                    [tabletClasses.shiftRight]: outlinerOpen,
-                    [tabletClasses.shiftLeft]: annotationSidebarOpen,
-                })}>
+                <div className={clsx("DocViewer.Tablet", "docviewer-inner", classes.flex, tabletClasses.root)}>
                     <ZenModeActiveContainer>
                         <MUIPaperToolbar borderBottom>
                             <Box justifyContent="space-between"

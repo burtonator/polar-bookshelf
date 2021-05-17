@@ -46,11 +46,16 @@ export const useDocViewerToolbarStyles = makeStyles((theme) =>
 
 
 export const DocActions = () => {
-    const {onDocTagged, toggleDocArchived, toggleDocFlagged} = useDocViewerCallbacks();
-    const {docMeta} = useDocViewerStore(['docMeta']);
+    const {onDocTagged, toggleDocArchived, toggleDocFlagged, toggleAreaHighlightMode} = useDocViewerCallbacks();
+    const {docMeta, areaHighlightMode} = useDocViewerStore(['docMeta', 'areaHighlightMode']);
 
     return (
         <>
+            <MUIDocAreaHighlightModeToggle
+                onClick={toggleAreaHighlightMode}
+                active={areaHighlightMode}
+            />
+            <Divider orientation="vertical" flexItem/>
             <MUIDocTagButton size="small"
                              onClick={onDocTagged}/>
 
@@ -67,10 +72,10 @@ export const DocActions = () => {
 
 export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
 
-    const {docScale, pageNavigator, scaleLeveler, docMeta, areaHighlightMode}
+    const {docScale, pageNavigator, scaleLeveler, docMeta}
         = useDocViewerStore(['docScale', 'pageNavigator', 'scaleLeveler', 'docMeta', 'areaHighlightMode']);
     const {finder} = useDocFindStore(['finder']);
-    const {setScale, doZoom, toggleAreaHighlightMode} = useDocViewerCallbacks();
+    const {setScale, doZoom} = useDocViewerCallbacks();
     const classes = useDocViewerToolbarStyles();
     const handleScaleChange = React.useCallback((scale: ScaleLevel) => {
 
@@ -194,15 +199,7 @@ export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
                              className="ml-auto vertical-aligned-children">
 
                             <MUIButtonBar>
-
-
-                                {/* TODO: implement keyboard shortcuts for these. */}
                                 <DocActions />
-                                <MUIDocAreaHighlightModeToggle
-                                    onClick={toggleAreaHighlightMode}
-                                    active={areaHighlightMode}
-                                />
-
                                 <Divider orientation="vertical" flexItem/>
 
                                 {/*

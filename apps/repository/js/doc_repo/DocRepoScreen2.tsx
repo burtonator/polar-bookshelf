@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import {FixedNav} from "../FixedNav";
 import {DocRepoTable2} from "./DocRepoTable2";
 import {Route, Switch} from "react-router";
@@ -14,6 +15,7 @@ import {useHistory} from "react-router-dom";
 import useLocationWithHashOnly = ReactRouters.useLocationWithHashOnly;
 import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import useTheme from "@material-ui/core/styles/useTheme";
+import {usePersistentRouteContext} from "../../../../web/js/apps/repository/PersistentRoute";
 
 namespace main {
 
@@ -73,12 +75,21 @@ const FolderDrawer = React.memo(function FolderDrawer() {
 
 namespace devices {
 
-    export const PhoneAndTablet = React.memo(() => (
-        <>
-            <FolderDrawer/>
-            <main.Documents/>
-        </>
-    ));
+    export const PhoneAndTablet = React.memo(() => {
+        const {active} = usePersistentRouteContext();
+        const sidecarElem = React.useMemo(() => document.querySelector<HTMLDivElement>("#sidenav-sidecar"), []);
+        return (
+            <>
+                {active && sidecarElem && ReactDOM.createPortal(
+                    <div style={{ width: 400, display: "flex", flexDirection: "column", height: "100%" }}>
+                        <main.Folders/>
+                    </div>,
+                    sidecarElem,
+                )}
+                <main.Documents/>
+            </>
+        );
+    });
 
     export const Desktop = React.memo(function Desktop() {
 
