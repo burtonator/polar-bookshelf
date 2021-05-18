@@ -15,6 +15,10 @@ import Box from '@material-ui/core/Box';
 import {ManageSubscriptionButton} from "../../premium/ManageSubscriptionButton";
 import {usePrefsContext} from "../../persistence_layer/PrefsContext2";
 import {useLocalStoragePrefs} from "./LocalStoragePrefs";
+import {MUIIconButton} from '../../../../../web/js/mui/icon_buttons/MUIIconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import {createStyles, makeStyles, Paper} from '@material-ui/core';
+import {useDocRepoCallbacks, useDocRepoStore} from '../../doc_repo/DocRepoStore2';
 
 export const PREF_PDF_DARK_MODE_OPTIONS = [
     {
@@ -31,10 +35,24 @@ export const PREF_PDF_DARK_MODE_OPTIONS = [
     }
 ];
 
+const useStyles = makeStyles((theme) =>
+    createStyles({
+        root: {
+            display: 'flex',
+            paddingTop: theme.spacing(1),
+            paddingBottom: theme.spacing(1),
+            paddingRight: theme.spacing(1),
+        },
+    }),
+);
+
 export const SettingsScreen = React.memo(function SettingsScreen() {
 
     const {theme, setTheme} = useContext(MUIThemeTypeContext);
     const prefs = usePrefsContext();
+    const classes = useStyles();
+    const {setLeftDockOpen} = useDocRepoCallbacks();
+    const {isLeftDockOpen} = useDocRepoStore(['isLeftDockOpen']);
 
     const localStoragePrefs = useLocalStoragePrefs();
 
@@ -46,8 +64,25 @@ export const SettingsScreen = React.memo(function SettingsScreen() {
 
     };
 
-    return (
+    const toggleLeftDock = () => {
+        setLeftDockOpen(!isLeftDockOpen);
+    };
 
+    return (
+        <>
+                <Paper square
+                       className={classes.root}>
+
+                        <div style={{
+                                 display: 'flex',
+                                 flexGrow: 1
+                             }}>
+
+                            <MUIIconButton onClick={toggleLeftDock}>
+                                <MenuIcon/>
+                            </MUIIconButton>
+                        </div>
+                    </Paper>
         <DefaultPageLayout>
             <ConfigureBody>
                 <ConfigureNavbar/>
@@ -147,6 +182,7 @@ export const SettingsScreen = React.memo(function SettingsScreen() {
             </ConfigureBody>
 
         </DefaultPageLayout>
+    </>
     );
 });
 

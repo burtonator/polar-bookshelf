@@ -38,7 +38,7 @@ export const useResizeObserver = (callback: UseResizeObserverCallback, elemRef: 
         return () => {
             resizeObserver.disconnect();
         };
-    }, [elemRef, callbackRef]);
+    }, [elemRef.current, callbackRef]);
 };
 
 interface IUsePDFPinchToZoomArgs {

@@ -1,4 +1,5 @@
-import {DocViewerToolbar} from "./toolbar/DocViewerToolbar";
+import {DocActions, DocViewerToolbar} from "./toolbar/DocViewerToolbar";
+import ReactDOM from "react-dom";
 import * as React from "react";
 import {DocViewerAppURLs} from "./DocViewerAppURLs";
 import {LoadingProgress} from "../../../web/js/ui/LoadingProgress";
@@ -19,11 +20,9 @@ import {
 import {createContextMenu} from "../../repository/js/doc_repo/MUIContextMenu";
 import {Helmet} from "react-helmet";
 import {DeviceRouter} from "../../../web/js/ui/DeviceRouter";
-import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import {DocFindButton} from "./DocFindButton";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from '@material-ui/icons/Menu';
-import {MUIPaperToolbar} from "../../../web/js/mui/MUIPaperToolbar";
 import {DocRenderer, DocViewerContext} from "./renderers/DocRenderer";
 import {ViewerContainerProvider} from "./ViewerContainerStore";
 import {FileTypes} from "../../../web/js/apps/main/file_loaders/FileTypes";
@@ -44,6 +43,9 @@ import {useDocViewerSnapshot} from "./UseDocViewerSnapshot";
 import {DockPanel} from "../../../web/js/ui/doc_layout/DockLayout";
 import {ZenModeActiveContainer} from "../../../web/js/mui/ZenModeActiveContainer";
 import {useZenModeStore} from "../../../web/js/mui/ZenModeStore";
+import {useDocRepoCallbacks, useDocRepoStore} from "../../repository/js/doc_repo/DocRepoStore2";
+import {usePersistentRouteContext} from "../../../web/js/apps/repository/PersistentRoute";
+import clsx from "clsx";
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -131,11 +133,12 @@ const useTabletLayoutStyles = makeStyles(() =>
             height: "100%",
             display: "flex",
             flexDirection: "column",
+            overflowY: "auto",
             "& > *": { flexGrow: 1 },
         },
         drawerLeft: {
             width: LEFT_DOCK_WIDTH,
-            left: 0,
+            position: "static",
         },
         drawerRight: {
             width: RIGHT_DOCK_WIDTH,
@@ -149,149 +152,148 @@ const useTabletLayoutStyles = makeStyles(() =>
             top: 0,
             bottom: 0,
         },
-        shiftRight: {
-            left: LEFT_DOCK_WIDTH,
-        },
-        shiftLeft: {
-            left: -RIGHT_DOCK_WIDTH,
+        rightOpen: {
+            "& .docviewer-inner": {
+                left: -RIGHT_DOCK_WIDTH,
+            },
         },
     }),
 );
 
-                {/*    <Outliner />*/}
-
 namespace Device {
-    export const Phone = React.memo(function Phone() {
-        const [outlinerOpen, setOutlinerOpen] = React.useState(false);
-        const [annotationSidebarOpen, setAnnotationSidebarOpen] = React.useState(false);
-        const classes = useStyles();
+    export interface HandheldToolbarProps {
+        readonly toggleRightDrawer: () => void;
+    }
 
-                <SwipeableDrawer
-                    anchor="right"
-                    open={annotationSidebarOpen}
-                    onClose={() => setAnnotationSidebarOpen(false)}
-                    onOpen={() => setAnnotationSidebarOpen(true)}
-                    classes={{ paper: classes.phoneDrawerPaper }}>
-                    <AnnotationSidebar2 />
-                </SwipeableDrawer>
+    const HandheldToolbar = React.memo(function HandheldToolbar(props: HandheldToolbarProps) {
 
-                <SwipeableDrawer
-                    anchor="left"
-                    open={outlinerOpen}
-                    onClose={() => setOutlinerOpen(false)}
-                    onOpen={() => setOutlinerOpen(true)}
-                    classes={{ paper: classes.phoneDrawerPaper }}>
-                    <Outliner />
-                </SwipeableDrawer>
+        return (
+            <MUIPaperToolbar borderBottom>
+            <div style={{
+                     display: 'flex',
+                     alignItems: 'center'
+                 }}
+                 className="p-1">
 
-                <div className={clsx("DocViewer.Phone", classes.flex)}>
-                    <MUIPaperToolbar borderBottom>
-                        <Box justifyContent="space-between"
-                             alignItems="center"
-                             display="flex"
-                             className="p-1">
-                            <div>
-                                <MUIIconButton onClick={() => setOutlinerOpen(!outlinerOpen)}>
-                                    <MenuIcon/>
-                                </MUIIconButton>
-                                <DocFindButton className="ml-1"/>
-                            </div>
-                            <div>
-                                <MUIIconButton onClick={() => setAnnotationSidebarOpen(!annotationSidebarOpen)}>
-                                    <MenuIcon/>
-                                </MUIIconButton>
-                            </div>
-                        </Box>
-                    </MUIPaperToolbar>
+                <div style={{
+                         display: 'flex',
+                         flexGrow: 1,
+                         flexBasis: 0,
+                         alignItems: 'center'
+                     }}>
 
-                    <div className={clsx("DocViewer.Phone.Body", classes.flex)}>
-                        <Main/>
-                    </div>
+                    <DocFindButton className="mr-1"/>
                 </div>
-            </>
-        );
-    }, isEqual);
+
+                <div style={{alignItems: 'center'}}>
+                    <IconButton onClick={props.toggleRightDrawer}>
+                        <MenuIcon/>
+                    </IconButton>
+                </div>
+
+            </div>
+            </MUIPaperToolbar>
+        )
+    });
 
     export const Tablet = React.memo(function Tablet() {
         const {docMeta} = useDocViewerStore(["docMeta"]);
         const {zenMode} = useZenModeStore(['zenMode']);
         const classes = useStyles();
         const tabletClasses = useTabletLayoutStyles();
-        const [outlinerOpen, setOutlinerOpen] = React.useState(false);
         const [annotationSidebarOpen, setAnnotationSidebarOpen] = React.useState(false);
+        const sidecarElem = React.useMemo(() => document.querySelector<HTMLDivElement>("#sidenav-sidecar"), []);
+        const {active} = usePersistentRouteContext();
+        const {setLeftDockOpen} = useDocRepoCallbacks();
+        const {isLeftDockOpen} = useDocRepoStore(['isLeftDockOpen']);
 
         // TODO: disable interacting with the docks until the document is fully loaded.
+        //
+
+        const toggleOutliner = () => {
+            setLeftDockOpen(!isLeftDockOpen);
+            setAnnotationSidebarOpen(false);
+        };
 
         const toggleAnnotationSidebar = () => {
             setAnnotationSidebarOpen(!annotationSidebarOpen);
-            setOutlinerOpen(false);
-        };
-
-        const toggleOutliner = () => {
-            setOutlinerOpen(!outlinerOpen);
-            setAnnotationSidebarOpen(false);
+            setLeftDockOpen(false);
         };
 
         React.useEffect(() => {
             if (zenMode) {
-                setOutlinerOpen(false);
+                setLeftDockOpen(false);
                 setAnnotationSidebarOpen(false);
             }
         }, [zenMode]);
 
+        if (!sidecarElem) {
+            return null;
+        }
+
         return (
-            <div className={classes.flex} style={{ position: "relative" }}>
+            <>
                 <div
                     className={clsx(
-                        tabletClasses.drawer,
-                        tabletClasses.drawerLeft,
-                    )}>
-                    <Outliner />
-                </div>
-                <div
-                    className={clsx(
-                        tabletClasses.drawer,
-                        tabletClasses.drawerRight,
-                    )}>
-                    <AnnotationSidebar2 />
-                </div>
-                <div className={clsx("DocViewer.Tablet", classes.flex, tabletClasses.root, {
-                    [tabletClasses.shiftRight]: outlinerOpen,
-                    [tabletClasses.shiftLeft]: annotationSidebarOpen,
-                })}>
-                    <ZenModeActiveContainer>
-                        <MUIPaperToolbar borderBottom>
-                            <Box justifyContent="space-between"
-                                 alignItems="center"
-                                 display="flex"
-                                 className="p-1">
-                                <div>
-                                    <MUIIconButton onClick={toggleOutliner}>
-                                        <MenuIcon/>
-                                    </MUIIconButton>
-                                    <DocFindButton className="mr-1"/>
-                                </div>
-
-                                <Box display="flex" alignItems="center" className="gap-box">
-                                    <DocActions />
-                                    <Divider orientation="vertical" flexItem={true} />
-                                    <ZenModeButton/>
-                                    <FullScreenButton/>
-                                    <DocViewerToolbarOverflowButton docInfo={docMeta?.docInfo}/>
-                                    <MUIIconButton onClick={toggleAnnotationSidebar}>
-                                        <MenuIcon/>
-                                    </MUIIconButton>
-                                </Box>
-                            </Box>
-                        </MUIPaperToolbar>
-                    </ZenModeActiveContainer>
-
-                    <div className={clsx("DocViewer.Tablet.Body", classes.flex)}>
-                        <Main/>
+                        classes.flex,
+                        {
+                            [tabletClasses.rightOpen]: annotationSidebarOpen,
+                        },
+                    )}
+                    style={{ position: "relative" }}
+                >
+                    {active && ReactDOM.createPortal(
+                        <div
+                            className={clsx(
+                                tabletClasses.drawer,
+                                tabletClasses.drawerLeft,
+                            )}>
+                            <Outliner />
+                        </div>,
+                        sidecarElem!,
+                    )}
+                    <div
+                        className={clsx(
+                            tabletClasses.drawer,
+                            tabletClasses.drawerRight,
+                        )}>
+                        <AnnotationSidebar2 />
                     </div>
+                    <div className={clsx("DocViewer.Tablet", "docviewer-inner", classes.flex, tabletClasses.root)}>
+                        <ZenModeActiveContainer>
+                            <MUIPaperToolbar borderBottom>
+                                <Box justifyContent="space-between"
+                                    alignItems="center"
+                                    display="flex"
+                                    className="p-1">
+                                    <div>
+                                        <MUIIconButton onClick={toggleOutliner}>
+                                            <MenuIcon/>
+                                        </MUIIconButton>
+                                        <DocFindButton className="mr-1"/>
+                                    </div>
 
+                                    <Box display="flex" alignItems="center" className="gap-box">
+                                        <DocActions />
+                                        <Divider orientation="vertical" flexItem={true} />
+                                        <ZenModeButton/>
+                                        <FullScreenButton/>
+                                        <DocViewerToolbarOverflowButton docInfo={docMeta?.docInfo}/>
+                                        <MUIIconButton onClick={toggleAnnotationSidebar}>
+                                            <MenuIcon/>
+                                        </MUIIconButton>
+                                    </Box>
+                                </Box>
+                            </MUIPaperToolbar>
+                        </ZenModeActiveContainer>
+
+                        <div className={clsx("DocViewer.Tablet.Body", classes.flex)}>
+                            <Main/>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }, isEqual);
 
@@ -341,7 +343,7 @@ namespace Device {
                     },
                     {
                         ...layout,
-                        component: docMeta ? <AnnotationSidebar2 /> : null,
+                        component: <AnnotationSidebar2 />,
                         collapsed: false,
                         id: "doc-panel-sidebar",
                         type: "fixed",
@@ -361,7 +363,6 @@ namespace Device {
             </DockLayout2.Root>
         );
     });
-
 }
 
 const DocViewerMain = deepMemo(function DocViewerMain() {
@@ -370,8 +371,7 @@ const DocViewerMain = deepMemo(function DocViewerMain() {
 
     return (
         <DeviceRouter desktop={<Device.Desktop />}
-                      tablet={<Device.Tablet />}
-                      phone={<Device.Phone />}/>
+                    handheld={<Device.Tablet />} />
     );
 
 });

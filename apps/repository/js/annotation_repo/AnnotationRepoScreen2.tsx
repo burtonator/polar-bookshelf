@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ReactDOM from "react-dom";
 import {FixedNav} from '../FixedNav';
 import {RepoFooter} from "../repo_footer/RepoFooter";
 import {DeviceRouter} from "../../../../web/js/ui/DeviceRouter";
@@ -14,6 +15,44 @@ import {StartReviewSpeedDial} from './StartReviewSpeedDial';
 import {MUIElevation} from "../../../../web/js/mui/MUIElevation";
 import { AnnotationRepoTable2 } from './AnnotationRepoTable2';
 import useTheme from '@material-ui/core/styles/useTheme';
+import {useDocRepoCallbacks, useDocRepoStore} from '../doc_repo/DocRepoStore2';
+import {MUIIconButton} from '../../../../web/js/mui/icon_buttons/MUIIconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import {usePersistentRouteContext} from '../../../../web/js/apps/repository/PersistentRoute';
+
+const Toolbar = React.memo(function Toolbar() {
+    const {setLeftDockOpen} = useDocRepoCallbacks();
+    const {isLeftDockOpen} = useDocRepoStore(['isLeftDockOpen']);
+
+    const toggleOutliner = () => {
+        setLeftDockOpen(!isLeftDockOpen);
+    };
+    return (
+        <MUIPaperToolbar id="header-filter"
+                         padding={1}>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center'
+            }}>
+
+                <div style={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
+                    <MUIIconButton onClick={toggleOutliner}>
+                        <MenuIcon/>
+                    </MUIIconButton>
+
+                    <AnnotationRepoFilterBar2/>
+                </div>
+
+            </div>
+
+        </MUIPaperToolbar>
+    );
+});
 
 namespace Phone {
 
@@ -73,31 +112,6 @@ namespace Desktop {
         );
 
     };
-
-    const Toolbar = React.memo(function Toolbar() {
-        return (
-            <MUIPaperToolbar id="header-filter"
-                             padding={1}>
-
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center'
-                }}>
-
-                    <div style={{
-                        flexGrow: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end'
-                    }}>
-                        <AnnotationRepoFilterBar2/>
-                    </div>
-
-                </div>
-
-            </MUIPaperToolbar>
-        );
-    });
 
     const Right = React.memo(function Right() {
 
@@ -195,6 +209,8 @@ namespace Desktop {
 namespace screen {
 
     export const HandheldScreen = () => {
+        const {sidenavElem} = useDocRepoStore(['sidenavElem']);
+        const {active} = usePersistentRouteContext();
 
         return (
 
@@ -210,12 +226,17 @@ namespace screen {
                              flexDirection: 'column',
                              minHeight: 0
                          }}>
+                        <Toolbar />
 
                         <StartReviewSpeedDial/>
 
                         <DeviceRouter phone={<Phone.Main />}
                                       tablet={<Tablet.Main />}/>
 
+                        {active && ReactDOM.createPortal(
+                            <FolderSidebar2/>,
+                            sidenavElem?.querySelector("#sidenav-sidecar")!
+                        )}
                     </div>
                 </FixedNav.Body>
 
@@ -236,7 +257,6 @@ namespace screen {
             <AnnotationRepoRoutedComponents/>
             <Desktop.Main />
 
-            <RepoFooter/>
 
         </FixedNav>
 

@@ -14,6 +14,7 @@ import {TagIDStr} from "polar-shared/src/tags/Tags";
 import {MUIElevation} from "../../../../web/js/mui/MUIElevation";
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
+import {usePersistentRouteContext} from '../../../../web/js/apps/repository/PersistentRoute';
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -62,7 +63,8 @@ export const FolderSidebar2 = React.memo((props: IProps) => {
                           display: 'flex',
                           flexGrow: 1,
                           flexDirection: "column",
-                          minHeight: 0
+                          minHeight: 0,
+                          height: "100%"
                       }}>
             <>
                 <MUIPaperToolbar borderBottom

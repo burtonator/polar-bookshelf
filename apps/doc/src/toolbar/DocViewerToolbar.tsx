@@ -30,6 +30,7 @@ import {ZenModeButton} from "./ZenModeButton";
 import {TextHighlightTrigger} from "./TextHighlightTrigger";
 import {AreaHighlightModeToggle} from "./AreaHighlightModeToggle";
 import {useAnnotationPopupBarEnabled} from "../annotations/annotation_popup/AnnotationPopup";
+import { createStyles, makeStyles } from "@material-ui/core";
 
 const getScaleLevelTuple = (scale: ScaleLevel) => (
     arrayStream(ScaleLevelTuples)
@@ -37,14 +38,43 @@ const getScaleLevelTuple = (scale: ScaleLevel) => (
         .first()
 );
 
+export const useDocViewerToolbarStyles = makeStyles((theme) =>
+    createStyles({
+        toolbarFontColor: {
+            color: theme.palette.text.secondary
+        },
+    }),
+);
+
+
+export const DocActions = () => {
+    const {onDocTagged, toggleDocArchived, toggleDocFlagged, toggleAreaHighlightMode} = useDocViewerCallbacks();
+    const {docMeta, areaHighlightMode} = useDocViewerStore(['docMeta', 'areaHighlightMode']);
+
+    return (
+        <>
+            <MUIDocTagButton size="small"
+                             onClick={onDocTagged}/>
+
+            <MUIDocArchiveButton size="small"
+                                 onClick={toggleDocArchived}
+                                 active={docMeta?.docInfo?.archived}/>
+
+            <MUIDocFlagButton size="small"
+                              onClick={toggleDocFlagged}
+                              active={docMeta?.docInfo?.flagged}/>
+        </>
+    );
+};
+
 export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
 
     const {docScale, pageNavigator, scaleLeveler, docMeta}
         = useDocViewerStore(['docScale', 'pageNavigator', 'scaleLeveler', 'docMeta', 'areaHighlightMode']);
     const {finder} = useDocFindStore(['finder']);
-    const {setScale, onDocTagged, doZoom, toggleDocArchived, toggleDocFlagged} = useDocViewerCallbacks();
+    const {setScale, doZoom} = useDocViewerCallbacks();
+    const classes = useDocViewerToolbarStyles();
     const newAnnotationBarEnabled = useAnnotationPopupBarEnabled();
-
     const handleScaleChange = React.useCallback((scale: ScaleLevel) => {
 
         setScale(getScaleLevelTuple(scale)!);
@@ -163,24 +193,11 @@ export const DocViewerToolbar = deepMemo(function DocViewerToolbar() {
                              className="ml-auto vertical-aligned-children">
 
                             <MUIButtonBar>
-
                                 {newAnnotationBarEnabled && <TextHighlightTrigger />}
 
                                 <AreaHighlightModeToggle />
-
                                 <Divider orientation="vertical" flexItem/>
-
-                                <MUIDocTagButton size="small"
-                                                 onClick={onDocTagged}/>
-
-                                <MUIDocArchiveButton size="small"
-                                                     onClick={toggleDocArchived}
-                                                     active={docMeta?.docInfo?.archived}/>
-
-                                <MUIDocFlagButton size="small"
-                                                  onClick={toggleDocFlagged}
-                                                  active={docMeta?.docInfo?.flagged}/>
-
+                                <DocActions />
                                 <Divider orientation="vertical" flexItem/>
 
                                 {/*

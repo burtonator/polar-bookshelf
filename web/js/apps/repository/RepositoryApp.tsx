@@ -2,7 +2,7 @@ import * as React from 'react';
 import {IEventDispatcher} from '../../reactor/SimpleReactor';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {PersistenceLayerManager} from '../../datastore/PersistenceLayerManager';
-import {BrowserRouter, Route, Switch, useHistory} from 'react-router-dom';
+import {BrowserRouter, Route, Switch, useHistory, useLocation} from 'react-router-dom';
 import {RepoDocMetaManager} from '../../../../apps/repository/js/RepoDocMetaManager';
 import {RepoDocMetaLoader} from '../../../../apps/repository/js/RepoDocMetaLoader';
 import WhatsNewScreen
@@ -24,7 +24,7 @@ import {App} from "./AppInitializer";
 import {Callback} from "polar-shared/src/util/Functions";
 import {MUIRepositoryRoot} from "../../mui/MUIRepositoryRoot";
 import {DocRepoScreen2} from "../../../../apps/repository/js/doc_repo/DocRepoScreen2";
-import {DocRepoStore2} from "../../../../apps/repository/js/doc_repo/DocRepoStore2";
+import {DocRepoStore2, useDocRepoCallbacks, useDocRepoStore} from "../../../../apps/repository/js/doc_repo/DocRepoStore2";
 import {DocRepoSidebarTagStore} from "../../../../apps/repository/js/doc_repo/DocRepoSidebarTagStore";
 import {AnnotationRepoSidebarTagStore} from "../../../../apps/repository/js/annotation_repo/AnnotationRepoSidebarTagStore";
 import {AnnotationRepoStore2} from "../../../../apps/repository/js/annotation_repo/AnnotationRepoStore";
@@ -58,7 +58,7 @@ import {PrefsContext2} from "../../../../apps/repository/js/persistence_layer/Pr
 import {LoginWithCustomTokenScreen} from "../../../../apps/repository/js/login/LoginWithCustomTokenScreen";
 import {WelcomeScreen} from "./WelcomeScreen";
 import {useSideNavStore} from '../../sidenav/SideNavStore';
-import {SideNav} from "../../sidenav/SideNav";
+import {SideNav, SIDENAV_WIDTH} from "../../sidenav/SideNav";
 import Divider from '@material-ui/core/Divider';
 import {SideNavInitializer} from "../../sidenav/SideNavInitializer";
 import {AccountDialogScreen} from "../../ui/cloud_auth/AccountDialogScreen";
@@ -71,6 +71,8 @@ import {NotesRouter} from "../../notes/NotesRouter";
 import {NotesContainer} from "../../notes/NotesContainer";
 import {BlocksStoreProvider} from "../../notes/store/BlocksStore";
 import {BlockStoreDefaultContextProvider} from "../../notes/store/BlockStoreContextProvider";
+import {Devices} from 'polar-shared/src/util/Devices';
+import {useResizeObserver} from '../../../../apps/doc/src/renderers/pdf/PinchToZoomHooks';
 
 interface IProps {
     readonly app: App;
@@ -153,6 +155,48 @@ const SideNavDocuments = React.memo(function SideNavDocuments(props: SideNavDocu
     );
 
 });
+
+const MainRenderer: React.FC = ({children}) => {
+    const {isLeftDockOpen, sidenavElem} = useDocRepoStore(['isLeftDockOpen', 'sidenavElem']);
+    const {setLeftDockOpen} = useDocRepoCallbacks();
+    const ref = React.useRef<HTMLDivElement>(null);
+
+    if (["phone", "tablet"].indexOf(Devices.get()) === -1) {
+        return <>{children}</>;
+    }
+
+    const updateStyles = () => {
+        const elem = ref.current;
+        if (elem && sidenavElem) {
+            elem.style.left = `${isLeftDockOpen ? sidenavElem.getBoundingClientRect().width : 0}px`;
+        }
+    };
+
+    React.useEffect(() => updateStyles(), [isLeftDockOpen]);
+
+    useResizeObserver(updateStyles, { current: sidenavElem || null });
+
+    return (
+        <div style={{
+            display: 'flex',
+            minWidth: 0,
+            minHeight: 0,
+            flexDirection: 'column',
+            flexGrow: 1,
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            left: 0,
+            transition: "left 225ms cubic-bezier(0, 0, 0.2, 1)",
+            background: "white",
+        }}
+            ref={ref}
+        >
+            {isLeftDockOpen && <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, width: "100%", height: "100%", background: "rgba(0, 0, 0, 0.5)", zIndex: 150 }} onClick={() => setLeftDockOpen(false)} />}
+             {children}
+         </div>
+    );
+};
 
 export const RepositoryApp = React.memo(function RepositoryApp(props: IProps) {
 
@@ -335,13 +379,7 @@ export const RepositoryApp = React.memo(function RepositoryApp(props: IProps) {
                                                                                                         <Divider orientation="vertical"/>
                                                                                                     </>
 
-                                                                                                    <div style={{
-                                                                                                             display: 'flex',
-                                                                                                             minWidth: 0,
-                                                                                                             minHeight: 0,
-                                                                                                             flexDirection: 'column',
-                                                                                                             flexGrow: 1
-                                                                                                         }}>
+                                                                                                    <MainRenderer>
 
                                                                                                         <PersistentRoute strategy="display" exact path="/">
                                                                                                             <RenderDefaultScreen/>
@@ -389,9 +427,8 @@ export const RepositoryApp = React.memo(function RepositoryApp(props: IProps) {
 
                                                                                                         </Switch>
 
-                                                                                                        <RepoFooter/>
 
-                                                                                                    </div>
+                                                                                                    </MainRenderer>
                                                                                                 </div>
 
                                                                                                 {/* the following are small popup screens that can exist anywhere */}
