@@ -109,6 +109,7 @@
     "workbox-cli": "=5.1.3"
   },
   "dependencies": {
+    "@pdftron/webviewer": "7.3.2",
     "@emotion/is-prop-valid": "=1.1.0",
     "@fortawesome/fontawesome-free": "5.13.0",
     "@fortawesome/fontawesome-svg-core": "=1.2.28",

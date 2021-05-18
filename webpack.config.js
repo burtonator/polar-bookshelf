@@ -354,6 +354,8 @@ module.exports = {
                 { from: './manifest.json', to: './'},
                 { from: './apps/repository/index.html', to: './'},
 
+                { from: '../../node_modules/@pdftron/webviewer/public', to: './webviewer/lib' }
+
             ],
         }),
         ! isDevServer && new GenerateSW({

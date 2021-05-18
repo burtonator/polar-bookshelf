@@ -56,6 +56,12 @@ import {useDocumentViewerVisibleElemFocus} from '../UseSidenavDocumentChangeCall
 import {AnnotationPopup, useAnnotationPopupBarEnabled} from '../../annotations/annotation_popup/AnnotationPopup';
 import {AreaHighlightCreator} from '../../annotations/AreaHighlightDrawer';
 import {useAnnotationBar} from '../../AnnotationBarHooks';
+import WebViewer, {Annotations, WebViewerInstance} from '@pdftron/webviewer';
+import {PageAnnotations} from '../../annotations/PageAnnotations';
+import {TextHighlightMerger} from '../../text_highlighter/TextHighlightMerger';
+import {Rects} from '../../../../../web/js/Rects';
+import {useAnnotationMutationsContext} from '../../../../../web/js/annotation_sidebar/AnnotationMutationsContext';
+import {TextHighlightRecords} from '../../../../../web/js/metadata/TextHighlightRecords';
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -130,342 +136,91 @@ interface IProps {
     readonly children: React.ReactNode;
 }
 
+const renderAnnotations = (docMeta: IDocMeta, instance: WebViewerInstance) => {
+    const pageAnnotations = PageAnnotations.compute(docMeta, pageMeta => Object.values(pageMeta.textHighlights || {}));
+    const {docViewer, Annotations} = instance;
+    const annotManager = docViewer.getAnnotationManager();
+    pageAnnotations.forEach(({ pageNum, annotation, fingerprint }) => {
+        const rects = Object.values(annotation.rects);
+        if (!rects.length) return;
+        const rect = rects.reduce(TextHighlightMerger.mergeRects);
+        const annot = new Annotations.TextHighlightAnnotation();
+        annot.Id = annotation.guid;
+        annot.X = rect.top;
+        annot.Y = rect.left;
+        annot.Width = rect.width;
+        annot.Height = rect.height;
+        annot.PageNumber = pageNum;
+        annot.StrokeColor = new Annotations.Color(255, 255, 0);
+        const quads = rects.map(rect => Rects.scale(rect, 0.75))
+            .map(({left, top, width, height}) => new instance.CoreControls.Math.Quad(
+                left, top,
+                left + width, top,
+                left + width, top + height,
+                left, top + height
+            ));
+        annot.Quads = quads;
+        annotManager.addAnnotation(annot, {imported: true});
+        annotManager.drawAnnotations(annot.PageNumber);
+    });
+};
+
 export const PDFDocument = deepMemo(function PDFDocument(props: IProps) {
-
-    const {docURL} = props;
-    const [active, setActive, activeRef] = useStateRef(false);
-
-    const docViewerRef = React.useRef<DocViewer | undefined>(undefined);
-    const scaleRef = React.useRef<ScaleLevelTuple>(ScaleLevelTuples[1]);
-    const docRef = React.useRef<PDFDocumentProxy | undefined>(undefined);
-    const pageNavigatorRef = React.useRef<PageNavigator | undefined>(undefined);
-    const pdfUpgrader = usePDFUpgrader();
-
-    const log = useLogger();
-
-    const {setDocDescriptor, setPageNavigator, setResizer, setScaleLeveler,
-           setDocScale, setPage, setOutline, setOutlineNavigator, docMetaProvider, setScale: setStoreScale}
-        = useDocViewerCallbacks();
-
-    const {setFinder} = useDocFindCallbacks();
-    const {persistenceLayerProvider} = usePersistenceLayerContext();
-    const prefs = usePrefsContext();
-    const hasPagesInitRef = React.useRef(false);
-    const hasLoadRef = React.useRef(false);
-    const annotationBarInjector = useAnnotationBar()
-    const newAnnotationBarEnabled = useAnnotationPopupBarEnabled();
-
-    const hasLoadStartedRef = React.useRef(false);
-
-    const handleActive = React.useCallback(() => {
-
-        if (hasPagesInitRef.current && hasLoadRef.current) {
-            if (! activeRef.current) {
-                setActive(true);
-            }
-        }
-
-    }, [activeRef, setActive]);
-
-    const onPagesInit = React.useCallback(() => {
-        hasPagesInitRef.current = true;
-        handleActive();
-    }, [handleActive]);
-
-    const onLoaded = React.useCallback(() => {
-        hasLoadRef.current = true;
-        handleActive();
-
-    }, [handleActive]);
-
-    const dispatchPDFDocMeta = React.useCallback(() => {
-
-        if (docRef.current && docViewerRef.current) {
-
-            const docDescriptor: IDocDescriptor = {
-                // title: docRef.current.title,
-                // scale: scaleRef.current,
-                // scaleValue: docViewerRef.current.viewer.currentScale,
-                nrPages: docRef.current.numPages,
-                fingerprint: props.docMeta.docInfo.fingerprint
-            };
-
-            setDocDescriptor(docDescriptor);
-
-            if (pageNavigatorRef.current) {
-                setPage(pageNavigatorRef.current.get());
-            } else {
-                log.warn("No pageNavigatorRef")
-            }
-
-        }
-
-    }, [log, props.docMeta.docInfo.fingerprint, setDocDescriptor, setPage]);
-
-    const setScale = React.useCallback((scale: ScaleLevelTuple) => {
-
-        if (docViewerRef.current) {
-            scaleRef.current = scale;
-            docViewerRef.current.viewer.currentScaleValue = scale.value;
-
-            dispatchPDFDocMeta();
-
-            return docViewerRef.current.viewer.currentScale;
-
-        }
-
-        throw new Error("No viewer");
-
-    }, [dispatchPDFDocMeta]);
-
-    const scaleLeveler = React.useCallback((scale: ScaleLevelTuple) => {
-        return setScale(scale);
-    }, [setScale]);
-
-    const resize = React.useCallback((): number => {
-
-        if (['page-width', 'page-fit'].includes(scaleRef.current.value)) {
-            setScale(scaleRef.current);
-            setStoreScale(scaleRef.current);
-        }
-
-        if (docViewerRef.current) {
-            return docViewerRef.current.viewer.currentScale;
-        } else {
-            throw new Error("No viewer");
-        }
-
-    }, [setScale, setStoreScale]);
-
-    const doLoad = React.useCallback(async (docViewer: DocViewer) => {
-
-        const loadingTask = PDFDocs.getDocument({url: docURL, docBaseURL: docURL});
-
-        let progressTracker: ProgressTracker | undefined;
-        loadingTask.onProgress = (progress) => {
-
-            if (! progressTracker) {
-                progressTracker = new ProgressTracker({
-                    id: 'pdf-download',
-                    total: progress.total
-                });
-            }
-
-            if (progress.loaded > progress.total) {
-                return;
-            }
-
-            ProgressMessages.broadcast(progressTracker!.abs(progress.loaded));
-
-        };
-
-        docRef.current = await loadingTask.promise;
-
-        const page = await docRef.current.getPage(1);
-
-        docViewer.viewer.setDocument(docRef.current);
-        docViewer.linkService.setDocument(docRef.current, null);
-
-        const finder = PDFFindControllers.createFinder(docViewer.eventBus,
-            docViewer.findController);
-        setFinder(finder);
-
-        docViewer.eventBus.on('pagesinit', () => {
-
-            // PageContextMenus.start()
-            
-            if (!newAnnotationBarEnabled) {
-                annotationBarInjector();
-            }
-
-            onPagesInit();
-        });
-
-        const resizeDebouncer = Debouncers.create(() => resize());
-
-        window.addEventListener('resize', resizeDebouncer, {passive: true});
-
-        document.getElementById("viewerContainer")!
-            .addEventListener("resize", resizeDebouncer);
-
-        setResizer(resizeDebouncer);
-
-        // do first resize async
-        setTimeout(() => resize(), 1 );
-
-        async function createOutline(): Promise<IOutline | undefined> {
-
-            function toOutline(outline: Outline): IOutlineItem {
-
-                const id = Numbers.toString(nonceFactory());
-
-                return {
-                    id,
-                    title: outline.title,
-                    destination: outline.dest,
-                    children: outline.items.map(toOutline)
-                };
-
-            }
-
-            const nonceFactory = Nonces.createFactory();
-
-            const outline = await docRef.current!.getOutline();
-
-            if (! outline) {
-                return undefined;
-            }
-
-            const items = outline.map(toOutline);
-            return {items};
-
-        }
-
-        const outline = await createOutline();
-        setOutline(outline);
-
-        setOutlineNavigator(async (destination: any) => docViewer.linkService.goToDestination(destination as Destination));
-
-        function createPageNavigator(pdfDocumentProxy: _pdfjs.PDFDocumentProxy): PageNavigator {
-
-            const count = pdfDocumentProxy.numPages;
-
-            function get(): number {
-                return docViewer.viewer.currentPageNumber;
-            }
-
-            async function jumpToPage(page: number) {
-                docViewer.viewer.currentPageNumber = page;
-            }
-
-            return {count, jumpToPage, get};
-
-        }
-
-        pageNavigatorRef.current = createPageNavigator(docRef.current);
-
-        dispatchPDFDocMeta();
-
-        setPageNavigator(pageNavigatorRef.current);
-
-        const handleScroll = Debouncers.create(() => {
-            dispatchPDFDocMeta();
-        });
-
-        docViewer.containerElement.addEventListener('scroll', () => {
-            handleScroll();
-        }, {passive: true});
-
-        class PDFDocScale implements IDocScale {
-
-            get scale(): ScaleLevelTuple {
-                const currentScaleValue = docViewerRef.current!.viewer.currentScaleValue;
-                const result = ScaleLevelTuplesMap[currentScaleValue];
-
-                if (! result) {
-                    return ScaleLevelTuplesMap["page width"];
-                }
-
-                return result;
-
-            }
-
-            get scaleValue(): number {
-                return docViewerRef.current!.viewer.currentScale;
-            }
-
-        }
-
-        setDocScale(new PDFDocScale());
-        setScaleLeveler(scaleLeveler);
-
-        function enableAutoPagemarks() {
-
-            if (prefs.get(KnownPrefs.AUTO_PAGEMARKS).getOrElse('false') !== 'true') {
-                // only enable this via prefs now...
-                return;
-            }
-
-            console.log("Auto pagemarks enabled");
-
-            function onPagemarkExtend(extendPagemark: ExtendPagemark) {
-
-                const docMeta = docMetaProvider();
-
-                if (! docMeta) {
-                    return;
-                }
-
-                const extender = Pagemarks.createExtender(docMeta);
-
-                // perform the mutation of the docMeta now...
-                extender(extendPagemark);
-
-                // then persist it back out..
-                async function doAsync(docMeta: IDocMeta) {
-                    const persistenceLayer = persistenceLayerProvider();
-                    await persistenceLayer.writeDocMeta(docMeta);
-                }
-
-                doAsync(docMeta)
-                    .catch(err => log.error("Unable to write docMeta: ", err));
-
-            }
-
-            // start the auto-pagemark system.
-            Scrollers.register(onPagemarkExtend, {mode: 'full'});
-
-        }
-
-        enableAutoPagemarks();
-
-        async function doUpgrade() {
-            const docMeta = docMetaProvider();
-
-            if (docMeta) {
-                await pdfUpgrader(docMeta);
-            }
-
-        }
-
-        await doUpgrade();
-
-        onLoaded()
-
-    }, [annotationBarInjector, dispatchPDFDocMeta, docMetaProvider, docURL, log, onLoaded,
-        onPagesInit, pdfUpgrader, persistenceLayerProvider, prefs, resize, scaleLeveler,
-        setDocScale, setFinder, setOutline, setOutlineNavigator, setPageNavigator,
-        setResizer, setScaleLeveler, newAnnotationBarEnabled]);
-
+    const annotationMutations = useAnnotationMutationsContext();
     React.useEffect(() => {
+        const {docMeta} = props;
+        const {containerElement} = ViewerElements.find(props.docMeta.docInfo.fingerprint);
+        if (!docMeta || !containerElement) return;
+        WebViewer(
+          {
+            path: '/webviewer/lib',
+            initialDoc: props.docURL,
+          },
+          containerElement,
+        ).then((instance) => {
+            const { docViewer, annotManager } = instance;
 
-        if (hasLoadStartedRef.current) {
-            return;
-        }
+            docViewer.on('documentLoaded', () => {
+                renderAnnotations(docMeta, instance);
+            });
+            annotManager.on("annotationChanged", (annots, action, info) => {
+                if (action === "add" && !info.imported) {
+                    annots.forEach(annot => {
+                        if (annot.Subject === "Highlight") {
+                            const highlight = (annot as Annotations.TextHighlightAnnotation);
+                            const quads = highlight.Quads;
+                            const textHighlight = TextHighlightRecords.create(
+                                quads.map(({x1, y1, x2, y2, x3, y3, x4, y4}) => {
+                                    const left = Math.min(x1, x2, x3, x4) / 0.75;
+                                    const right = Math.max(x1, x2, x3, x4) / 0.75;
+                                    const top = Math.min(y1, y2, y3, y4) / 0.75;
+                                    const bottom = Math.max(y1, y2, y3, y4) / 0.75;
+                                    return {
+                                        left,
+                                        top,
+                                        bottom,
+                                        right,
+                                        width: right - left,
+                                        height: bottom - top,
+                                    };
+                                }),
+                                [],
+                                {TEXT: annot.getContents()},
+                                "#FF0000"
+                            );
+                            annotationMutations.onTextHighlight({
+                                type: "create",
+                                docMeta,
+                                pageMeta: docMeta.pageMetas[annot.PageNumber],
+                                textHighlight: textHighlight.value
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    }, []);
 
-        hasLoadStartedRef.current = true;
-
-        const docID = props.docMeta.docInfo.fingerprint;
-        docViewerRef.current = createDocViewer(docID);
-
-        doLoad(docViewerRef.current)
-            .catch(err => log.error("PDFDocument: Could not load PDF: ", err));
-
-    }, [doLoad, log, props.docMeta.docInfo.fingerprint]);
-
-    useDocumentViewerVisibleElemFocus(
-        props.docMeta.docInfo.fingerprint,
-        docViewerRef.current?.containerElement,
-    );
-
-    return active && (
-        <>
-            <AreaHighlightCreator />
-            <DocumentInit/>
-            {newAnnotationBarEnabled && <AnnotationPopup/>}
-            {props.children}
-        </>
-    ) || null;
-
+    return null;
 });
 
