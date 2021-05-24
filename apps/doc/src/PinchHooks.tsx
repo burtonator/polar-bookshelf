@@ -36,6 +36,8 @@ export const useFakePinchToZoom = ({
             const x = -elemRect.left + wrapperRect.left, y = -elemRect.top + wrapperRect.top;
             elem.style.transformOrigin = `${x}px ${y}px`;
             elem.style.willChange = "transform";
+            elem.querySelectorAll<HTMLDivElement>(".textLayer")
+                .forEach(x => x.style.display = "none");
             pinchingRef.current = true;
         }
         elem.style.transform = `scale(${newScale})`;
@@ -44,7 +46,7 @@ export const useFakePinchToZoom = ({
     const onFinish = React.useCallback(() => {
         const elem = elemRef.current!;
         pinchingRef.current = false;
-        elem.removeAttribute('style');
+        elem.removeAttribute("style");
         onZoom(zoomRef.current);
         zoomRef.current = 1;
     }, [zoomRef, onZoom, elemRef]);
