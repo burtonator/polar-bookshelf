@@ -22,7 +22,7 @@
         "checkJs": false,
         "jsx": "react",
         "esModuleInterop": true,
-
+        "skipLibCheck":true,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
 
