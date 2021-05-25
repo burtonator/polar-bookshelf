@@ -101,7 +101,7 @@ export const BlockContentEditable = observer((props: IProps) => {
 
     const onChange = React.useMemo(() =>
         debounceCalls(250, 20, () => props.onChange(contentRef.current))
-    , [props.onChange, contentRef]);
+    , [props, contentRef]);
 
     const handleChange = React.useCallback(() => {
 
