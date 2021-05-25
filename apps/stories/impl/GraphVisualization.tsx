@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import G6, { Graph, INode, StateStyles } from "@antv/g6";
 import { SimpleDialog } from "./SimpleDialog";
 
 export const GraphVisualization = () => {
-  const ref = React.useRef<HTMLDivElement | null>(null);
-  let graph: Graph | null = null;
-
+  const ref = useRef<HTMLDivElement | null>(null);
+  
   const [open, setOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState<metaType | null>(null);
-
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
-
+  
   const handleClose = () => {
     setOpen(false);
     setSelectedValue(null);
   };
-
-
+  
+  
   useEffect(() => {
+    let graph: Graph | null = null;
     if (!graph) {
       const minimap = new G6.Minimap();
 
