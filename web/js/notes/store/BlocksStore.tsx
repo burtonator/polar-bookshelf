@@ -214,7 +214,7 @@ export class BlocksStore implements IBlocksStore {
 
     private readonly uid: UIDStr;
 
-    private readonly undoQueue ;
+    private readonly undoQueue;
 
     @observable _index: BlocksIndex = {};
 
@@ -1108,12 +1108,12 @@ export class BlocksStore implements IBlocksStore {
             }
 
             // create the new block - the sourceID is used for the ref to compute the nspace.
-            const targetID = this.doCreateNewNamedBlock(targetName, {newBlockID: sourceBlockID, nspace: sourceBlock.nspace});
+            const targetBlockID = this.doCreateNewNamedBlock(targetName, {newBlockID: targetID, nspace: sourceBlock.nspace});
 
             sourceBlock.withMutation(() => {
 
                 sourceBlock.addLink({
-                    id: targetID,
+                    id: targetBlockID,
                     text: targetName
                 });
 
@@ -1155,8 +1155,7 @@ export class BlocksStore implements IBlocksStore {
 
         }
 
-        this.undoQueue.push({redo, undo});
-
+        return this.doUndoPush([sourceBlockID], redo);
     }
 
     @action public updateBlocks(blocks: ReadonlyArray<IBlock>): void {

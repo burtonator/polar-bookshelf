@@ -99,7 +99,9 @@ export const BlockContentEditable = observer((props: IProps) => {
 
     const createNoteActionsProvider = React.useMemo(() => createActionsProvider(noteLinkActions), [noteLinkActions]);
 
-    const onChange = React.useMemo(() => debounceCalls(350, 20, props.onChange), [props.onChange]);
+    const onChange = React.useMemo(() =>
+        debounceCalls(250, 20, () => props.onChange(contentRef.current))
+    , [props.onChange, contentRef]);
 
     const handleChange = React.useCallback(() => {
 
@@ -132,7 +134,7 @@ export const BlockContentEditable = observer((props: IProps) => {
         }
 
         contentRef.current = newContent;
-        onChange(newContent);
+        onChange();
     }, [onChange]);
 
     const updateMarkdownFromEditable = React.useCallback(() => {
